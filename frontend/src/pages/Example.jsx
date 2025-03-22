@@ -4,6 +4,7 @@ export default function Example() {
   const [inputText, setInputText] = useState("");
   const [savedText, setSavedText] = useState(null);
 
+  // load saved text when on page render
   useEffect(() => {
     const fetchSavedText = async () => {
       try {
