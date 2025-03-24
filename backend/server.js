@@ -60,6 +60,11 @@ app.post("/example/save-text", async (req, res) => {
   }
 });
 
+app.get("/faq", async (req, res) => {
+  const [result] = await pool.query("SELECT * FROM p2.faq;");
+  res.status(200).json(result);
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

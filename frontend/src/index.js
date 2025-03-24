@@ -7,6 +7,7 @@ import Header from "./pages/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
+import FAQ from "./pages/FAQ";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/" element={<Header />}>
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
+          <Route path="/FAQ" element={<FAQ />} />
         </Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
