@@ -9,6 +9,7 @@ import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
 import FAQ from "./pages/FAQ";
 import Vendor from "./pages/Vendor";
+import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
+          <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
           <Route path="/Vendor" element={<Vendor />} />
         </Route>
         <Route path="*" element={<NoPage />} />
