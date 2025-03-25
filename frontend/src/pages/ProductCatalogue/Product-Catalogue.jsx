@@ -1,16 +1,29 @@
+import React, {useState, useEffect} from "react";
 import ProductCard from "./Product-Card";
 import "./Product-Card.css"
 import CatalogueFilter from "./Catalogue-Filter";
 
+
 export default function ProductCatalogue (){
-    const array = [
-        <ProductCard storeName="Shop 1" productName="Pants 1" price={100} imgURL="/Img/TestBillede.png" />,
-        <ProductCard storeName="Shop 2" productName="Pants 2" price={100} imgURL="/Img/TestBillede.png" />,
-        <ProductCard storeName="Shop 3" productName="Pants 3" price={100} imgURL="/Img/TestBillede.png" />,
-        <ProductCard storeName="Shop 4" productName="Pants 4" price={100} imgURL="/Img/TestBillede.png" />,
-        <ProductCard storeName="Shop 5" productName="Pants 5" price={100} imgURL="/Img/TestBillede.png" />,
-        <ProductCard storeName="Shop 6" productName="Pants 6" price={100} imgURL="/Img/TestBillede.png" />
-    ];
+
+const [products, setProducts] = useState([]);
+    useEffect(() => {
+        async function loadInitialProducts(){
+            try{
+                const response = await fetch("http://localhost:3001/products");
+                if (!response.ok) {
+                    throw new Error("Failed to load products");
+                }
+                const data = await response.json();
+                setProducts(data);
+            } catch(err){
+                console.log('Failed to load products');
+            }
+        }
+        loadInitialProducts();
+    }, []);
+
+
     const genderOptionArray = [
         'Male','Female'
     ]
@@ -33,7 +46,11 @@ export default function ProductCatalogue (){
                 <CatalogueFilter FilterName={'Size'} FilterOptions={sizeOptionArray} />
             </div>
             <div className="product-grid">
-                {array}
+                {products.map((product) => {
+                    return (
+                    <ProductCard storeName={'store'} productName={product.Name} price={product.Price}></ProductCard>
+                    )
+                })}
             </div>
         </div>
     )

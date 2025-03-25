@@ -66,6 +66,17 @@ app.get("/faq", async (req, res) => {
   res.status(200).json(result);
 });
 
+app.get("/products", async (req, res) => {
+  try{
+    const [result] = await pool.query("SELECT * FROM p2.product;");
+    res.status(200).json(result);
+  }
+  catch (err){
+    console.error("Error fetching product:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
