@@ -1,7 +1,5 @@
 .product-card h1 {
-   
     font-size: 20px;
-
 }
 
 .product-card {
@@ -48,3 +46,16 @@
     width: calc(33.333% - 20px); /* Ensures 3 per row */
     min-width: 200px; /* Ensures they don't get too small */
 }
+.SortBox{
+    width: 100px;
+    padding: 10px;
+    font-size: small;
+}
+.SortBoxes{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 4 columns per row */
+    flex-wrap: wrap;
+    margin: 0 auto;
+    justify-content: center;
+}
+
