@@ -48,7 +48,7 @@ const [products, setProducts] = useState([]);
             <div className="product-grid">
                 {products.map((product) => {
                     return (
-                    <ProductCard storeName={'store'} productName={product.Name} price={product.Price}></ProductCard>
+                    <ProductCard id={product.ID} storeName={product.StoreName} productName={product.Name} price={product.Price}></ProductCard>
                     )
                 })}
             </div>
