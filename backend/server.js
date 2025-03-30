@@ -1,19 +1,9 @@
 import express from "express";
-import mysql from "mysql2/promise";
 import cors from "cors";
+import pool from "./db.js";
 
 const app = express();
 const port = 3001;
-
-const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "password",
-  database: "P2",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
 
 app.use(
   cors({
@@ -21,6 +11,9 @@ app.use(
   })
 );
 app.use(express.json());
+
+import addProductRoute from "./routes/add-product.js";
+app.use("/add-product", addProductRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
