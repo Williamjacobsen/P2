@@ -12,7 +12,7 @@ function FilterOption({optionName, IsTitle = false}) {
     )
 }
 
-export default function CatalogueFilter({FilterName, FilterOptions}) {
+export function CatalogueFilter({FilterName, FilterOptions}) {
     return (
         <div>
             <label htmlFor="category"></label>
@@ -24,4 +24,12 @@ export default function CatalogueFilter({FilterName, FilterOptions}) {
             </select>
         </div>
     );
+}
+
+export function CatalogueSearch(){
+    return (
+        <div>
+            <input type={"text"} placeholder={"Search for products..."} className="SearchBox"/>
+        </div>
+    )
 }

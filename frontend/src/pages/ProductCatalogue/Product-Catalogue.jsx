@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from "react";
 import ProductCard from "./Product-Card";
 import "./Product-Card.css"
-import CatalogueFilter from "./Catalogue-Filter";
-
+import {CatalogueFilter, CatalogueSearch} from "./Catalogue-Filter";
 
 export default function ProductCatalogue (){
 
 const [products, setProducts] = useState([]);
+//useEffect loads product array from database and sets it to the products variable
     useEffect(() => {
         async function loadInitialProducts(){
             try{
@@ -39,11 +39,12 @@ const [products, setProducts] = useState([]);
 
     return (
         <div>
-            <div className="SortBoxes">
+            <div className="FilterElements">
                 <CatalogueFilter FilterName={'Gender'} FilterOptions={genderOptionArray} />
                 <CatalogueFilter FilterName={'Product Type'} FilterOptions={clothingOptionArray} />
                 <CatalogueFilter FilterName={'Price'} FilterOptions={priceOptionArray} />
                 <CatalogueFilter FilterName={'Size'} FilterOptions={sizeOptionArray} />
+                <CatalogueSearch></CatalogueSearch>
             </div>
             <div className="product-grid">
                 {products.map((product) => {

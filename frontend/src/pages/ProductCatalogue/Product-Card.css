@@ -51,7 +51,7 @@
     padding: 10px;
     font-size: small;
 }
-.SortBoxes{
+.FilterElements{
     display: grid;
     grid-template-columns: repeat(7, 1fr); /* 4 columns per row */
     flex-wrap: wrap;
@@ -64,4 +64,9 @@
     color: inherit;
     display: block;
     width:fit-content;
+}
+.SearchBox{
+    width: 300px;
+    padding: 10px;
+    font-size: small;
 }
