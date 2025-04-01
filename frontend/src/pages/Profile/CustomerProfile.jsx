@@ -16,19 +16,19 @@ export default function CustomerProfile() {
       <b>Email address: </b>
       {/* \n{profile.email} */}
       <br />
-      <Modal openButtonText="Change email address?" modalContent={<ChangeEmailAddress />} />
+      <Modal openButtonText="Change email address?" modalContent={<ChangeEmailAddressModal />} />
       <br />
       <b>Phone number: </b>
       {/* \n{profile.phoneNumber} */}
       <br />
-      <Modal openButtonText="Change phone number?" modalContent={<ChangePhoneNumber />} />
+      <Modal openButtonText="Change phone number?" modalContent={<ChangePhoneNumberModal />} />
       <br />
-      <Modal openButtonText="Change password?" modalContent={(<ChangePassword />)} />
+      <Modal openButtonText="Change password?" modalContent={(<ChangePasswordModal />)} />
     </>
   );
 }
 
-function ChangePhoneNumber() {
+function ChangePhoneNumberModal() {
 
   return (
     <>
@@ -38,7 +38,7 @@ function ChangePhoneNumber() {
 
 }
 
-function ChangeEmailAddress() {
+function ChangeEmailAddressModal() {
 
   return (
     <>
@@ -48,7 +48,7 @@ function ChangeEmailAddress() {
 
 }
 
-function ChangePassword() {
+function ChangePasswordModal() {
 
   return (
     <>
