@@ -1,7 +1,7 @@
 // A tutorial I've taken heavy inspiration from: https://www.youtube.com/watch?v=9DwGahSqcEc
 
 import React, { useState } from "react";
-import "./Modal.css";
+import "./modal.css";
 
 /** Creates a button that when pressed shows a pop up. */
 export default function Modal({ modalContent = "X", openButtonText = "X", closeButtonText = "CLOSE" }) {
