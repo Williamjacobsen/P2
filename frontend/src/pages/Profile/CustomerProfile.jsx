@@ -1,12 +1,18 @@
 import React from "react";
 import Modal from "../Modal/Modal"
+import { Navigate } from "react-router-dom";
 
 export default function CustomerProfile() {
 
-  // TODO
-  // Is user signed in? If not, direct them to the sign in page
+  try {
+    // TODO
+    // Is user signed in? If not, direct them to the sign in page
+  }
+  catch {
+    return <Navigate to="/sign-in" />;
+  }
 
-  let profile; // = something
+  let profile; // TODO = something
 
   return (
     <>
@@ -16,19 +22,19 @@ export default function CustomerProfile() {
       <b>Email address: </b>
       {/* \n{profile.email} */}
       <br />
-      <Modal openButtonText="Change email address?" modalContent={<ChangeEmailAddressModal />} />
-      <br />
       <b>Phone number: </b>
       {/* \n{profile.phoneNumber} */}
       <br />
-      <Modal openButtonText="Change phone number?" modalContent={<ChangePhoneNumberModal />} />
+      <Modal openButtonText="Change email address?" modalContent={<ChangeEmailAddress />} />
       <br />
-      <Modal openButtonText="Change password?" modalContent={(<ChangePasswordModal />)} />
+      <Modal openButtonText="Change phone number?" modalContent={<ChangePhoneNumber />} />
+      <br />
+      <Modal openButtonText="Change password?" modalContent={(<ChangePassword />)} />
     </>
   );
 }
 
-function ChangePhoneNumberModal() {
+function ChangePhoneNumber() {
 
   return (
     <>
@@ -38,7 +44,7 @@ function ChangePhoneNumberModal() {
 
 }
 
-function ChangeEmailAddressModal() {
+function ChangeEmailAddress() {
 
   return (
     <>
@@ -48,7 +54,7 @@ function ChangeEmailAddressModal() {
 
 }
 
-function ChangePasswordModal() {
+function ChangePassword() {
 
   return (
     <>
