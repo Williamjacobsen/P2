@@ -1,5 +1,5 @@
 # How to start server on own your own local pc:
-dd
+
 For frontend:
 1) Create new terminal inside the project root folder.
 2) Enter "cd frontend".
