@@ -5,9 +5,9 @@ import Modal from "../Modal/Modal"
 
 export default function CustomerSignIn() {
 
-  // TODO: Include functionality to add cookie storing user profile
+  //y TODO: Include functionality to add cookie storing user profile
 
-  // TODO: implement password encryption (right now it is just being sent directly)
+  //y TODO: implement password encryption (right now it is just being sent directly)
 
   return (
     <>
@@ -35,15 +35,15 @@ export default function CustomerSignIn() {
 async function attemptSignIn(event) {
   try {
 
-    // TODO: add variable validation
+    //y TODO: add variable validation
 
     // Prevent page from refreshing on submit
     event.preventDefault();
 
     // Extract data from the form
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email")
-    const password = formData.get("password")
+    const email = formData.get("email");
+    const password = formData.get("password");
 
     // Post form data to server
     const response = await fetch("http://localhost:3001/sign-in-customer", {
@@ -57,7 +57,14 @@ async function attemptSignIn(event) {
       }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) throw new Error("Failed to sign in.");
+
+    response.json().then((data) => {
+      console.log(data.profile.ID);
+      console.log(data.profile.Email);
+    });
 
     //r NOT FINISHED
   }
