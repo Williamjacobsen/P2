@@ -59,6 +59,31 @@ app.get("/faq", async (req, res) => {
   res.status(200).json(result);
 });
 
+/** Gets all product data with related image paths and store name */
+app.get("/product/:id", async (req, res) => {
+  try{
+    const { id } = req.params;
+
+    const [result] = await pool.query(
+        `SELECT 
+        p2.product.*, 
+        p2.store.Name AS StoreName, 
+        p2.productimage.Path
+        FROM p2.product
+        JOIN p2.store ON p2.product.StoreID = p2.store.ID
+        LEFT JOIN p2.productimage ON p2.product.ID = p2.productimage.ProductID
+        WHERE p2.product.ID = ?;`,
+        [id]
+      );
+    res.status(200).json(result);
+  }
+  catch (err){
+    console.error("Error fetching product:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
