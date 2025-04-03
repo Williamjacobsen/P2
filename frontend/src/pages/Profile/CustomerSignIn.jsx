@@ -16,7 +16,7 @@ export default function CustomerSignIn() {
         <b>
           Username or email address:
         </b> <br />
-        <input name="email" /> <br />
+        <input name="username" /> <br />
         <b>
           Password:
         </b> <br />
@@ -42,17 +42,17 @@ async function attemptSignIn(event) {
 
     // Extract data from the form
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
+    const username = formData.get("username");
     const password = formData.get("password");
 
     // Post form data to server
-    const response = await fetch("http://localhost:3001/sign-in-customer", {
+    const response = await fetch("http://localhost:3001/sign-in-profile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
+        username,
         password,
       }),
     });
@@ -63,7 +63,7 @@ async function attemptSignIn(event) {
 
     response.json().then((data) => {
       console.log(data.profile.ID);
-      console.log(data.profile.Email);
+      console.log(data.profile.Username);
     });
 
     //r NOT FINISHED

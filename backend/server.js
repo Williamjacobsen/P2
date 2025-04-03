@@ -14,8 +14,8 @@ app.use(express.json());
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
-import signInCustomerRoute from "./routes/sign-in-customer.js";
-app.use("/sign-in-customer", signInCustomerRoute);
+import signInProfileRoute from "./routes/sign-in-profile.js";
+app.use("/sign-in-profile", signInProfileRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
