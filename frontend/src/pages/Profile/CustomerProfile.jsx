@@ -4,9 +4,10 @@ import { Navigate } from "react-router-dom";
 
 export default function CustomerProfile() {
 
+  //y TODO: This whole thing. It is far from finished yet.
+
   try {
-    // TODO
-    // Is user signed in? If not, direct them to the sign in page
+    //y TODO: Is user signed in? If not, direct them to the sign in page
   }
   catch {
     return <Navigate to="/sign-in" />;

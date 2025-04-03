@@ -7,16 +7,14 @@ export default function CustomerSignIn() {
 
   //y TODO: Include functionality to add cookie storing user profile
 
-  //y TODO: implement password encryption (right now it is just being sent directly)
-
   return (
     <>
       <h3>--- Sign In ---</h3>
       <form onSubmit={attemptSignIn}>
         <b>
-          Username or email address:
+          Email address:
         </b> <br />
-        <input name="username" /> <br />
+        <input name="email" /> <br />
         <b>
           Password:
         </b> <br />
@@ -37,44 +35,45 @@ async function attemptSignIn(event) {
 
     //y TODO: add variable validation
 
+    //y TODO: implement password encryption (right now it is just being sent directly)
+
     // Prevent page from refreshing on submit
     event.preventDefault();
 
     // Extract data from the form
     const formData = new FormData(event.currentTarget);
-    const username = formData.get("username");
+    const email = formData.get("email");
     const password = formData.get("password");
 
-    // Post form data to server
-    const response = await fetch("http://localhost:3001/sign-in-profile", {
+    // Post data from form to server
+    const response = await fetch("http://localhost:3001/try-get-profile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username,
+        email,
         password,
       }),
     });
 
     const data = await response.json();
 
-    if (!response.ok) throw new Error("Failed to sign in.");
+    if (!response.ok) {
+      throw new Error(data.errorMessage);
+    }
 
-    response.json().then((data) => {
-      console.log(data.profile.ID);
-      console.log(data.profile.Username);
-    });
-
-    //r NOT FINISHED
+    console.log(data.profile.PhoneNumber); //r NOT FINISHED
   }
   catch (error) {
     console.error("Error:", error);
-    alert("Error signing in.");
+    alert(error);
   }
 }
 
 function SignUp() {
+
+  //y TODO: This whole thing.
 
   return (
     <>
