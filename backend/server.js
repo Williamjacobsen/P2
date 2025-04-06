@@ -15,6 +15,9 @@ app.use(express.json());
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
 
+import payment from "./routes/payment.js";
+app.use("/checkout", payment);
+
 app.get("/test", (req, res) => {
   res.send("API is working!");
 });
