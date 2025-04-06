@@ -21,21 +21,48 @@ export default function ProductPage() {
         allProductData();
     }, [id]);
 
+    /** Made to switch main image with clicked secondary picture */
+    const onExtraImgClick = (i) => {
+        if (i === 0) return;
+
+        const newImages = [...productData];
+        // Switches clicked image with main image
+        [newImages[0], newImages[i]] = [newImages[i], newImages[0]];
+        // Force re-render of images to update
+        setProductData(newImages.slice());
+    };
+
     return (
     <div className="container">
         <div className="left-content">
-            {/* idk how images are going to work but this works for the db */}
-            <div className="product-gallery">
-                {productData?.map((product) => (
-                    product?.Path && (
-                    <div key={product.id} className="gallery-item">
-                        <img src={product.Path} alt={`Product ${product.id}`} className="product-image"nError={(e) => {
-                            e.target.src = '/PlusIcon.jpg'; // Handle broken images
-                        }}/>
+            {productData.length > 0 && (
+                <div className="image-gallery">
+                    <div className="main-image-container">
+                        <img
+                            src={productData[0].Path}
+                            alt={`Product ${productData[0].id}`}
+                            className="main-image"
+                            onError={(e) => {
+                                e.target.src = '/PlusIcon.jpg';
+                            }}/>
                     </div>
-                    )
-                ))}
-            </div>
+                    <div className="thumbnail-row">
+                        {productData.slice(1).map((product, i) => (
+                            product?.Path && (
+                                <div key={product.id} className="thumbnail-container">
+                                    <button onClick={() => onExtraImgClick(i+1)}><img
+                                        src={product.Path}
+                                        alt={`Thumbnail ${product.id}`}
+                                        className="thumbnail-image"
+                                        onError={(e) => {
+                                            e.target.src = '/PlusIcon.jpg';
+                                        }}/></button>
+                                </div>
+                            )
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
         <div className="right-content">
             <p className="product-brand">{productData[0]?.Brand}</p>
@@ -55,8 +82,11 @@ export default function ProductPage() {
                 {[...Array(10)].map((e, i) => <option value={i+1} key={i}>{i+1}</option>)}
                 </select>
                 {/* Missing cart things */}
-                <button id="button" defaultValue="" style={{ width: "200px" }} onClick={() => navigate('/cart')}>ADD TO CART</button>
+                <button id="button" defaultValue="" style={{ width: "200px" }} onClick={() => navigate("/cart")}>ADD TO CART</button>
 
+            </div>
+            <div>
+                <p>{productData[0]?.Description}</p>
             </div>
         </div>
     </div>

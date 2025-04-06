@@ -8,6 +8,8 @@
   }
   
   .left-content {
+    display: flex;
+    justify-content: center;
     padding-right: 20px;
   }
   
@@ -31,33 +33,41 @@
     color: #000;
   }
 
-.product-gallery {
+.image-gallery {
     display: flex;
-    gap: 16px; 
-    padding: 20px;
-    overflow-x: auto; 
+    flex-direction: column;
+    align-items: flex-start; /* Lean left */
+    transform: translateX(-50px); /* Nudge it slightly left */
   }
   
-  .gallery-item {
-    flex: 1; 
-    min-width: 200px; 
+  .main-image-container {
+    margin-bottom: 12px;
   }
   
-  .product-image {
-    width: 100%;
+  .main-image {
+    width: 400px;
     height: auto;
     border-radius: 8px;
     object-fit: cover;
-    aspect-ratio: 1/1; 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
-  @media (min-width: 768px) {
-    .product-gallery {
-      justify-content: center;
-      overflow-x: visible;
-    }
-    
-    .gallery-item {
-      max-width: 300px;
-    }
+  .thumbnail-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start; /* Align thumbs to the left */
+    max-width: 400px; /* Ensure thumbnail row doesn't exceed the width of the main image */
+    overflow-x: auto; /* Make the thumbnails scrollable horizontally if they exceed the container */
+    padding-bottom: 10px; /* Add some space at the bottom for scrolling */
+    white-space: nowrap; /* Prevent wrapping of thumbnails */
+  }
+  
+  .thumbnail-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+  }
+  
+  .thumbnail-image:hover {
+    opacity: 1;
   }

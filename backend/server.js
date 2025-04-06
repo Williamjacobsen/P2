@@ -66,13 +66,13 @@ app.get("/product/:id", async (req, res) => {
 
     const [result] = await pool.query(
         `SELECT 
-        p2.product.*, 
-        p2.store.Name AS StoreName, 
+        p2.Product.*, 
+        p2.Vendor.Name AS StoreName, 
         p2.productimage.Path
-        FROM p2.product
-        JOIN p2.store ON p2.product.StoreID = p2.store.ID
-        LEFT JOIN p2.productimage ON p2.product.ID = p2.productimage.ProductID
-        WHERE p2.product.ID = ?;`,
+        FROM p2.Product
+        JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+        LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
+        WHERE p2.Product.ID = ?;`,
         [id]
       );
     res.status(200).json(result);
