@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import Header from "./pages/Header";
+import Header from "./pages/Header/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
@@ -11,6 +11,7 @@ import FAQ from "./pages/FAQ";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
+import Cart from "./pages/Cart/Cart";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
+          <Route path="/Cart" element={<Cart />} />
         </Route>
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<Vendor />} />

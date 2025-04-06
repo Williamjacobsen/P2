@@ -1,16 +1,16 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 
-export default function Layout() {
+export default function Header() {
   return (
     <div>
-      <Header />
+      <HeaderContent />
       <Outlet />
     </div>
   );
 }
 
-const Header = () => {
+const HeaderContent = () => {
   return (
     <nav className="flex justify-between items-center px-6 py-3 border-b shadow-md">
       {/* Left Section - Website */}
@@ -21,11 +21,31 @@ const Header = () => {
 
       {/* Center Section - Navigation Links */}
       <ul className="flex space-x-6 text-sm">
-        <li><Link to="/" className="hover:underline">Home</Link></li>
-        <li><Link to="/products" className="hover:underline">Products</Link></li>
-        <li><Link to="/profile" className="hover:underline">Profile</Link></li>
-        <li><Link to="/help" className="hover:underline">Help</Link></li>
-        <li><Link to="/partners" className="hover:underline">For Partners</Link></li>
+        <li>
+          <Link to="/" className="hover:underline">
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link to="/products" className="hover:underline">
+            Products
+          </Link>
+        </li>
+        <li>
+          <Link to="/profile" className="hover:underline">
+            Profile
+          </Link>
+        </li>
+        <li>
+          <Link to="/help" className="hover:underline">
+            Help
+          </Link>
+        </li>
+        <li>
+          <Link to="/partners" className="hover:underline">
+            For Partners
+          </Link>
+        </li>
       </ul>
 
       {/*Right Section - Cart */}
