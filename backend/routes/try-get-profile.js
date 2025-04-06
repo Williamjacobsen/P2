@@ -3,6 +3,7 @@ import pool from "../db.js";
 
 const router = express.Router();
 
+// Error messages
 const errorWrongEmail = "Email does not have a profile.";
 const errorWrongPassword = "Password does not match email.";
 
@@ -14,7 +15,7 @@ router.post("/", async (req, res) => {
       password,
     } = req.body;
 
-    const profile = await TryGetProfile(email, password);
+    const profile = await tryGetProfile(email, password);
 
     //y TODO: implement password encryption (right now it is just being sent directly)
 
@@ -41,7 +42,7 @@ router.post("/", async (req, res) => {
  * @param {*} password 
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
-async function TryGetProfile(email, password) {
+async function tryGetProfile(email, password) {
 
   // Get an array of profiles with the corresponding email from the database
   const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email = '${email}';`);

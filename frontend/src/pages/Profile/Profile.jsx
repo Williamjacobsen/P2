@@ -1,15 +1,14 @@
 import React from "react";
 import Modal from "../Modal/Modal"
 import { Navigate } from "react-router-dom";
+import { isSignedIn } from "./SignIn"
+import { deleteCookie } from "../../tools/cookies"
 
-export default function CustomerProfile() {
+export default function Profile() {
 
   //y TODO: This whole thing. It is far from finished yet.
 
-  try {
-    //y TODO: Is user signed in? If not, direct them to the sign in page
-  }
-  catch {
+  if (!isSignedIn()) {
     return <Navigate to="/sign-in" />;
   }
 
@@ -17,9 +16,14 @@ export default function CustomerProfile() {
 
   return (
     <>
+
       <h3>
         --- Profile Information ---
       </h3>
+      <button onClick={signOut}>
+        Sign out
+      </button>
+      <br />
       <b>Email address: </b>
       {/* \n{profile.email} */}
       <br />
@@ -33,6 +37,15 @@ export default function CustomerProfile() {
       <Modal openButtonText="Change password?" modalContent={(<ChangePassword />)} />
     </>
   );
+}
+
+function signOut() {
+  // Delete profile credential cookies
+  deleteCookie("profileEmail");
+  deleteCookie("profilePassword");
+
+  // Reload the page (this navigates to the sign in page because the user is now signed out)
+  window.location.reload();
 }
 
 function ChangePhoneNumber() {
