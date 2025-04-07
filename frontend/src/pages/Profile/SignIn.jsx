@@ -2,7 +2,7 @@
 
 import React from "react";
 import Modal from "../Modal/Modal"
-import { setCookie, getCookie } from "../../tools/cookies"
+import { setCookie, getCookie } from "../../utils/cookies"
 import { Navigate } from "react-router-dom";
 
 export default function SignIn() {

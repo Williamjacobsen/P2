@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../Modal/Modal"
 import { Navigate } from "react-router-dom";
 import { isSignedIn } from "./SignIn"
-import { deleteCookie, getCookie } from "../../tools/cookies"
+import { deleteCookie, getCookie } from "../../utils/cookies"
 
 export default function Profile() {
 
