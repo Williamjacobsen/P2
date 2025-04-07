@@ -14,12 +14,8 @@ app.use(express.json());
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
-import getProfileRoute from "./routes/get-profile.js";
-app.use("/get-profile", getProfileRoute);
-import createProfileRoute from "./routes/create-profile.js";
-app.use("/create-profile", createProfileRoute);
-import modifyProfileRoute from "./routes/modify-profile.js";
-app.use("/modify-profile", modifyProfileRoute);
+import profileRoute from "./routes/profile.js";
+app.use("/profile", profileRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");

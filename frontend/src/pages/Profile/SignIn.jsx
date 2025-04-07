@@ -154,7 +154,7 @@ async function getProfile(email, password) {
     //y TODO: implement password encryption (right now it is just being sent directly)
 
     // Post data from the form to server
-    const response = await fetch("http://localhost:3001/get-profile", {
+    const response = await fetch("http://localhost:3001/profile/get", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -190,7 +190,7 @@ async function addProfile(email, password, phoneNumber) {
     //y TODO: implement password encryption (right now it is just being sent directly)
 
     // Post data from the form to server
-    const response = await fetch("http://localhost:3001/create-profile", {
+    const response = await fetch("http://localhost:3001/profile/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
