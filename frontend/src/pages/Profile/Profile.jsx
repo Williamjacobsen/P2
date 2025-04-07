@@ -8,6 +8,7 @@ export default function Profile() {
 
   //y TODO: This whole thing. It is far from finished yet.
 
+  // Not signed in?
   if (isSignedIn() == false) {
     return <Navigate to="/sign-in" />;
   }
@@ -32,6 +33,8 @@ export default function Profile() {
       <Modal openButtonText="Change phone number?" modalContent={<ChangePhoneNumber />} />
       <br />
       <Modal openButtonText="Change password?" modalContent={(<ChangePassword />)} />
+      <br />
+      <Modal openButtonText="Delete profile?" modalContent={(<DeleteProfile />)} />
     </>
   );
 }
@@ -45,6 +48,25 @@ function signOut() {
   // Reload the page (this navigates to the sign in page because the user is now signed out)
   window.location.reload();
 }
+
+function DeleteProfile() {
+  return (
+    <>
+      <form onSubmit={deleteProfile}>
+        <b>
+          Current password:
+        </b> <br />
+        <input type="password" name="password" required /> <br />
+        <input type="submit" value="Delete profile" />
+      </form >
+    </>
+  )
+}
+
+async function deleteProfile(event) {
+
+}
+
 
 function ChangePhoneNumber() {
 

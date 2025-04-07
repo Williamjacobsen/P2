@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../db.js";
 
+// Router
 const router = express.Router();
 export default router;
 
@@ -10,7 +11,6 @@ const errorProfilePhoneNumberAlreadyExists = "Another profile already uses that 
 
 router.post("/", async (req, res) => {
   try {
-
     const {
       email,
       password,
@@ -26,7 +26,9 @@ router.post("/", async (req, res) => {
     res.status(201).json({
       profile: profile
     });
-  } catch (error) {
+  }
+  catch (error) {
+    // Respond with error messages
     if (error === errorProfileEmailAlreadyExists) {
       res.status(409).json({ errorMessage: errorProfileEmailAlreadyExists }); // 409 = Conflict
     } else if (error === errorProfilePhoneNumberAlreadyExists) {
@@ -38,7 +40,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-/**
+/** 
+ * Tries to add a profile to the database.
+ * @param {*} email string
+ * @param {*} password string
+ * @param {*} phoneNumber int
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
 async function addProfile(email, password, phoneNumber) {
