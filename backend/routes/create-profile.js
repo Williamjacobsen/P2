@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
 
     //y TODO: add some variable validation (like "email" needs to be "not null" in database)
 
-    const profile = await addProfile(email, password, phoneNumber);
+    const profile = await createProfile(email, password, phoneNumber);
 
     res.status(201).json({
       profile: profile
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
  * @param {*} phoneNumber int
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
-async function addProfile(email, password, phoneNumber) {
+async function createProfile(email, password, phoneNumber) {
 
   // Check if the email is already used by an existing profile
   let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email = '${email}';`);
