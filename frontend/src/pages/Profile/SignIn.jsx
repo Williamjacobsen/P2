@@ -15,7 +15,7 @@ export default function SignIn() {
   return (
     <>
       <h3>--- Sign In ---</h3>
-      <form onSubmit={trySignIn}>
+      <form onSubmit={signIn}>
         <b>
           Email address:
         </b> <br />
@@ -37,7 +37,7 @@ export default function SignIn() {
 function SignUpModal() {
   return (
     <>
-      <form onSubmit={trySignIn}>
+      <form onSubmit={signUp}>
         <b>
           Email address:
         </b> <br />
@@ -49,14 +49,14 @@ function SignUpModal() {
         <b>
           Phone number:
         </b> <br />
-        <input type="phoneNumber" name="phoneNumber" required /> <br />
+        <input type="phoneNumber" name="phoneNumber" required minLength={8} maxLength={16} /> <br />
         <input type="submit" value="Sign up" />
       </form >
     </>
   )
 }
 
-async function trySignUp(event) {
+async function signUp(event) {
   try {
     // Prevent page from refreshing on submit
     event.preventDefault();
@@ -67,12 +67,16 @@ async function trySignUp(event) {
     const password = formData.get("password");
     const phoneNumber = formData.get("phoneNumber");
 
-    //r NOT FINISHED
+    // Add profile to server
+    const profile = await addProfile(email, password, phoneNumber);
 
-    //b Sign in using the new account
+    // Create sign in cookie
+    setCookie("profileEmail", profile.Email, 7);
+    setCookie("profilePassword", profile.Password, 7);
+    setCookie("profilePhoneNumber", profile.PhoneNumber, 7);
 
-    //b reload page
-
+    // Reload the page (this navigates to the profile page because the user is now signed in)
+    window.location.reload();
   }
   catch (error) {
     // Alert the user of the error (for example duplicate email)
@@ -80,7 +84,7 @@ async function trySignUp(event) {
   }
 }
 
-async function trySignIn(event) {
+async function signIn(event) {
   try {
 
     //y TODO: add variable validation
@@ -101,6 +105,7 @@ async function trySignIn(event) {
     // Create sign in cookie
     setCookie("profileEmail", profile.Email, 7);
     setCookie("profilePassword", profile.Password, 7);
+    setCookie("profilePhoneNumber", profile.PhoneNumber, 7);
 
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
@@ -111,10 +116,48 @@ async function trySignIn(event) {
   }
 }
 
+
 /**
  * Tries to get a profile from the server using email and password.
- * @param {*} email 
- * @param {*} password 
+ * @param {*} email string
+ * @param {*} password string
+ * @param {*} phoneNumber int
+ * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
+ */
+async function addProfile(email, password, phoneNumber) {
+  try {
+
+    //y TODO: implement password encryption (right now it is just being sent directly)
+
+    // Post data from the form to server
+    const response = await fetch("http://localhost:3001/add-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        phoneNumber
+      }),
+    });
+
+    // Handle server response
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.errorMessage);
+    }
+    return data.profile;
+  }
+  catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Tries to get a profile from the server using email and password.
+ * @param {*} email string
+ * @param {*} password string
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
 async function getProfile(email, password) {
@@ -123,7 +166,7 @@ async function getProfile(email, password) {
     //y TODO: implement password encryption (right now it is just being sent directly)
 
     // Post data from the form to server
-    const response = await fetch("http://localhost:3001/try-get-profile", {
+    const response = await fetch("http://localhost:3001/get-profile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

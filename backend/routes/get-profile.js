@@ -2,6 +2,7 @@ import express from "express";
 import pool from "../db.js";
 
 const router = express.Router();
+export default router;
 
 // Error messages
 const errorWrongEmail = "Email does not have a profile.";
@@ -21,17 +22,17 @@ router.post("/", async (req, res) => {
 
     //y TODO: add some variable validation (like "email" needs to be "not null" in database)
 
-    res.status(201).json({
+    res.status(200).json({ // 200 = OK
       profile: profile
     });
   } catch (error) {
     if (error === errorWrongEmail) {
-      res.status(404).json({ errorMessage: errorWrongEmail });
+      res.status(404).json({ errorMessage: errorWrongEmail }); // 404 = Not Found
     } else if (error === errorWrongPassword) {
-      res.status(401).json({ errorMessage: errorWrongPassword });
+      res.status(401).json({ errorMessage: errorWrongPassword }); // 401 = Unauthorized
     } else {
       console.error("Database error:", error);
-      res.status(500).json({ errorMessage: "Database error finding profile in database." });
+      res.status(500).json({ errorMessage: "Database error finding profile in database." }); // 500 = Internal Server Error
     }
   }
 });
@@ -54,5 +55,3 @@ async function tryGetProfile(email, password) {
   }
   return profile[0];
 }
-
-export default router;
