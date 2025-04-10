@@ -1,45 +1,79 @@
 import express from "express";
 import pool from "../db.js";
 
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
 const router = express.Router();
 export default router;
+router.post("/get", async (req, res) => {
+  try {
+    const { email, password } = req.body; // Get data from body
+    const profile = await getProfile(email, password);
+    res.status(200).json({ profile: profile }); // Send back response
+    //y TODO: implement password encryption (right now it is just being sent directly)
+    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+  }
+});
+router.post("/create", async (req, res) => {
+  try {
+    const { email, password, phoneNumber } = req.body; // Get data from body
+    const profile = await createProfile(email, password, phoneNumber);
+    res.status(201).json({ profile: profile }); // Send back response
+    //y TODO: implement password encryption (right now it is just being sent directly)
+    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+  }
+});
+router.post("/delete", async (req, res) => {
+  try {
+    const { email, password, } = req.body; // Get data from body
+    await deleteProfile(email, password);
+    res.status(200).json({}); // No message
+    //y TODO: implement password encryption (right now it is just being sent directly)
+    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+  }
+});
+router.post("/modify", async (req, res) => {
+  try {
+    const { email, password, propertyName, newValue } = req.body; // Get data from body
+    const profile = await modifyProfile(email, password, propertyName, newValue);
+    res.status(201).json({ profile: profile }); // Send back response
+    //y TODO: implement password encryption (right now it is just being sent directly)
+    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+  }
+});
 
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Error messages
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
 const errorWrongEmail = "Email does not have a profile.";
 const errorWrongPassword = "Password does not match email.";
 const errorProfileEmailAlreadyExists = "Another profile already uses that email.";
 const errorProfilePhoneNumberAlreadyExists = "Another profile already uses that phone number.";
 
-router.post("/get", async (req, res) => {
-  try {
-    const {
-      email,
-      password,
-    } = req.body;
-
-    const profile = await getProfile(email, password);
-
-    //y TODO: implement password encryption (right now it is just being sent directly)
-
-    //y TODO: add some variable validation (like "email" needs to be "not null" in database)
-
-    res.status(200).json({ // 200 = OK
-      profile: profile
-    });
+function getErrorCode(errorMessage) {
+  switch (errorMessage) {
+    case errorWrongEmail: return 404; // 404 = Not Found
+    case errorWrongPassword: return 401; // 401 = Unauthorized
+    case errorProfileEmailAlreadyExists: return 409; // 409 = Conflict
+    case errorProfilePhoneNumberAlreadyExists: return 409; // 409 = Conflict
+    default: return 500; // 500 = Internal Server Error
   }
-  catch (error) {
-    // Respond with error messages
-    if (error === errorWrongEmail) {
-      res.status(404).json({ errorMessage: errorWrongEmail }); // 404 = Not Found
-    } else if (error === errorWrongPassword) {
-      res.status(401).json({ errorMessage: errorWrongPassword }); // 401 = Unauthorized
-    } else {
-      console.error("Database error:", error);
-      res.status(500).json({ errorMessage: "Database error finding profile in database." }); // 500 = Internal Server Error
-    }
-  }
-});
+}
+
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+// Helpers
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
  * Tries to get a profile from the database using email and password.
@@ -48,51 +82,17 @@ router.post("/get", async (req, res) => {
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
 async function getProfile(email, password) {
-
   // Get an array of profiles with the corresponding email from the database
   const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-
   // Check that profile exists and password is right
   if (Object.keys(profile).length == 0) {
     return Promise.reject(errorWrongEmail);
   } else if (profile[0].Password != password) {
     return Promise.reject(errorWrongPassword);
   }
-
   // Return profile
   return profile[0];
 }
-
-router.post("/create", async (req, res) => {
-  try {
-    const {
-      email,
-      password,
-      phoneNumber
-    } = req.body;
-
-    //y TODO: implement password encryption (right now it is just being sent directly)
-
-    //y TODO: add some variable validation (like "email" needs to be "not null" in database)
-
-    const profile = await createProfile(email, password, phoneNumber);
-
-    res.status(201).json({
-      profile: profile
-    });
-  }
-  catch (error) {
-    // Respond with error messages
-    if (error === errorProfileEmailAlreadyExists) {
-      res.status(409).json({ errorMessage: errorProfileEmailAlreadyExists }); // 409 = Conflict
-    } else if (error === errorProfilePhoneNumberAlreadyExists) {
-      res.status(409).json({ errorMessage: errorProfilePhoneNumberAlreadyExists }); // 409 = Conflict
-    } else {
-      console.error("Database error:", error);
-      res.status(500).json({ errorMessage: "Database error adding profile to database." }); // 500 = Internal Server Error
-    }
-  }
-});
 
 /** 
  * Tries to add a profile to the database.
@@ -102,58 +102,24 @@ router.post("/create", async (req, res) => {
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
 async function createProfile(email, password, phoneNumber) {
-
   // Check if the email is already used by an existing profile
   let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
   if (Object.keys(profile).length != 0) {
     return Promise.reject(errorProfileEmailAlreadyExists);
   }
-
   // Check if the phone number is already used by an existing profile
   [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${phoneNumber}';`);
   if (Object.keys(profile).length != 0) {
     return Promise.reject(errorProfilePhoneNumberAlreadyExists);
   }
-
   // Add profile to database
   await pool.query(`INSERT INTO p2.Profile 
       (Email, Password, PhoneNumber)
       VALUES ('${email}', '${password}', ${phoneNumber})`);
   [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-
   // Return profile
   return profile[0];
 }
-
-router.post("/delete", async (req, res) => {
-  try {
-    const {
-      email,
-      password,
-    } = req.body;
-
-    await deleteProfile(email, password);
-
-    //y TODO: implement password encryption (right now it is just being sent directly)
-
-    //y TODO: add some variable validation (like "email" needs to be "not null" in database)
-
-    res.status(200).json({ // 200 = OK
-      // No message
-    });
-  }
-  catch (error) {
-    // Respond with error messages
-    if (error === errorWrongEmail) {
-      res.status(404).json({ errorMessage: errorWrongEmail }); // 404 = Not Found
-    } else if (error === errorWrongPassword) {
-      res.status(401).json({ errorMessage: errorWrongPassword }); // 401 = Unauthorized
-    } else {
-      console.error("Database error:", error);
-      res.status(500).json({ errorMessage: "Database error deleting profile in database." }); // 500 = Internal Server Error
-    }
-  }
-});
 
 /** 
  * Tries to delete the profile from the database.
@@ -161,56 +127,17 @@ router.post("/delete", async (req, res) => {
  * @param {*} password string.
  */
 async function deleteProfile(email, password) {
-
   // Get an array of profiles with the corresponding email from the database
   const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-
   // Check that profile exists and password is right
   if (Object.keys(profile).length === 0) {
     return Promise.reject(errorWrongEmail);
   } else if (profile[0].Password !== password) {
     return Promise.reject(errorWrongPassword);
   }
-
   // Delete the profile
   await pool.query(`DELETE FROM p2.Profile WHERE Email='${email}';`);
 }
-
-router.post("/modify", async (req, res) => {
-  try {
-    const {
-      email,
-      password,
-      propertyName,
-      newValue
-    } = req.body;
-
-    //y TODO: implement password encryption (right now it is just being sent directly)
-
-    //y TODO: add some variable validation (like "email" needs to be "not null" in database)
-
-    const profile = await modifyProfile(email, password, propertyName, newValue);
-
-    res.status(201).json({
-      profile: profile
-    });
-  }
-  catch (error) {
-    // Respond with error messages
-    if (error === errorWrongEmail) {
-      res.status(404).json({ errorMessage: errorWrongEmail }); // 404 = Not Found
-    } else if (error === errorWrongPassword) {
-      res.status(401).json({ errorMessage: errorWrongPassword }); // 401 = Unauthorized
-    } else if (error === errorProfileEmailAlreadyExists) {
-      res.status(409).json({ errorMessage: errorProfileEmailAlreadyExists }); // 409 = Conflict
-    } else if (error === errorProfilePhoneNumberAlreadyExists) {
-      res.status(409).json({ errorMessage: errorProfilePhoneNumberAlreadyExists }); // 409 = Conflict
-    } else {
-      console.error("Database error:", error);
-      res.status(500).json({ errorMessage: "Database error modifying profile in database." }); // 500 = Internal Server Error
-    }
-  }
-});
 
 /** 
  * Tries to assign a new value to a property of a profile in the database.
@@ -221,17 +148,15 @@ router.post("/modify", async (req, res) => {
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
 async function modifyProfile(email, password, propertyName, newValue) {
-
   // Check that profile exists and password is right
   let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-  const profileID = profile[0].ID;
   if (Object.keys(profile).length === 0) {
     return Promise.reject(errorWrongEmail);
   } else if (profile[0].Password !== password) {
     return Promise.reject(errorWrongPassword);
   }
-
-  // Check for duplicates in case of wanting to modify email or phone number
+  const profileID = profile[0].ID;
+  // Check for duplicates (for example, two profiles cannot have the same email address)
   let otherProfile;
   switch (propertyName) {
     case "Email":
@@ -247,10 +172,8 @@ async function modifyProfile(email, password, propertyName, newValue) {
       }
       break;
   }
-
   // Update property with the new value
   await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
-
   // Return profile
   [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
   return profile[0];
