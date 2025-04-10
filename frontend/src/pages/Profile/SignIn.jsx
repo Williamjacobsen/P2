@@ -8,7 +8,7 @@ import { Navigate } from "react-router-dom";
 export default function SignIn() {
 
   // Already signed in?
-  if (isSignedIn() == true) {
+  if (isSignedIn() === true) {
     return <Navigate to="/profile" />;
   }
 
@@ -44,9 +44,11 @@ export function isSignedIn() {
     const cookieEmail = getCookie("profileEmail");
     const cookiePassword = getCookie("profilePassword");
 
+    //y TODO: delete cookies and go to sign in if your saved cookie credentials are now invalid because the credentials have been changed on another device
+
     // Are the login credentials valid?
     if (cookieEmail != null && cookiePassword != null) {
-      const profile = getProfile(cookieEmail, cookiePassword);
+      const profile = RequestProfile(cookieEmail, cookiePassword);
       if (profile != null) {
         return true;
       }
@@ -81,7 +83,6 @@ function SignUpModal() {
   )
 }
 
-
 async function signIn(event) {
   try {
 
@@ -98,7 +99,7 @@ async function signIn(event) {
     const password = formData.get("password");
 
     // Get profile from server
-    const profile = await getProfile(email, password);
+    const profile = await RequestProfile(email, password);
 
     // Create sign in cookie
     setCookie("profileEmail", profile.Email, 7);
@@ -126,7 +127,7 @@ async function signUp(event) {
     const phoneNumber = formData.get("phoneNumber");
 
     // Add profile to server
-    const profile = await addProfile(email, password, phoneNumber);
+    const profile = await requestProfileCreation(email, password, phoneNumber);
 
     // Create sign in cookie
     setCookie("profileEmail", profile.Email, 7);
@@ -148,7 +149,7 @@ async function signUp(event) {
 * @param {*} password string
 * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
 */
-async function getProfile(email, password) {
+async function RequestProfile(email, password) {
   try {
 
     //y TODO: implement password encryption (right now it is just being sent directly)
@@ -184,7 +185,7 @@ async function getProfile(email, password) {
  * @param {*} phoneNumber int
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
-async function addProfile(email, password, phoneNumber) {
+async function requestProfileCreation(email, password, phoneNumber) {
   try {
 
     //y TODO: implement password encryption (right now it is just being sent directly)
