@@ -12,11 +12,16 @@ function FilterOption({optionName, IsTitle = false}) {
     )
 }
 
-export function CatalogueFilter({FilterName, FilterOptions}) {
+export function CatalogueFilter({FilterName, FilterOptions, value, onChange}) {
     return (
         <div>
-            <label htmlFor="category"></label>
-            <select id="category" defaultValue="" className="SortBox">
+            <label htmlFor={FilterName}></label>
+            <select
+                id="category"
+                defaultValue=""
+                className="SortBox"
+                value = {value}
+                onChange={onChange}>
                 <FilterOption optionName={FilterName} IsTitle={true} />
                 {FilterOptions.map((option) => (
                     <option value={option}>{option}</option>
