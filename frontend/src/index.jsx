@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import Header from "./pages/Header";
+import Header from "./pages/Header/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
@@ -13,6 +13,7 @@ import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
 import Profile from "./pages/Profile/Profile";
 import SignIn from "./pages/Profile/SignIn";
+import Cart from "./pages/Cart/Cart";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/Cart" element={<Cart />} />
         </Route>
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<Vendor />} />
