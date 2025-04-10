@@ -10,7 +10,6 @@ export default function ProductCatalogue (){
     const [priceSort, setPriceSort] = useState("");
     const [clothingTypeFilter, setClothingTypeFilter] = useState("");
     const [search, setSearch] = useState("");
-    const [sizeFilter, setSizeFilter] = useState("");
 
     //loadedProducts is the actual json of the products that we load in,
     //shownProducts is only references to that array in indices 0,..., n-1
@@ -21,7 +20,6 @@ export default function ProductCatalogue (){
     const [shownProducts, setShownProducts] = useState([]);
 
     function clearFilters(){
-        setSizeFilter('')
         setSearch('')
         setClothingTypeFilter('')
         setPriceSort('')
@@ -55,6 +53,7 @@ export default function ProductCatalogue (){
             const product = loadedProducts[index];
             return (genderFilter === '' || product.Gender === genderFilter) &&
                 (clothingTypeFilter === '' || product.ClothingType === clothingTypeFilter)
+                && (search === '' || product.Name.toLowerCase().includes(search.toLowerCase()))
             //missing product size implementation
         });
     }
@@ -87,19 +86,31 @@ export default function ProductCatalogue (){
     useEffect(() => {
         if (loadedProducts.length === 0) return;
         setShownProducts(filterAndSortProducts(loadedProducts));
-    }, [genderFilter,priceSort,clothingTypeFilter,search,sizeFilter]);
+    }, [genderFilter,priceSort,clothingTypeFilter,search,]);
 
     const genderOptionArray = [
         'Male','Female'
     ]
     const clothingOptionArray = [
-        'T-shirt','Hoodie','Pants','Jeans'
-    ]
+        'T-shirts',
+        'Shirts',
+        'Hoodies',
+        'Sweaters',
+        'Jackets',
+        'Coats',
+        'Pants',
+        'Jeans',
+        'Shorts',
+        'Skirts',
+        'Dresses',
+        'Underwear',
+        'Swimwear',
+        'Accessories',
+        'Footwear'
+    ];
+
     const priceOptionArray = [
         'Highest Price','Lowest Price'
-    ]
-    const sizeOptionArray = [
-        'Small', 'Medium', 'Large',
     ]
 // filters take a lot of parameters (props technically) so we can update them when they change
     return (
@@ -117,15 +128,11 @@ export default function ProductCatalogue (){
                                  FilterOptions={priceOptionArray}
                                  value={priceSort}
                                  onChange={event =>setPriceSort(event.target.value)}/>
-                <CatalogueFilter FilterName={'Size'}
-                                 FilterOptions={sizeOptionArray}
-                                 value={sizeFilter}
-                                 onChange={event => setSizeFilter(event.target.value)}/>
-                <CatalogueSearch></CatalogueSearch>
+                <CatalogueSearch value={search} onChange={event => setSearch(event.target.value)}/>
                 {
                     // we use curly braces to enter JS inside the html (part of React functionality)
                     // then we use a short circuit logic expression that only displays this button if the filters is enabled
-                    (genderFilter || search || clothingTypeFilter || sizeFilter || priceSort) &&
+                    (genderFilter || search || clothingTypeFilter || priceSort) &&
                     (<button className={'ClearFilterButton'} onClick={clearFilters}>
                         ❌
                     </button>)

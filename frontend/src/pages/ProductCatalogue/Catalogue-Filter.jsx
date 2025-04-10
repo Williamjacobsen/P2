@@ -31,10 +31,10 @@ export function CatalogueFilter({FilterName, FilterOptions, value, onChange}) {
     );
 }
 
-export function CatalogueSearch(){
+export function CatalogueSearch({value, onChange}){
     return (
         <div>
-            <input type={"text"} placeholder={"Search for products..."} className="SearchBox"/>
+            <input type={"text"} placeholder={"Search for products..."} className="SearchBox" value={value} onChange={onChange}/>
         </div>
     )
 }
