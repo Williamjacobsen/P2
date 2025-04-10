@@ -169,7 +169,7 @@ async function RequestProfile(email, password) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.errorMessage);
+      return Promise.reject(data.errorMessage);
     }
     return data.profile;
   }
@@ -206,7 +206,7 @@ async function requestProfileCreation(email, password, phoneNumber) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.errorMessage);
+      return Promise.reject(data.errorMessage);
     }
     return data.profile;
   }

@@ -114,7 +114,7 @@ async function requestProfileDeletion(email, password) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.errorMessage);
+      return Promise.reject(data.errorMessage);
     }
   }
   catch (error) {
@@ -241,7 +241,7 @@ async function requestProfileModification(email, password, propertyName, newValu
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.errorMessage);
+      return Promise.reject(data.errorMessage);
     }
     return data.profile;
   }
