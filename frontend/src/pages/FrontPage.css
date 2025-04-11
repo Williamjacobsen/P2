@@ -27,7 +27,10 @@
   .content {
     max-width: 50%;
     z-index: 2; 
-    margin-left: -35rem; 
+  }
+
+  .content h1 {
+    font-size: 3rem;
   }
   
   .content h1 span {
@@ -35,8 +38,24 @@
   }
 
   
-.buttons {
-    margin-right: 10px;
-    padding: 10px 20px;
-  }
 
+  .buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .buttons button {
+    background-color: #0dd78f;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  
+  .buttons button:hover {
+    background-color: #0bb77f;
+  }
