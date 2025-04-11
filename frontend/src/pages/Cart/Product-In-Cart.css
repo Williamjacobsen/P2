@@ -1,0 +1,28 @@
+.cartProduct{
+    width: 600px;
+    height: 300px;
+    background: lightblue;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cartImg{
+    margin: 10px;
+    width: 200px;
+    height: 280px;
+}
+
+.cartText{
+    font-size: 14px;
+}
+
+.cartRemove{
+    align-content: end;
+    margin-bottom: 20px;
+}
+.cartRemoveButton{
+    font-size: larger;
+}
+.cartRemoveButton:hover{
+    cursor: pointer;
+}
