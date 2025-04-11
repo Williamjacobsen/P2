@@ -1,0 +1,42 @@
+.background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 8rem;
+    width: 100%;
+    min-height: 90vh;
+    background-image: url('https://migogaalborg.dk/wp-content/uploads/2018/12/21-1024x683.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: white; 
+  }
+  
+  
+  .background::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4); 
+    z-index: 1;
+  }
+  
+  .content {
+    max-width: 50%;
+    z-index: 2; 
+    margin-left: -35rem; 
+  }
+  
+  .content h1 span {
+    color: #00b386;
+  }
+
+  
+.buttons {
+    margin-right: 10px;
+    padding: 10px 20px;
+  }
+
