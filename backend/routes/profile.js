@@ -18,6 +18,7 @@ router.post("/get", async (req, res) => {
     res.status(getErrorCode(error)).json({ errorMessage: error });
   }
 });
+
 router.post("/create", async (req, res) => {
   try {
     const { email, password, phoneNumber } = req.body; // Get data from body
@@ -29,6 +30,7 @@ router.post("/create", async (req, res) => {
     res.status(getErrorCode(error)).json({ errorMessage: error });
   }
 });
+
 router.post("/delete", async (req, res) => {
   try {
     const { email, password, } = req.body; // Get data from body
@@ -40,6 +42,7 @@ router.post("/delete", async (req, res) => {
     res.status(getErrorCode(error)).json({ errorMessage: error });
   }
 });
+
 router.post("/modify", async (req, res) => {
   try {
     const { email, password, propertyName, newValue } = req.body; // Get data from body

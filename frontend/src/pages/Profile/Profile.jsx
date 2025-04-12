@@ -1,13 +1,33 @@
 import React from "react";
 import Modal from "../Modal/Modal"
 import { Navigate } from "react-router-dom";
-import { isSignedIn, createProfileCookies, deleteProfileCookies } from "./SignIn"
+import { createProfileCookies, deleteProfileCookies } from "./SignIn"
 import { getCookie } from "../../utils/cookies"
+import useCheckLoginValidity from "./useCheckLoginValidity";
+import useGetVendor from "./useGetVendor";
 
 export default function Profile() {
-  // Not signed in?
-  if (isSignedIn() === false) {
+
+  // Vendor info from cookies
+  const cookieVendorID = getCookie("profileVendorID");
+  const isVendor = (cookieVendorID != "null" && cookieVendorID != null); // "getCookie()" returns either null or a string (which would be "null" if the cookie exists, but the profile has the vendor ID null (so, if the profile is not a vendor)). 
+  const bypassUseGetVendor = !isVendor;
+
+  // Custom hooks
+  const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
+  const [isLoadingVendor, vendor] = useGetVendor(cookieVendorID, bypassUseGetVendor);
+
+  // Is the user signed in?
+  if (isLoadingLogin) {
+    return (<>Loading login...</>);
+  }
+  else if (!isLoginValid) {
     return <Navigate to="/sign-in" />;
+  }
+
+  // Is the user a vendor?
+  if (isLoadingVendor) {
+    return (<>Loading vendor information...</>);
   }
 
   return (
@@ -25,13 +45,48 @@ export default function Profile() {
       <b>Phone number: </b>
       {getCookie("profilePhoneNumber")}
       <br />
-      <Modal openButtonText="Change email address?" modalContent={<ChangeEmailAddressModal />} />
+      <Modal
+        openButtonText="Change email address?"
+        modalContent={<ModifyProfileModal
+          databasePropertyName="Email"
+          labelText="New email: "
+          inputType="email" />} />
       <br />
-      <Modal openButtonText="Change phone number?" modalContent={<ChangePhoneNumberModal />} />
+      <Modal
+        openButtonText="Change phone number?"
+        modalContent={<ModifyProfileModal
+          databasePropertyName="PhoneNumber"
+          labelText="New phone number: "
+          inputType="number" />} />
       <br />
-      <Modal openButtonText="Change password?" modalContent={(<ChangePasswordModal />)} />
+      <Modal
+        openButtonText="Change password?"
+        modalContent={<ModifyProfileModal
+          databasePropertyName="Password"
+          labelText="New password "
+          inputType="password" />} />
       <br />
-      <Modal openButtonText="Delete profile?" modalContent={(<DeleteProfileModal />)} />
+      <Modal
+        openButtonText="Delete profile?"
+        modalContent={(<DeleteProfileModal />)} />
+      {
+        !isVendor && (
+          <>
+            {/* //y NOT DONE */}
+            not vendor
+          </>
+        )
+      }
+      {
+        isVendor && (
+          <>
+            {/* //y NOT DONE */}
+            {vendor.Name}
+            <br />
+            {vendor.Email}
+          </>
+        )
+      }
     </>
   );
 }
@@ -40,57 +95,19 @@ export default function Profile() {
 // Modals
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
-function ChangePhoneNumberModal() {
+function ModifyProfileModal({ databasePropertyName, labelText, inputType = "text", theMinLength = 0, theMaxLength = 256 }) {
   return (
     <>
       <form onSubmit={modifyProfile}>
-        <input type="hidden" name="databasePropertyName" value="PhoneNumber" /> <br />
+        <input type="hidden" name="databasePropertyName" value={databasePropertyName} /> <br />
         <b>
           Current password:
         </b> <br />
         <input type="password" name="password" required /> <br />
         <b>
-          New phone number:
+          {labelText}
         </b> <br />
-        <input name="newValue" required minLength={8} maxLength={16} /> <br />
-        <input type="submit" value="Apply" />
-      </form >
-    </>
-  );
-}
-
-function ChangeEmailAddressModal() {
-  return (
-    <>
-      <form onSubmit={modifyProfile}>
-        <input type="hidden" name="databasePropertyName" value="Email" /> <br />
-        <b>
-          Current password:
-        </b> <br />
-        <input type="password" name="password" required /> <br />
-        <b>
-          New email:
-        </b> <br />
-        <input name="newValue" required /> <br />
-        <input type="submit" value="Apply" />
-      </form >
-    </>
-  );
-}
-
-function ChangePasswordModal() {
-  return (
-    <>
-      <form onSubmit={modifyProfile}>
-        <input type="hidden" name="databasePropertyName" value="Password" /> <br />
-        <b>
-          Current password:
-        </b> <br />
-        <input type="password" name="password" required /> <br />
-        <b>
-          New password:
-        </b> <br />
-        <input type="password" name="newValue" required /> <br />
+        <input type={inputType} name="newValue" required minLength={theMinLength} maxLength={theMaxLength} /> <br />
         <input type="submit" value="Apply" />
       </form >
     </>
@@ -193,6 +210,11 @@ async function requestProfileModification(email, password, propertyName, newValu
   }
 }
 
+/**
+ * @param {*} email string
+ * @param {*} password string
+ * @returns either nothing, or a Promise.reject() with an error message.
+ */
 async function requestProfileDeletion(email, password) {
   try {
     //y TODO: implement password encryption (right now it is just being sent directly)
@@ -225,3 +247,7 @@ function signOut() {
   // Reload the page (this navigates to the sign in page because the user is now signed out)
   window.location.reload();
 }
+
+
+
+

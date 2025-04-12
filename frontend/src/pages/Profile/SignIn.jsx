@@ -2,12 +2,20 @@
 
 import React from "react";
 import Modal from "../Modal/Modal"
-import { setCookie, getCookie, deleteCookie } from "../../utils/cookies"
+import { setCookie, deleteCookie } from "../../utils/cookies"
 import { Navigate } from "react-router-dom";
+import useCheckLoginValidity from "./useCheckLoginValidity";
 
 export default function SignIn() {
-  // Already signed in?
-  if (isSignedIn() === true) {
+
+  // Custom hooks
+  const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
+
+  // Is the user already signed in?
+  if (isLoadingLogin) {
+    return (<>Loading login...</>);
+  }
+  else if (isLoginValid) {
     return <Navigate to="/profile" />;
   }
 
@@ -18,7 +26,7 @@ export default function SignIn() {
         <b>
           Email address:
         </b> <br />
-        <input name="email" required /> <br />
+        <input type="email" name="email" required /> <br />
         <b>
           Password:
         </b> <br />
@@ -44,7 +52,7 @@ function SignUpModal() {
         <b>
           Email address:
         </b> <br />
-        <input name="email" required /> <br />
+        <input type="email" name="email" required /> <br />
         <b>
           Password:
         </b> <br />
@@ -59,9 +67,9 @@ function SignUpModal() {
   )
 }
 
-// ___________________________________________________________________
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Events
-// ___________________________________________________________________
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 async function signIn(event) {
   try {
@@ -118,7 +126,7 @@ async function signUp(event) {
  * @param {*} password string
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
-async function RequestProfile(email, password) {
+export async function RequestProfile(email, password) {
   try {
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
@@ -175,32 +183,8 @@ async function requestProfileCreation(email, password, phoneNumber) {
 }
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Export functions
+// Cookies
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-
-/**
- * Does the user have valied profile credential cookies?
- * @returns true or false.
- */
-export function isSignedIn() {
-  try {
-    //y TODO: delete cookies and go to sign in if your saved cookie credentials are now invalid because the credentials have been changed on another device
-    // Get login credential from cookies
-    const cookieEmail = getCookie("profileEmail");
-    const cookiePassword = getCookie("profilePassword");
-    // Are the login credentials valid?
-    if (cookieEmail != null && cookiePassword != null) {
-      const profile = RequestProfile(cookieEmail, cookiePassword);
-      if (profile != null) {
-        return true;
-      }
-    }
-    return false;
-  }
-  catch (error) {
-    return false;
-  }
-}
 
 export function createProfileCookies(databaseProfile) {
   setCookie("profileEmail", databaseProfile.Email, 7);

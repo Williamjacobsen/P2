@@ -31,7 +31,7 @@ export function deleteCookie(name, path = "/") {
 
 /**
  * @param {*} name string 
- * @returns Either the value of the cookie, or null if the cookie name cannot be found;
+ * @returns Either the value of the cookie (AS A STRING), or null if the cookie name cannot be found;
  */
 export function getCookie(name) {
   const nameValuePairs = document.cookie.split("; ");
