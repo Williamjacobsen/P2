@@ -1,5 +1,5 @@
 import React from 'react';
-import './Product-In-Cart.css';
+import './Cart.css';
 
 function ProductInCart({id, storeName, storeAdress, quantity, size, productName, price, imgURL}) {
     return (
