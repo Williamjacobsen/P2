@@ -76,9 +76,9 @@ export async function getProfile(email, password) {
   // Get an array of profiles with the corresponding email from the database
   const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
   // Check that profile exists and password is right
-  if (Object.keys(profile).length == 0) {
+  if (Object.keys(profile).length === 0) {
     return Promise.reject(errorWrongEmail);
-  } else if (profile[0].Password != password) {
+  } else if (profile[0].Password !== password) {
     return Promise.reject(errorWrongPassword);
   }
   // Return profile
@@ -95,12 +95,12 @@ export async function getProfile(email, password) {
 async function createProfile(email, password, phoneNumber) {
   // Check if the email is already used by an existing profile
   let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-  if (Object.keys(profile).length != 0) {
+  if (Object.keys(profile).length !== 0) {
     return Promise.reject(errorProfileEmailAlreadyExists);
   }
   // Check if the phone number is already used by an existing profile
   [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${phoneNumber}';`);
-  if (Object.keys(profile).length != 0) {
+  if (Object.keys(profile).length !== 0) {
     return Promise.reject(errorProfilePhoneNumberAlreadyExists);
   }
   // Add profile to database

@@ -9,6 +9,7 @@ export default function ProfileProductOrders() {
   const navigate = useNavigate();
   const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
   const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoginValid);
+  // const [sortedOrders, setSortedOrders] = useState(null); //b
 
   // Is the user signed in?
   if (isLoadingLogin) {
@@ -22,27 +23,35 @@ export default function ProfileProductOrders() {
   if (isLoadingOrders) {
     return (<>Loading order history...</>);
   }
-  else if (Object.keys(orders).length == 0) {
+  else if (Object.keys(orders).length === 0) {
     return (<>You have no orders.</>)
   }
 
-  //y TODO: Be able to sort by date or by isResolved and then date
+  // Sort the orders by IsResolved and secondarily sort by Datetime
+  let sortedOrders = orders;
+  sortedOrders.sort((a, b) => {
+    if (a.IsResolved === "1" && b.IsResolved === "0") return true;
+    else if (a.IsResolved === "0" && b.IsResolved === "1") return false;
+    else return b.Datetime.localeCompare(a.Datetime);
+  })
+
+  //y TODO: Maybe show 
 
   return (
     <>
       <h3>
-        --- Orders ---
+        --- Orders (sorted by resolved and then time) ---
       </h3>
-      {orders.map((order) => (
+      {sortedOrders.map((order) => (
         <>
+          <b>Has been resolved: </b>
+          {order.IsResolved}
+          <br />
           <b>Time of purchase: </b>
           {order.Datetime}
           <br />
           <b>Product ID: </b>
           {order.ProductID}
-          <br />
-          <b>Has been resolved: </b>
-          {order.IsResolved}
           <br />
           <br />
         </>

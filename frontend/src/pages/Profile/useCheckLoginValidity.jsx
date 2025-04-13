@@ -49,9 +49,9 @@ async function isCookieLoginValid() {
     const cookieEmail = getCookie("profileEmail");
     const cookiePassword = getCookie("profilePassword");
     // Are the login credentials valid?
-    if (cookieEmail != null && cookiePassword != null) {
+    if (cookieEmail !== null && cookiePassword !== null) {
       const profile = await RequestProfile(cookieEmail, cookiePassword);
-      if (profile != null) {
+      if (profile !== null) {
         return true;
       }
     }

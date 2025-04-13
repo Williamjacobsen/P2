@@ -46,7 +46,7 @@ async function getVendor(vendorID) {
   // Get an array of vendors with the corresponding ID from the database
   const [vendor] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
   // Check that vendor exists
-  if (Object.keys(vendor).length == 0) {
+  if (Object.keys(vendor).length === 0) {
     return Promise.reject(errorWrongVendorID);
   }
   // Return vendor

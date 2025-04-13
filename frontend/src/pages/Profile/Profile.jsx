@@ -10,7 +10,7 @@ export default function Profile() {
 
   // Vendor info from cookies
   const cookieVendorID = getCookie("profileVendorID");
-  const isVendor = (cookieVendorID != "null" && cookieVendorID != null); // "getCookie()" returns either null or a string (which would be "null" if the cookie exists, but the profile has the vendor ID null (so, if the profile is not a vendor)). 
+  const isVendor = (cookieVendorID !== "null" && cookieVendorID !== null); // "getCookie()" returns either null or a string (which would be "null" if the cookie exists, but the profile has the vendor ID null (so, if the profile is not a vendor)). 
   const bypassUseGetVendor = !isVendor;
 
   // Hooks
