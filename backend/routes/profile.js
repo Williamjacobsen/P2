@@ -1,5 +1,12 @@
 import express from "express";
 import pool from "../db.js";
+import {
+  getErrorCode,
+  errorWrongEmail,
+  errorWrongPassword,
+  errorProfileEmailAlreadyExists,
+  errorProfilePhoneNumberAlreadyExists
+} from "../errorMessage.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -56,25 +63,6 @@ router.post("/modify", async (req, res) => {
 });
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Error messages
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-
-const errorWrongEmail = "Email does not have a profile.";
-const errorWrongPassword = "Password does not match email.";
-const errorProfileEmailAlreadyExists = "Another profile already uses that email.";
-const errorProfilePhoneNumberAlreadyExists = "Another profile already uses that phone number.";
-
-function getErrorCode(errorMessage) {
-  switch (errorMessage) {
-    case errorWrongEmail: return 404; // 404 = Not Found
-    case errorWrongPassword: return 401; // 401 = Unauthorized
-    case errorProfileEmailAlreadyExists: return 409; // 409 = Conflict
-    case errorProfilePhoneNumberAlreadyExists: return 409; // 409 = Conflict
-    default: return 500; // 500 = Internal Server Error
-  }
-}
-
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Helpers
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
@@ -84,7 +72,7 @@ function getErrorCode(errorMessage) {
  * @param {*} password string
  * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
  */
-async function getProfile(email, password) {
+export async function getProfile(email, password) {
   // Get an array of profiles with the corresponding email from the database
   const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
   // Check that profile exists and password is right
@@ -131,13 +119,7 @@ async function createProfile(email, password, phoneNumber) {
  */
 async function deleteProfile(email, password) {
   // Get an array of profiles with the corresponding email from the database
-  const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-  // Check that profile exists and password is right
-  if (Object.keys(profile).length === 0) {
-    return Promise.reject(errorWrongEmail);
-  } else if (profile[0].Password !== password) {
-    return Promise.reject(errorWrongPassword);
-  }
+  const [profile] = await getProfile(email, password);
   // Delete the profile
   await pool.query(`DELETE FROM p2.Profile WHERE Email='${email}';`);
 }
@@ -152,13 +134,8 @@ async function deleteProfile(email, password) {
  */
 async function modifyProfile(email, password, propertyName, newValue) {
   // Check that profile exists and password is right
-  let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-  if (Object.keys(profile).length === 0) {
-    return Promise.reject(errorWrongEmail);
-  } else if (profile[0].Password !== password) {
-    return Promise.reject(errorWrongPassword);
-  }
-  const profileID = profile[0].ID;
+  let profile = await getProfile(email, password);
+  const profileID = profile.ID;
   // Check for duplicates (for example, two profiles cannot have the same email address)
   let otherProfile;
   switch (propertyName) {
@@ -178,7 +155,7 @@ async function modifyProfile(email, password, propertyName, newValue) {
   // Update property with the new value
   await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
   // Return profile
-  [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
-  return profile[0];
+  const [updatedProfile] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
+  return updatedProfile[0];
 }
 

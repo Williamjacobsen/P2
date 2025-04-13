@@ -3,12 +3,13 @@
 import React from "react";
 import Modal from "../Modal/Modal"
 import { setCookie, deleteCookie } from "../../utils/cookies"
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useCheckLoginValidity from "./useCheckLoginValidity";
 
 export default function SignIn() {
 
-  // Custom hooks
+  // Hooks
+  const navigate = useNavigate();
   const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
 
   // Is the user already signed in?
@@ -16,7 +17,7 @@ export default function SignIn() {
     return (<>Loading login...</>);
   }
   else if (isLoginValid) {
-    return <Navigate to="/profile" />;
+    navigate("/profile");
   }
 
   return (
@@ -26,11 +27,11 @@ export default function SignIn() {
         <b>
           Email address:
         </b> <br />
-        <input type="email" name="email" required /> <br />
+        <input type="email" name="email" required maxLength={150} /> <br />
         <b>
           Password:
         </b> <br />
-        <input type="password" name="password" required /> <br />
+        <input type="password" name="password" required maxLength={500} /> <br />
         <input type="submit" value="Sign in" />
       </form >
       <br />
@@ -52,15 +53,15 @@ function SignUpModal() {
         <b>
           Email address:
         </b> <br />
-        <input type="email" name="email" required /> <br />
+        <input type="email" name="email" required maxLength={150} /> <br />
         <b>
           Password:
         </b> <br />
-        <input type="password" name="password" required /> <br />
+        <input type="password" name="password" required maxLength={500} /> <br />
         <b>
           Phone number:
         </b> <br />
-        <input type="phoneNumber" name="phoneNumber" required minLength={8} maxLength={16} /> <br />
+        <input type="text" name="phoneNumber" required minLength={8} maxLength={16} /> <br />
         <input type="submit" value="Sign up" />
       </form >
     </>
@@ -124,7 +125,7 @@ async function signUp(event) {
  * Tries to get a profile from the server using email and password.
  * @param {*} email string
  * @param {*} password string
- * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
+ * @returns either a profile object, or a Promise.reject() with an error message.
  */
 export async function RequestProfile(email, password) {
   try {
@@ -155,7 +156,7 @@ export async function RequestProfile(email, password) {
  * @param {*} email string
  * @param {*} password string
  * @param {*} phoneNumber int
- * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
+ * @returns either a profile object, or a Promise.reject() with an error message.
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {
