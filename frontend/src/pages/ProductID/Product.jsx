@@ -9,6 +9,7 @@ export default function ProductPage() {
     const navigate = useNavigate();
 
     const [productData, setProductData] = useState([]);
+    const [mainImage, setMainImage] = useState();
 
     /** Finds all data relevant see server.js for database interaction */
     useEffect(() => {
@@ -16,22 +17,18 @@ export default function ProductPage() {
             const res = await fetch(`http://localhost:3001/product/${id}`);
             await res.json().then((productData) => {
                 setProductData(productData);
+                setMainImage(productData[0]); // Initializing first Image
             });
         }
         allProductData();
     }, [id]);
 
-    /** Made to switch main image with clicked secondary picture */
-    const onExtraImgClick = (i) => {
-        if (i === 0) return;
-
-        const newImages = [...productData];
-        // Switches clicked image with main image
-        [newImages[0], newImages[i]] = [newImages[i], newImages[0]];
-        // Force re-render of images to update
-        setProductData(newImages.slice());
+    /** Made to switch main image */
+    const onImgClick = (image) => {
+        setMainImage(image);
     };
 
+    console.log("this is first image" + mainImage);
     return (
     <div className="container">
         <div className="left-content">
@@ -39,18 +36,19 @@ export default function ProductPage() {
                 <div className="image-gallery">
                     <div className="main-image-container">
                         <img
-                            src={productData[0].Path}
-                            alt={`Product ${productData[0].id}`}
+                            src={mainImage.Path}
+                            alt={`Product ${mainImage.id}`}
                             className="main-image"
                             onError={(e) => {
                                 e.target.src = '/PlusIcon.jpg';
                             }}/>
                     </div>
                     <div className="thumbnail-row">
-                        {productData.slice(1).map((product, i) => (
+                        {productData.map((product, i) => (
                             product?.Path && (
                                 <div key={product.id} className="thumbnail-container">
-                                    <button onClick={() => onExtraImgClick(i+1)}><img
+                                    <button onClick={() => onImgClick(product)}><img
+                                        key={i}
                                         src={product.Path}
                                         alt={`Thumbnail ${product.id}`}
                                         className="thumbnail-image"
