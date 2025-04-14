@@ -19,12 +19,6 @@ app.use("/product-images", productImagesRoute);
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
-import profileRoute from "./routes/profile.js";
-app.use("/profile", profileRoute);
-import vendorRoute from "./routes/vendor.js";
-app.use("/vendor", vendorRoute);
-import productOrderRoute from "./routes/productOrder.js";
-app.use("/productOrder", productOrderRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
