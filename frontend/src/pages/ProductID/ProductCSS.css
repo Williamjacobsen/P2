@@ -1,0 +1,73 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .left-content, .right-content {
+    width: 48%; 
+  }
+  
+  .left-content {
+    display: flex;
+    justify-content: center;
+    padding-right: 20px;
+  }
+  
+  .right-content {
+    padding-left: 20px;
+  }
+
+  .product-brand {
+    font-size: 16px;
+    color: #555;
+  }
+  
+  .product-name {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+  
+  .product-price {
+    font-size: 20px;
+    color: #000;
+  }
+
+.image-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Lean left */
+    transform: translateX(-50px); /* Nudge it slightly left */
+  }
+  
+  .main-image-container {
+    margin-bottom: 12px;
+  }
+  
+  .main-image {
+    width: 400px;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .thumbnail-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start; /* Align thumbs to the left */
+    max-width: 400px; /* Ensure thumbnail row doesn't exceed the width of the main image */
+    overflow-x: auto; /* Make the thumbnails scrollable horizontally if they exceed the container */
+    padding-bottom: 10px; /* Add some space at the bottom for scrolling */
+    white-space: nowrap; /* Prevent wrapping of thumbnails */
+  }
+  
+  .thumbnail-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+  }
+  
+  .thumbnail-image:hover {
+    opacity: 1;
+  }
