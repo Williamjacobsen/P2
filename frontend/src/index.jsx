@@ -12,12 +12,17 @@ import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
 import Cart from "./pages/Cart/Cart";
+import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Header />}>
+          <Route
+            path="/DisplayProductImages"
+            element={<DisplayProductImages />}
+          />
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
