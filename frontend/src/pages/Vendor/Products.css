@@ -1,0 +1,33 @@
+.plusIcon {
+  width: 125px;
+  height: 125px;
+  border-radius: 50%;
+  transition: box-shadow 0.25s, width 0.25s, height 0.25s;
+}
+
+.plusIcon:hover {
+  box-shadow: 0px 0px 15px #000000;
+  width: 135px;
+  height: 135px;
+}
+
+.addProduct {
+  background: rgb(38, 148, 238);
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .product-card {
+    width: 90%;
+    height: auto;
+  }
+
+  .product-card img {
+    height: 180px;
+  }
+}
