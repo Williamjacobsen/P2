@@ -16,7 +16,7 @@
 }
 
 .overlay {
-  background: rgba(53, 53, 53, 0.8);
+  background: rgba(49, 49, 49, 0.8);
 }
 
 .modal-content {
@@ -25,7 +25,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   line-height: 1.4;
-  background: #121212;
+  background: #f1f1f1;
   padding: 14px 28px;
   border-radius: 3px;
   max-width: 600px;
