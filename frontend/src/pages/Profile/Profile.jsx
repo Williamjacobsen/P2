@@ -190,7 +190,7 @@ export default function Profile() {
 }
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Modals
+// Modals content
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 function DeleteProfileModal() {
