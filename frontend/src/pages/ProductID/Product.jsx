@@ -1,13 +1,11 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
 import "./ProductCSS.css";
+import { setCookie } from "../../utils/cookies.js";
 
 export default function ProductPage() {
     const { id } = useParams();
-    const navigate = useNavigate();
-
     const [productData, setProductData] = useState([]);
     const [mainImage, setMainImage] = useState();
 
@@ -28,7 +26,6 @@ export default function ProductPage() {
         setMainImage(image);
     };
 
-    console.log("this is first image" + mainImage);
     return (
     <div className="container">
         <div className="left-content">
@@ -37,7 +34,7 @@ export default function ProductPage() {
                     <div className="main-image-container">
                         <img
                             src={mainImage.Path}
-                            alt={`Product ${mainImage.id}`}
+                            alt={`Product ${mainImage.ID}`}
                             className="main-image"
                             onError={(e) => {
                                 e.target.src = '/PlusIcon.jpg';
@@ -50,7 +47,7 @@ export default function ProductPage() {
                                     <button onClick={() => onImgClick(product)}><img
                                         key={i}
                                         src={product.Path}
-                                        alt={`Thumbnail ${product.id}`}
+                                        alt={`Thumbnail ${product.ID}`}
                                         className="thumbnail-image"
                                         onError={(e) => {
                                             e.target.src = '/PlusIcon.jpg';
@@ -79,9 +76,9 @@ export default function ProductPage() {
                 <option value="AMOUNT" hidden={true}>AMOUNT</option>
                 {[...Array(10)].map((e, i) => <option value={i+1} key={i}>{i+1}</option>)}
                 </select>
-                {/* Missing cart things */}
-                <button id="button" defaultValue="" style={{ width: "200px" }} onClick={() => navigate("/cart")}>ADD TO CART</button>
-
+                <button id="button" defaultValue="" style={{ width: "200px" }} onClick={() =>
+                    setCookie(productData[0]?.Name, productData[0]?.ID, null, `/product/${productData[0]?.ID}`)}>ADD TO CART</button> 
+                    {/* Made to make a cookie with product name, id, keep cookie till browser closed, path to product. Check cookies.js for more info */}
             </div>
             <div>
                 <p>{productData[0]?.Description}</p>
