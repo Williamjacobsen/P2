@@ -11,8 +11,10 @@ import FAQ from "./pages/FAQ";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
+import Product from "./pages/ProductID/Product"
 import Cart from "./pages/Cart/Cart";
 import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
+
 
 export default function App() {
   return (
@@ -27,6 +29,7 @@ export default function App() {
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
+          <Route path="/Product/:id" element={<Product />} />
           <Route path="/Cart" element={<Cart />} />
         </Route>
         {/* todo: add header to vendor route */}
