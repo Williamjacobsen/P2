@@ -19,6 +19,12 @@ app.use("/product-images", productImagesRoute);
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
+import profileRoute from "./routes/profile.js";
+app.use("/profile", profileRoute);
+import vendorRoute from "./routes/vendor.js";
+app.use("/vendor", vendorRoute);
+import productOrderRoute from "./routes/productOrder.js";
+app.use("/productOrder", productOrderRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
@@ -59,18 +65,13 @@ app.post("/example/save-text", async (req, res) => {
   }
 });
 
-app.get("/faq", async (req, res) => {
-  const [result] = await pool.query("SELECT * FROM p2.faq;");
-  res.status(200).json(result);
-});
-
 /** Gets all product data with related image paths and store name */
 app.get("/product/:id", async (req, res) => {
-  try{
+  try {
     const { id } = req.params;
 
     const [result] = await pool.query(
-        `SELECT 
+      `SELECT 
         p2.Product.*, 
         p2.Vendor.Name AS StoreName, 
         p2.productimage.Path
@@ -78,18 +79,23 @@ app.get("/product/:id", async (req, res) => {
         JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
         LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
         WHERE p2.Product.ID = ?;`,
-        [id]
-      );
+      [id]
+    );
     res.status(200).json(result);
   }
-  catch (err){
+  catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
+app.get("/faq", async (req, res) => {
+  const [result] = await pool.query("SELECT * FROM p2.faq;");
+  res.status(200).json(result);
+});
+
 app.get("/products", async (req, res) => {
-  try{
+  try {
     const [result] = await pool.query(`
       SELECT p2.product.*, p2.store.Name AS StoreName
       FROM p2.product
@@ -97,7 +103,7 @@ app.get("/products", async (req, res) => {
     `);
     res.status(200).json(result);
   }
-  catch (err){
+  catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
