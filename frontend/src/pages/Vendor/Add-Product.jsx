@@ -1,8 +1,7 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function AddProduct() {
-  const [storeID, setStoreID] = useState(-1); // can only do, when auth is done
+  const [storeID, setStoreID] = useState(-1);
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0.0);
   const [discountProcent, setDiscountProcent] = useState(0.0);
@@ -10,13 +9,59 @@ export default function AddProduct() {
   const [clothingType, setClothingType] = useState("");
   const [brand, setBrand] = useState("");
   const [gender, setGender] = useState("");
+  const [images, setImages] = useState([]);
+
+  const handleImageChange = (e) => {
+    if (e.target.files) {
+      setImages(Array.from(e.target.files));
+    }
+  };
+
+  const handleAddProduct = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("storeID", storeID);
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("discountProcent", discountProcent);
+      formData.append("description", description);
+      formData.append("clothingType", clothingType);
+      formData.append("brand", brand);
+      formData.append("gender", gender);
+
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+
+      const response = await fetch("http://localhost:3001/add-product", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Failed to add product");
+
+      setName("");
+      setPrice(0.0);
+      setDiscountProcent(0.0);
+      setDescription("");
+      setClothingType("");
+      setBrand("");
+      setGender("");
+      setImages([]);
+
+      alert("Product added successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error adding product");
+    }
+  };
 
   return (
     <div>
       <h1>Add Product</h1>
       <div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Product Name</h4>
+          <h4>Product Name</h4>
           <input
             type="text"
             placeholder="Product Name..."
@@ -25,7 +70,7 @@ export default function AddProduct() {
           />
         </div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Price</h4>
+          <h4>Price</h4>
           <input
             type="text"
             placeholder="Price..."
@@ -34,7 +79,7 @@ export default function AddProduct() {
           />
         </div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Discount procent</h4>
+          <h4>Discount Procent</h4>
           <input
             type="text"
             placeholder="Discount procent..."
@@ -43,7 +88,7 @@ export default function AddProduct() {
           />
         </div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Description</h4>
+          <h4>Description</h4>
           <input
             type="text"
             placeholder="Description..."
@@ -52,7 +97,7 @@ export default function AddProduct() {
           />
         </div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Clothing type</h4>
+          <h4>Clothing Type</h4>
           <input
             type="text"
             placeholder="Clothing type..."
@@ -61,7 +106,7 @@ export default function AddProduct() {
           />
         </div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Brand</h4>
+          <h4>Brand</h4>
           <input
             type="text"
             placeholder="Brand..."
@@ -70,7 +115,7 @@ export default function AddProduct() {
           />
         </div>
         <div>
-          <h4 style={{ marginBottom: "2px" }}>Gender</h4>
+          <h4>Gender</h4>
           <input
             type="text"
             placeholder="Gender..."
@@ -78,47 +123,17 @@ export default function AddProduct() {
             onChange={(e) => setGender(e.target.value)}
           />
         </div>
+        <div>
+          <h4>Product Images</h4>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+          />
+        </div>
       </div>
-      <button
-        style={{ marginTop: "20px" }}
-        onClick={async () => {
-          try {
-            // add variable validation ("name" cant be "not null" in database)
-
-            const response = await fetch("http://localhost:3001/add-product", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                storeID,
-                name,
-                price,
-                discountProcent,
-                description,
-                clothingType,
-                brand,
-                gender,
-              }),
-            });
-
-            if (!response.ok) throw new Error("Failed to add product");
-
-            setName("");
-            setPrice(0.0);
-            setDiscountProcent(0.0);
-            setDescription("");
-            setClothingType("");
-            setBrand("");
-            setGender("");
-
-            alert("Product added successfully!");
-          } catch (error) {
-            console.error("Error:", error);
-            alert("Error adding product");
-          }
-        }}
-      >
+      <button style={{ marginTop: "20px" }} onClick={handleAddProduct}>
         Add Product
       </button>
     </div>

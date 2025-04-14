@@ -1,3 +1,22 @@
+# How to start server on own your own local pc:
+
+For frontend:
+1) Create new terminal inside the project root folder.
+2) Enter "cd frontend".
+3) Enter "npm start".
+
+For backend:
+1) Create new terminal inside the project root folder.
+2) Enter "cd backend".
+3) Enter either "node --watch server.js" or "node server.js".
+
+For MySQL (only relevant if you have disabled starting it on system boot-up):
+1) In Windows Search, search for "services" (Danish: "tjenester")
+2) Open the "services" app.
+3) Find the service "MySQL80".
+4) Right-click it and press "start".
+5) You can now connect to your MySQL database using the MySQL Workbench app.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

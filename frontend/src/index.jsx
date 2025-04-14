@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import Header from "./pages/Header";
+import Header from "./pages/Header/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
@@ -12,17 +12,25 @@ import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
 import Product from "./pages/ProductID/Product"
+import Cart from "./pages/Cart/Cart";
+import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
+
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Header />}>
+          <Route
+            path="/DisplayProductImages"
+            element={<DisplayProductImages />}
+          />
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
           <Route path="/Product/:id" element={<Product />} />
+          <Route path="/Cart" element={<Cart />} />
         </Route>
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<Vendor />} />
