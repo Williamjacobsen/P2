@@ -5,7 +5,7 @@
     padding: 4rem 8rem;
     width: 100%;
     min-height: 65vh;
-    background-image: url('https://migogaalborg.dk/wp-content/uploads/2018/12/21-1024x683.jpg');
+    background-image: url('https://photos.watchmedier.dk/Images/article13220816.ece/ALTERNATES/schema-16_9/EDC%20Aalborg.jpg');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -41,8 +41,6 @@
   .content h1 span {
     color: #00b386;
   }
-
-  
 
   .buttons {
     margin-top: 20px;
