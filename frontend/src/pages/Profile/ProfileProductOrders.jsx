@@ -9,7 +9,6 @@ export default function ProfileProductOrders() {
   const navigate = useNavigate();
   const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
   const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoginValid);
-  // const [sortedOrders, setSortedOrders] = useState(null); //b
 
   // Is the user signed in?
   if (isLoadingLogin) {
@@ -30,17 +29,17 @@ export default function ProfileProductOrders() {
   // Sort the orders by IsResolved and secondarily sort by Datetime
   let sortedOrders = orders;
   sortedOrders.sort((a, b) => {
-    if (a.IsResolved === "1" && b.IsResolved === "0") return true;
-    else if (a.IsResolved === "0" && b.IsResolved === "1") return false;
+    if (a.IsResolved === 1 && b.IsResolved === 0) return true;
+    else if (a.IsResolved === 0 && b.IsResolved === 1) return false;
     else return b.Datetime.localeCompare(a.Datetime);
   })
 
-  //y TODO: Maybe show 
+  //y TODO: Maybe show unresolved and resolved seperately?
 
   return (
     <>
       <h3>
-        --- Orders (sorted by resolved and then time) ---
+        --- Orders (sorted primarily by resolved and secondarily by time) ---
       </h3>
       {sortedOrders.map((order) => (
         <>
@@ -49,6 +48,7 @@ export default function ProfileProductOrders() {
           <br />
           <b>Time of purchase: </b>
           {order.Datetime}
+          {/* NOTE: A MySQL Datetime also factors in daylight savings time (DST). */}
           <br />
           <b>Product ID: </b>
           {order.ProductID}
@@ -97,7 +97,7 @@ function useGetProfileProductOrders(isLoginValidated) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * @returns either a vendor object, or a Promise.reject() with an error message.
+ * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestProfileProductOrders(email, password) {
   try {
@@ -122,7 +122,3 @@ async function requestProfileProductOrders(email, password) {
     return Promise.reject(error);
   }
 }
-
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Helpers
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――

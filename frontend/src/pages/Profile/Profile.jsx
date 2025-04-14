@@ -280,7 +280,6 @@ async function modifyProfile(event) {
 
 async function modifyVendor(event) {
   try {
-    //y TODO: add variable validation
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
@@ -334,7 +333,7 @@ async function requestProfileDeletion(email, password) {
 }
 
 /**
- * @returns either a profile object, or a Promise.reject() with an error message.
+ * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestProfileModification(email, password, propertyName, newValue) {
   try {
@@ -363,7 +362,7 @@ async function requestProfileModification(email, password, propertyName, newValu
 }
 
 /**
- * @returns either a vendor object, or a Promise.reject() with an error message.
+ * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestVendorModification(email, password, propertyName, newValue) {
   try {

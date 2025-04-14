@@ -30,7 +30,7 @@ router.post("/getProfileProductOrders", async (req, res) => {
 /**
  * @param {*} email string
  * @param {*} password string
- * @returns either an array of JSON objects with orders, or a Promise.reject() with an error message.
+ * @returns either an array of JSON objects with orders (from the MySQL database), or a Promise.reject() with an error message.
  */
 export async function getProfileProfileOrders(email, password) {
   // Check that profile exists and password is right

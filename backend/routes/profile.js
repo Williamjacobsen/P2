@@ -70,7 +70,7 @@ router.post("/modify", async (req, res) => {
  * Tries to get a profile from the database using email and password.
  * @param {*} email string
  * @param {*} password string
- * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
+ * @returns either a JSON object with the profile (from the MySQL database), or a Promise.reject() with an error message.
  */
 export async function getProfile(email, password) {
   // Get an array of profiles with the corresponding email from the database
@@ -90,7 +90,7 @@ export async function getProfile(email, password) {
  * @param {*} email string
  * @param {*} password string
  * @param {*} phoneNumber int
- * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
+ * @returns either a JSON object with the profile (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function createProfile(email, password, phoneNumber) {
   // Check if the email is already used by an existing profile
@@ -130,7 +130,7 @@ async function deleteProfile(email, password) {
  * @param {*} password string.
  * @param {*} propertyName string name of the property in the MySQL database.
  * @param {*} newValue the new value of the property.
- * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
+ * @returns either a JSON object with the profile (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function modifyProfile(email, password, propertyName, newValue) {
   // Check that profile exists and password is right

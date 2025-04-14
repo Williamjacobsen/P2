@@ -74,7 +74,6 @@ function SignUpModal() {
 
 async function signIn(event) {
   try {
-    //y TODO: add variable validation
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
@@ -97,6 +96,7 @@ async function signIn(event) {
 
 async function signUp(event) {
   try {
+    //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
     // Extract data from the form
@@ -125,7 +125,7 @@ async function signUp(event) {
  * Tries to get a profile from the server using email and password.
  * @param {*} email string
  * @param {*} password string
- * @returns either a profile object, or a Promise.reject() with an error message.
+ * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
  */
 export async function RequestProfile(email, password) {
   try {
@@ -156,7 +156,7 @@ export async function RequestProfile(email, password) {
  * @param {*} email string
  * @param {*} password string
  * @param {*} phoneNumber int
- * @returns either a profile object, or a Promise.reject() with an error message.
+ * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {

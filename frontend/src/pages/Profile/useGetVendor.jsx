@@ -38,7 +38,7 @@ export default function useGetVendor(vendorID, bypass = false) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * @returns either a JSON object with the vendor, or a Promise.reject() with an error message.
+ * @returns either a JSON object with the vendor (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestVendor(vendorID) {
   try {
