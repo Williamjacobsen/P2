@@ -74,7 +74,7 @@ export default function Profile() {
         openButtonText="Change password?"
         modalContent={<ModifyModal
           modificationFunction={modifyProfile}
-          databasePropertyName="Password"
+          databasePropertyName="PasswordHash" // Note that this is not an actual property in the database. 
           labelText="New password "
           inputType="password"
           theMaxLength={500}
@@ -268,7 +268,11 @@ async function modifyProfile(event) {
     // Modify profile in server
     const profile = await requestProfileModification(email, password, propertyName, newValue);
     // Create sign in cookie
-    createProfileCookies(profile);
+    if (propertyName == "PasswordHash") {
+      createProfileCookies(profile, newValue); // NOTE: The newValue is NOT a hashed password, but just a password in plaintext.
+    } else {
+      createProfileCookies(profile, password);
+    }
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -333,6 +337,8 @@ async function requestProfileDeletion(email, password) {
 }
 
 /**
+ * NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
+ * but instead just a password in plain text, since the server handles the hashing itself.
  * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestProfileModification(email, password, propertyName, newValue) {

@@ -84,7 +84,7 @@ async function signIn(event) {
     // Get profile from server
     const profile = await RequestProfile(email, password);
     // Create sign in cookie
-    createProfileCookies(profile);
+    createProfileCookies(profile, password);
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
   }
@@ -107,7 +107,7 @@ async function signUp(event) {
     // Add profile to server
     const profile = await requestProfileCreation(email, password, phoneNumber);
     // Create sign in cookie
-    createProfileCookies(profile);
+    createProfileCookies(profile, password);
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
   }
@@ -129,7 +129,6 @@ async function signUp(event) {
  */
 export async function RequestProfile(email, password) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/get", {
       method: "POST",
@@ -160,7 +159,6 @@ export async function RequestProfile(email, password) {
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/create", {
       method: "POST",
@@ -187,9 +185,9 @@ async function requestProfileCreation(email, password, phoneNumber) {
 // Cookies
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
-export function createProfileCookies(databaseProfile) {
+export function createProfileCookies(databaseProfile, password) {
   setCookie("profileEmail", databaseProfile.Email, 7);
-  setCookie("profilePassword", databaseProfile.Password, 7);
+  setCookie("profilePassword", password, 7);
   setCookie("profilePhoneNumber", databaseProfile.PhoneNumber, 7);
   setCookie("profileVendorID", databaseProfile.VendorID, 7);
 }
@@ -200,7 +198,6 @@ export function deleteProfileCookies() {
   deleteCookie("profilePhoneNumber");
   deleteCookie("profileVendorID");
 }
-
 
 
 

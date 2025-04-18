@@ -34,7 +34,7 @@ export default function ProfileProductOrders() {
     else return b.Datetime.localeCompare(a.Datetime);
   })
 
-  //y TODO: Maybe show unresolved and resolved seperately?
+  //y TODO: Maybe show unresolved and resolved separately?
 
   return (
     <>

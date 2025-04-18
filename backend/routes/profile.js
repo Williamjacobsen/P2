@@ -1,5 +1,9 @@
+// Video on storing password (encryption, hashing, salting, and using 3rd party authentification): https://www.youtube.com/watch?v=qgpsIBLvrGY
+// Video on how to use
+
 import express from "express";
 import pool from "../db.js";
+import bcrypt from "bcrypt";
 import {
   getErrorCode,
   errorWrongEmail,
@@ -7,6 +11,13 @@ import {
   errorProfileEmailAlreadyExists,
   errorProfilePhoneNumberAlreadyExists
 } from "../errorMessage.js"
+
+
+// The bigger this is, the more processing power the salting needs 
+// (this needs to find a compromise between not being too slow to 
+// hinder user experience (less than a second of processing time) 
+// and not being too fast to compromise security to brute force attacks).
+const saltingRounds = 11;
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -75,10 +86,11 @@ router.post("/modify", async (req, res) => {
 export async function getProfile(email, password) {
   // Get an array of profiles with the corresponding email from the database
   const [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
+
   // Check that profile exists and password is right
   if (Object.keys(profile).length === 0) {
     return Promise.reject(errorWrongEmail);
-  } else if (profile[0].Password !== password) {
+  } else if (await bcrypt.compare(password, profile[0].PasswordHash) === false) {
     return Promise.reject(errorWrongPassword);
   }
   // Return profile
@@ -103,10 +115,12 @@ async function createProfile(email, password, phoneNumber) {
   if (Object.keys(profile).length !== 0) {
     return Promise.reject(errorProfilePhoneNumberAlreadyExists);
   }
+  // Salt and hash password
+  const passwordHash = await bcrypt.hash(password, saltingRounds);
   // Add profile to database
   await pool.query(`INSERT INTO p2.Profile 
       (Email, Password, PhoneNumber)
-      VALUES ('${email}', '${password}', ${phoneNumber})`);
+      VALUES ('${email}', '${passwordHash}', ${phoneNumber})`);
   [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
   // Return profile
   return profile[0];
@@ -118,8 +132,8 @@ async function createProfile(email, password, phoneNumber) {
  * @param {*} password string.
  */
 async function deleteProfile(email, password) {
-  // Get an array of profiles with the corresponding email from the database
-  const [profile] = await getProfile(email, password);
+  // Tries to get the profile from the database (if it does not exist, this returns a promise reject)
+  await getProfile(email, password);
   // Delete the profile
   await pool.query(`DELETE FROM p2.Profile WHERE Email='${email}';`);
 }
@@ -134,9 +148,9 @@ async function deleteProfile(email, password) {
  */
 async function modifyProfile(email, password, propertyName, newValue) {
   // Check that profile exists and password is right
-  let profile = await getProfile(email, password);
+  const profile = await getProfile(email, password);
   const profileID = profile.ID;
-  // Check for duplicates (for example, two profiles cannot have the same email address)
+  // Property-specific cases
   let otherProfile;
   switch (propertyName) {
     case "Email":
@@ -151,6 +165,12 @@ async function modifyProfile(email, password, propertyName, newValue) {
         return Promise.reject(errorProfilePhoneNumberAlreadyExists);
       }
       break;
+    // NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
+    // but instead just a password in plain text, since the server handles the hashing itself.
+    case "PasswordHash": //r
+      // Salt and hash password
+      const passwordHash = await bcrypt.hash(newValue, saltingRounds);
+      newValue = passwordHash;
   }
   // Update property with the new value
   await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);

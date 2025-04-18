@@ -36,11 +36,11 @@ export default function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/Cart" element={<Cart />} />
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
+          <Route path="*" element={<NoPage />} />
         </Route>
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<Vendor />} />
         <Route path="/vendor/add-product" element={<AddProduct />} />
-        <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>
   );
