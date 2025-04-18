@@ -7,6 +7,7 @@ export const errorProfilePhoneNumberAlreadyExists = "Another profile already use
 
 // Vendor
 export const errorWrongVendorID = "Vendor ID does not exist."
+export const errorTriedToDeleteVendorProfile = "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile.";
 
 export function getErrorCode(errorMessage) {
   switch (errorMessage) {
@@ -15,6 +16,7 @@ export function getErrorCode(errorMessage) {
     case errorProfileEmailAlreadyExists: return 409; // 409 = Conflict
     case errorProfilePhoneNumberAlreadyExists: return 409; // 409 = Conflict
     case errorWrongVendorID: return 404; // 404 = Not Found
+    case errorTriedToDeleteVendorProfile: return 401; // 401 = Unauthorized
     default: return 500; // 500 = Internal Server Error
   }
 }

@@ -33,16 +33,16 @@ export default function Profile() {
 
   return (
     <>
-      <h3>
-        --- Profile Information ---
-      </h3>
       <button onClick={signOut}>
         Sign out
       </button>
+      <br />
       <button onClick={() => navigate("/profile-product-orders")}>
         Go to order history
       </button>
-      <br />
+      <h3>
+        --- Profile Information ---
+      </h3>
       <b>Email address: </b>
       {getCookie("profileEmail")}
       <Modal

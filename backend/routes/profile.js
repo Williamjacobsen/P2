@@ -9,7 +9,8 @@ import {
   errorWrongEmail,
   errorWrongPassword,
   errorProfileEmailAlreadyExists,
-  errorProfilePhoneNumberAlreadyExists
+  errorProfilePhoneNumberAlreadyExists,
+  errorTriedToDeleteVendorProfile,
 } from "../errorMessage.js"
 
 
@@ -119,10 +120,11 @@ async function createProfile(email, password, phoneNumber) {
   const passwordHash = await bcrypt.hash(password, saltingRounds);
   // Add profile to database
   await pool.query(`INSERT INTO p2.Profile 
-      (Email, Password, PhoneNumber)
+      (Email, PasswordHash, PhoneNumber)
       VALUES ('${email}', '${passwordHash}', ${phoneNumber})`);
   [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
   // Return profile
+
   return profile[0];
 }
 
@@ -133,7 +135,11 @@ async function createProfile(email, password, phoneNumber) {
  */
 async function deleteProfile(email, password) {
   // Tries to get the profile from the database (if it does not exist, this returns a promise reject)
-  await getProfile(email, password);
+  const profile = await getProfile(email, password);
+  // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
+  if (profile.VendorID !== null) {
+    return Promise.reject(errorTriedToDeleteVendorProfile);
+  }
   // Delete the profile
   await pool.query(`DELETE FROM p2.Profile WHERE Email='${email}';`);
 }

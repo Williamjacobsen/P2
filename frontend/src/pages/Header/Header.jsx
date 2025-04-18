@@ -28,7 +28,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/products" className="hover:underline">
+          <Link to="/Product-Catalogue" className="hover:underline">
             Products
           </Link>
         </li>
@@ -38,7 +38,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/help" className="hover:underline">
+          <Link to="/FAQ" className="hover:underline">
             Help
           </Link>
         </li>
