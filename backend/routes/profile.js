@@ -26,6 +26,7 @@ const saltingRounds = 11;
 
 const router = express.Router();
 export default router;
+
 router.post("/get", async (req, res) => {
   try {
     const { email, password } = req.body; // Get data from body

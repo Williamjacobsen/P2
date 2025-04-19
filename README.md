@@ -1,4 +1,4 @@
-# How to start server on own your own local pc:
+# How to Start Server on Your Own Local PC:
 
 For frontend:
 1) Create new terminal inside the project root folder.
@@ -17,11 +17,19 @@ For MySQL (only relevant if you have disabled starting it on system boot-up):
 4) Right-click it and press "start".
 5) You can now connect to your MySQL database using the MySQL Workbench app.
 
-Intalling npm into the frontend for the first time (needed to run the command "npm start"):
-1) Create new terminal inside the project root folder.
-2) Enter "cd frontend".
-3) Enter "npm install".
-3a) If you get an error saying that running scripts is disabled on the system, then enter the command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser" and try running "npm install" again.
+# Included and required packages
+
+How to navigate inside the terminal:
+* "cd " + the name of the folder you wish to navigate to.
+
+Required packages in the frontend folder (these ARE NOT installed in the project due to size, so they MUST be installed by yourself):
+* "npm install"
+
+Included packages in the backend folder (these ARE ALREADY installed in the project):
+* "npm install bcrypt"
+
+FAQ:
+* If you get an error saying that running scripts is disabled on the system, then enter the command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser" and try running "npm install" again.
 
 # Getting Started with Create React App
 
