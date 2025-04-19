@@ -46,11 +46,10 @@ async function isCookieLoginValid() {
   try {
     //y TODO: delete cookies and go to sign in if your saved cookie credentials are now invalid because the credentials have been changed on another device
     // Get login credential from cookies
-    const cookieEmail = getCookie("profileEmail");
-    const cookiePassword = getCookie("profilePassword");
+    const cookieAccessToken = getCookie("profileAccessToken");
     // Are the login credentials valid?
-    if (cookieEmail !== null && cookiePassword !== null) {
-      const profile = await RequestProfile(cookieEmail, cookiePassword);
+    if (cookieAccessToken !== null && cookiePassword !== null) {
+      const profile = await RequestProfile(cookieAccessToken);
       if (profile !== null) {
         return true;
       }

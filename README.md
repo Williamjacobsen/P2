@@ -26,7 +26,7 @@ Required packages in the frontend folder (these ARE NOT installed in the project
 * "npm install"
 
 Included packages in the backend folder (these ARE ALREADY installed in the project):
-* "npm install bcrypt"
+* "npm install bcrypt jsonwebtoken"
 
 FAQ:
 * If you get an error saying that running scripts is disabled on the system, then enter the command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser" and try running "npm install" again.

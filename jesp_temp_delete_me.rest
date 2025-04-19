@@ -1,0 +1,73 @@
+
+### Testing of profile.js
+
+POST http://localhost:3001/profile/create
+Content-Type: application/json
+
+{
+  "email": "5@5",
+  "password": "5",
+  "phoneNumber": "11223344"
+}
+
+POST http://localhost:3001/profile/sign-in
+Content-Type: application/json
+
+{
+  "email": "5@5",
+  "password": "5"
+}
+
+POST http://localhost:3001/profile/get
+Content-Type: application/json
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4"
+}
+
+
+POST http://localhost:3001/profile/modify
+Content-Type: application/json
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4",
+  "password": "5",
+  "propertyName": "PhoneNumber",
+  "newValue": "88884444"
+}
+
+POST http://localhost:3001/profile/delete
+Content-Type: application/json
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4",
+  "password": "5"
+}
+
+### Testing of productOrder.js
+
+POST http://localhost:3001/productOrder/getProfileProductOrders
+Content-Type: application/json
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4"
+}
+
+### Testing of vendor.js
+
+POST http://localhost:3001/vendor/get
+Content-Type: application/json
+
+{
+  "vendorID": "1"
+}
+
+POST http://localhost:3001/vendor/modify
+Content-Type: application/json
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4",
+  "password": "5",
+  "propertyName": "Name",
+  "newValue": "Lui Fendi Prada Designer"
+}

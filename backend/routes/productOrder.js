@@ -13,30 +13,17 @@ const router = express.Router();
 export default router;
 router.post("/getProfileProductOrders", async (req, res) => {
   try {
-    const { email, password } = req.body; // Get data from body
-    const productOrders = await getProfileProfileOrders(email, password);
-    res.status(200).json({ productOrders: productOrders }); // Send back response
-    //y TODO: implement password encryption (right now it is just being sent directly)
-    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+    // Get data from body
+    const { accessToken } = req.body;
+    // Check that profile exists and password is right
+    const profile = await getProfile(accessToken);
+    const profileID = profile.ID;
+    // Get product orders for that profile
+    const [profileProductOrderRows] = await pool.query(`SELECT * FROM p2.ProductOrder WHERE CustomerID='${profileID}';`);
+    // Send back response
+    res.status(200).json({ productOrders: profileProductOrderRows }); // 200 = OK
   } catch (error) {
     res.status(getErrorCode(error)).json({ errorMessage: error });
   }
 });
 
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Helpers
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-
-/**
- * @param {*} email string
- * @param {*} password string
- * @returns either an array of JSON objects with orders (from the MySQL database), or a Promise.reject() with an error message.
- */
-export async function getProfileProfileOrders(email, password) {
-  // Check that profile exists and password is right
-  const profile = await getProfile(email, password);
-  const profileID = profile.ID;
-  // Get product orders for that profile
-  const [profileProductOrders] = await pool.query(`SELECT * FROM p2.ProductOrder WHERE CustomerID='${profileID}';`);
-  return profileProductOrders;
-}

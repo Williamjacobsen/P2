@@ -5,18 +5,18 @@ import pool from "./db.js";
 const app = express();
 const port = 3001;
 
+// Middleware
 app.use(
   cors({
     origin: "http://localhost:3000",
   })
 );
 app.use(express.json()); // This allows the app to use json.
-
 app.use("/uploads", express.static("uploads"));
 
+// Routes
 import productImagesRoute from "./routes/product-images-example-for-martin.js";
 app.use("/product-images", productImagesRoute);
-
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
 import profileRoute from "./routes/profile.js";
@@ -25,6 +25,8 @@ import vendorRoute from "./routes/vendor.js";
 app.use("/vendor", vendorRoute);
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
+
+// Stuff that needs to be made into seperate files in the "route" directory
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
@@ -109,6 +111,7 @@ app.get("/products", async (req, res) => {
   }
 });
 
+// Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

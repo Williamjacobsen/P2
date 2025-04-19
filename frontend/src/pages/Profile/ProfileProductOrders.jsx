@@ -77,9 +77,8 @@ function useGetProfileProductOrders(isLoginValidated) {
     (async () => {
       try {
         if (isLoginValidated) { // Before we can use the profile's information, we must ensure that the user is logged in.
-          const email = getCookie("profileEmail");
-          const password = getCookie("profilePassword");
-          setOrders(await requestProfileProductOrders(email, password));
+          const profileAccessToken = getCookie("profileAccessToken");
+          setOrders(await requestProfileProductOrders(profileAccessToken));
           setIsLoading(false);
         }
       }
@@ -99,7 +98,7 @@ function useGetProfileProductOrders(isLoginValidated) {
 /**
  * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestProfileProductOrders(email, password) {
+async function requestProfileProductOrders(accessToken) {
   try {
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
@@ -109,8 +108,7 @@ async function requestProfileProductOrders(email, password) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
-        password,
+        accessToken
       }),
     });
     // Handle server response

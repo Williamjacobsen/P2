@@ -239,9 +239,9 @@ async function deleteProfile(event) {
     // Get data
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password");
-    const email = getCookie("profileEmail");
+    const profileAccessToken = getCookie("profileAccessToken");
     // Delete profile from server
-    await requestProfileDeletion(email, password);
+    await requestProfileDeletion(profileAccessToken, password);
     // Delete sign in cookie
     deleteProfileCookies();
     // Reload the page (this navigates to the sign in page because the user is now signed out)
@@ -264,9 +264,9 @@ async function modifyProfile(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const email = getCookie("profileEmail");
+    const profileAccessToken = getCookie("profileAccessToken");
     // Modify profile in server
-    const profile = await requestProfileModification(email, password, propertyName, newValue);
+    const profile = await requestProfileModification(profileAccessToken, password, propertyName, newValue);
     // Create sign in cookie
     if (propertyName == "PasswordHash") {
       createProfileCookies(profile, newValue); // NOTE: The newValue is NOT a hashed password, but just a password in plaintext.
@@ -292,9 +292,9 @@ async function modifyVendor(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const email = getCookie("profileEmail");
+    const profileAccessToken = getCookie("profileAccessToken");
     // Modify profile in server
-    await requestVendorModification(email, password, propertyName, newValue);
+    await requestVendorModification(profileAccessToken, password, propertyName, newValue);
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -313,7 +313,7 @@ async function modifyVendor(event) {
  * @param {*} password string
  * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestProfileDeletion(email, password) {
+async function requestProfileDeletion(accessToken, password) {
   try {
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
@@ -323,7 +323,7 @@ async function requestProfileDeletion(email, password) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
+        accessToken,
         password,
       }),
     });
@@ -341,7 +341,7 @@ async function requestProfileDeletion(email, password) {
  * but instead just a password in plain text, since the server handles the hashing itself.
  * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestProfileModification(email, password, propertyName, newValue) {
+async function requestProfileModification(accessToken, password, propertyName, newValue) {
   try {
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
@@ -351,7 +351,7 @@ async function requestProfileModification(email, password, propertyName, newValu
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
+        accessToken,
         password,
         propertyName,
         newValue,
@@ -370,7 +370,7 @@ async function requestProfileModification(email, password, propertyName, newValu
 /**
  * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestVendorModification(email, password, propertyName, newValue) {
+async function requestVendorModification(accessToken, password, propertyName, newValue) {
   try {
     //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
@@ -380,7 +380,7 @@ async function requestVendorModification(email, password, propertyName, newValue
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
+        accessToken,
         password,
         propertyName,
         newValue,
