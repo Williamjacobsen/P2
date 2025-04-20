@@ -16,8 +16,9 @@ import {
 import jwt from "jsonwebtoken";
 
 // JWT tokens
-const accessTokenSecretKey = "aGoodSecret1"; // This is essentially a password.
-const refreshTokenSecretKey = "aGoodSecret2"; // This is essentially a password.
+const accessTokenSecretKey = "aGoodSecret1"; // This is essentially a password, so it should be more complex than this placeholder.
+const refreshTokenSecretKey = "aGoodSecret2"; // This is essentially a password, so it should be more complex than this placeholder.
+const accessTokenExpirationAge = "10m";
 
 // Hashing
 // The bigger this is, the more processing power the salting needs 
@@ -34,25 +35,60 @@ const router = express.Router();
 export default router;
 
 router.post("/sign-in", async (req, res) => {
-  // Get data from body
-  const { email, password } = req.body;
-  // Get an array of profiles with the corresponding email from the database
-  const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-  // Verify that profile exists
-  if (Object.keys(profileRows).length === 0) {
-    throw Error(errorWrongEmail);
+  try {
+    // Get data from body
+    const { email, password } = req.body;
+    // Get an array of profiles with the corresponding email from the database
+    const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
+    // Verify that profile exists
+    if (Object.keys(profileRows).length === 0) {
+      throw Error(errorWrongEmail);
+    }
+    // Verify password
+    if (await bcrypt.compare(password, profileRows[0].PasswordHash) === false) {
+      throw Error(errorWrongPassword);
+    }
+    // Create an access token containing the user's profile ID
+    const profileID = profileRows[0].ID;
+    const refreshToken = await generateRefreshToken(profileID);
+    const accessToken = await generateAccessToken(refreshToken);
+    // Send back response with access token
+    res.status(200).json({ refreshToken: refreshToken, accessToken: accessToken }); // 200 = OK
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R needs "403 = forbidden" error code in case jwt.verify makes error
   }
-  // Verify password
-  if (await bcrypt.compare(password, profileRows[0].PasswordHash) === false) {
-    throw Error(errorWrongPassword);
-  }
-  // Create an access token containing the user's profile ID
-  const profileID = profileRows[0].ID;
-  const payload = { profileID };
-  const accessToken = jwt.sign(payload, accessTokenSecretKey);
-  // Send back response with access token
-  res.status(200).json({ accessToken: accessToken }) // 200 = OK
 })
+
+router.post("/generate-access-token", async (req, res) => {
+  try {
+    // Get data from body
+    const { refreshToken } = req.body;
+    // Create a new access token using the refresh token
+    const newAccessToken = await generateAccessToken(refreshToken);
+    // Response. Send back access token.
+    res.status(201).json({ accessToken: newAccessToken }); // 201 = Created
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R needs "403 = forbidden" error code in case jwt.verify makes error
+  }
+})
+
+router.post("/sign-out", async (req, res) => {
+  try {
+    // Get data from body
+    const { refreshToken } = req.body;
+    //y Remove refresh tokens from server
+    //y invalidate older access tokens
+    // Response. No message. 
+    res.status(204).json({}); // 204 = No content
+  } catch (error) {
+    res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R
+  }
+})
+
+//y TODO: Make sign out for all refresh tokens for all accounts
 
 router.post("/get", async (req, res) => {
   try {
@@ -61,6 +97,7 @@ router.post("/get", async (req, res) => {
     res.status(200).json({ profile: profile }); // Send back response. 200 = OK
   } catch (error) {
     res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R needs "403 = forbidden" error code in case jwt.verify makes error
   }
 });
 
@@ -82,13 +119,15 @@ router.post("/create", async (req, res) => {
     const passwordHash = await bcrypt.hash(password, saltingRounds);
     // Add profile to database
     await pool.query(`INSERT INTO p2.Profile 
-      (Email, PasswordHash, PhoneNumber)
-      VALUES ('${email}', '${passwordHash}', ${phoneNumber})`);
+      (Email, PasswordHash, PhoneNumber) 
+      VALUES (?, ?, ?)`,
+      [email, passwordHash, phoneNumber]);
     [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Send back response
     res.status(201).json({ profile: profile[0] }); // 201 = Created
   } catch (error) {
     res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R needs "403 = forbidden" error code in case jwt.verify makes error
   }
 });
 
@@ -111,8 +150,8 @@ router.post("/delete", async (req, res) => {
     // Response. No message. 
     res.status(204).json({}); // 204 = No Content
   } catch (error) {
-    console.log(error);
     res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R needs "403 = forbidden" error code in case jwt.verify makes error
   }
 });
 
@@ -159,8 +198,11 @@ router.post("/modify", async (req, res) => {
     res.status(201).json({ profile: updatedProfileRows[0] }); // 201 = Created
   } catch (error) {
     res.status(getErrorCode(error)).json({ errorMessage: error });
+    //R needs "403 = forbidden" error code in case jwt.verify makes error
   }
 });
+
+
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Helpers
@@ -171,43 +213,58 @@ router.post("/modify", async (req, res) => {
  * @returns either a JSON object with the profile (from the MySQL database), or a Promise.reject() with an error message.
  */
 export async function getProfile(accessToken) {
-  try {
-    // Verify access token and extract profile ID from it
-    const tokenPayload = jwt.verify(accessToken, accessTokenSecretKey);
-    const profileID = tokenPayload.profileID;
-    // Get an array of profiles with the corresponding profile ID from the database
-    const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
-    // Check that profile exists
-    if (Object.keys(profileRows).length === 0) {
-      return Promise.reject(errorWrongEmail); //R it's not wrong email
-    }
-    // Return profile
-    return profileRows[0];
+  // Verify access token
+  let decodedAccessToken;
+  try { decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); } // This throws an error if the validation fails.
+  catch { return Promise.reject("Access token has expired"); } //R
+  // Extract profile ID from the token
+  const profileID = decodedAccessToken.profileID;
+  // Get an array of profiles with the corresponding profile ID from the database
+  const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
+  // Check that profile exists
+  if (Object.keys(profileRows).length === 0) {
+    return Promise.reject(errorWrongEmail); //R it's not wrong email
   }
-  catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
-  }
+  // Return profile
+  return profileRows[0];
 }
 
-// function authenticateAccessToken(req, res, next) {
+/**
+ * @returns a JWT access token.
+ */
+async function generateRefreshToken(profileID) {
+  // Create refresh token
+  const payload = { profileID };
+  const refreshToken = jwt.sign(payload, refreshTokenSecretKey);
+  // Add new refresh token to database
+  const expirationDateTime = new Date();
+  expirationDateTime.getUTCDate(); //r this might need to be changed to not UTC, so just getDate().
+  await pool.query(`INSERT INTO p2.ProfileRefreshToken 
+    (ProfileID, ExpirationDateTime, Token) 
+    VALUES (?, ?, ?)`,
+    [profileID, expirationDateTime, refreshToken]);
+  // Return refresh token
+  return refreshToken;
+}
 
-//   // Extract access token from request header
-//   // The access token is formatted like this: "Bearer TOKEN".
-//   const authorizationHeader = req.headers["authorization"];
-//   const accessToken = (authorizationHeader != null && authorizationHeader.split(" ")[1]);
-//   if (accessToken == null) {
-//     return res.status(401).json({ errorMessage: "..." }) // 401 = unauthorized //r
-//   }
-
-//   // Verify access token
-//   jwt.verify(accessToken, accessTokenSecretKey, (error, payload) => {
-
-//     if (error) {
-//       return res.status(403).json({ errorMessage: "We see that you have a token, but it is no longer valid." }) // 403 = Forbidden //r
-//     }
-//     req.profile = payload;
-//     next();
-//   })
-// }
+/**
+ * Throws an error if validation of the refresh token fails.
+ * @returns a JWT access token.
+ */
+async function generateAccessToken(refreshToken) {
+  // Verify validity of refresh token
+  let decodedRefreshToken;
+  try { decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); } // This throws an error if the validation fails.
+  catch { return Promise.reject("Refresh token has expired"); } //r
+  // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database) //r need to implement this automatic deletion
+  const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
+  if (Object.keys(refreshTokenRows).length === 0) {
+    return Promise.reject("Profile refresh token does not exist in database."); //r 
+  }
+  // Create and return a new access token
+  const profileID = decodedRefreshToken.profileID;
+  const tokenPayload = { profileID };
+  const accessToken = jwt.sign(tokenPayload, accessTokenSecretKey, { expiresIn: accessTokenExpirationAge });
+  return accessToken;
+}
 

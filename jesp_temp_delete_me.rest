@@ -18,11 +18,19 @@ Content-Type: application/json
   "password": "5"
 }
 
+
+POST http://localhost:3001/profile/generate-access-token
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzg0MjR9.kpTupdaLTZh_on6OjNWR_KfQ5E_5ZuuopqEwsahB0u4"
+}
+
 POST http://localhost:3001/profile/get
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzkwNDYsImV4cCI6MTc0NTEzOTA3Nn0.SO5UcqKEddd0PY3HWxx9RJ8PtGdLCkpiqpTqPTT6OJ0"
 }
 
 
@@ -30,7 +38,7 @@ POST http://localhost:3001/profile/modify
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzkxMDgsImV4cCI6MTc0NTEzOTEzOH0.VnZXsjExGwISllb2TvT8wnQK_HcXW9ES4FT_LTJKonM",
   "password": "5",
   "propertyName": "PhoneNumber",
   "newValue": "88884444"
@@ -40,7 +48,7 @@ POST http://localhost:3001/profile/delete
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzkxMDgsImV4cCI6MTc0NTEzOTEzOH0.VnZXsjExGwISllb2TvT8wnQK_HcXW9ES4FT_LTJKonM",
   "password": "5"
 }
 
@@ -50,7 +58,7 @@ POST http://localhost:3001/productOrder/getProfileProductOrders
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzY0MjcsImV4cCI6MTc0NTEzNjQzMn0.YXeG2G4TPmktQdNEpMnDk9mbt5hQdBUyoQjCZ841pmk"
 }
 
 ### Testing of vendor.js
@@ -66,7 +74,7 @@ POST http://localhost:3001/vendor/modify
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEzLCJpYXQiOjE3NDUwNjA4Njh9.mOtgSe3mvR3_tB-GXeFRaEpqcvZypgT-5BYMRGCKrs4",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzY0MjcsImV4cCI6MTc0NTEzNjQzMn0.YXeG2G4TPmktQdNEpMnDk9mbt5hQdBUyoQjCZ841pmk",
   "password": "5",
   "propertyName": "Name",
   "newValue": "Lui Fendi Prada Designer"
