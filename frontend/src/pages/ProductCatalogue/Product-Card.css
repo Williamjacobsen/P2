@@ -36,9 +36,9 @@
     flex-wrap: wrap;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto; /* Centers grid */
+    margin:  auto; /* Centers grid */
     padding: 20px;
-    gap: 20px; /* Space between cards */
+    gap: 50px; /* Space between cards */
     justify-content: center;
 }
 

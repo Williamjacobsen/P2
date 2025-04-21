@@ -33,7 +33,7 @@ export default function ProductCard({id, storeName, productName, price}) {
                 <img src={images[0]?.Path || '/Img/MissingImgImg.jpg'} alt='Product Image'></img>
                 <h1>{storeName}</h1>
                 <h1>{productName}</h1>
-                <p>{price}DKK</p>
+                <p>{`${price},00 kr`}</p>
             </div>
         </Link>
     );

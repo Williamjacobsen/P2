@@ -63,7 +63,7 @@ export default function ProductPage() {
         <div className="right-content">
             <p className="product-brand">{productData[0]?.Brand}</p>
             <p className="product-name">{productData[0]?.Name}</p>
-            <p className="product-price">{productData[0]?.Price} DKK</p>
+            <p className="product-price">{productData[0]?.Price},00 kr</p>
             <div>
                 <select id="category" defaultValue="" className="SortBox" onChange={(e) => {setSizeSelection(e.target.value)}} style={{ width: "300px" }}>
                 <option value="SIZE" hidden={true}>SIZE</option>

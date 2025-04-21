@@ -1,10 +1,13 @@
 /* Product-In-Cart.jsx */
-.cartProduct{
+.cartProduct {
     width: 600px;
     height: 300px;
     background: lightblue;
     display: flex;
-    flex-wrap: wrap;
+    padding: 10px;
+    gap: 10px;
+    box-sizing: border-box;
+    position: relative;
 }
 .checkoutCard{
     width: 600px;
@@ -18,15 +21,22 @@
     width: 200px;
     height: 280px;
 }
-.cartText{
+.cartText {
+    flex-grow: 1;
     font-size: 14px;
+    overflow: hidden;
 }
-.cartRemove{
-    align-content: end;
-    margin-bottom: 20px;
+.cartRemove {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
 }
-.cartRemoveButton{
+.cartRemoveButton {
     font-size: larger;
+    padding: 6px 12px;
 }
 .cartRemoveButton:hover{
     cursor: pointer;

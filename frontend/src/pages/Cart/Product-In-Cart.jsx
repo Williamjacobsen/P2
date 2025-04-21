@@ -34,7 +34,7 @@ function ProductInCart({id, storeName, storeAddress, quantity, size, productName
                 <h2>{storeAddress}</h2>
                 <p>{productName}</p>
                 <p>{size}</p>
-                <h1>{price}</h1>
+                <h1>{`${price},00 kr`}</h1>
                 <h1>{quantity}</h1>
             </div>
             <div className={'cartRemove'}>

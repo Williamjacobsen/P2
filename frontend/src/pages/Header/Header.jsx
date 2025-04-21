@@ -28,7 +28,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/products" className="hover:underline">
+          <Link to="/Product-Catalogue" className="hover:underline">
             Products
           </Link>
         </li>
@@ -51,7 +51,9 @@ const HeaderContent = () => {
 
       {/*Right Section - Cart */}
       <div className="flex items-center space-x-2">
+        <Link to="/Cart" className="hover:underline">
         <span className="text-sm font-bold">Cart</span>
+        </Link>
       </div>
     </nav>
   );
