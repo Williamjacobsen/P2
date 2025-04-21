@@ -8,7 +8,8 @@ export default function ProductPage() {
     const { id } = useParams();
     const [productData, setProductData] = useState([]);
     const [mainImage, setMainImage] = useState();
-
+    const [sizeSelection, setSizeSelection] = useState('')
+    const [quantitySelection, setQuantitySelection] = useState(1)
     /** Finds all data relevant see server.js for database interaction */
     useEffect(() => {
         async function allProductData() {
@@ -64,7 +65,7 @@ export default function ProductPage() {
             <p className="product-name">{productData[0]?.Name}</p>
             <p className="product-price">{productData[0]?.Price} DKK</p>
             <div>
-                <select id="category" defaultValue="" className="SortBox" style={{ width: "300px" }}>
+                <select id="category" defaultValue="" className="SortBox" onChange={(e) => {setSizeSelection(e.target.value)}} style={{ width: "300px" }}>
                 <option value="SIZE" hidden={true}>SIZE</option>
                 <option value="small">small</option>
                 <option value="medium">medium</option>
@@ -72,13 +73,23 @@ export default function ProductPage() {
                 </select>
             </div>
             <div>
-                <select id="category" defaultValue="" style={{ width: "100px" }}>
+                <select id="category" defaultValue="1" onChange={(e) => {setQuantitySelection(parseInt(e.target.value))}} style={{ width: "100px" }}>
                 <option value="AMOUNT" hidden={true}>AMOUNT</option>
                 {[...Array(10)].map((e, i) => <option value={i+1} key={i}>{i+1}</option>)}
                 </select>
-                <button id="button" defaultValue="" style={{ width: "200px" }} onClick={() =>
-                    setCookie(productData[0]?.Name, productData[0]?.ID, null, `/product/${productData[0]?.ID}`)}>ADD TO CART</button> 
-                    {/* Made to make a cookie with product name, id, keep cookie till browser closed, path to product. Check cookies.js for more info */}
+                <button id="button" defaultValue="" style={{ width: "200px" }} onClick={() =>{
+                    if (!sizeSelection) {
+                        alert('Please Select a size');
+                        return;
+                    }
+                    const cookievalue= JSON.stringify({
+                        id: productData[0]?.ID,
+                        size: sizeSelection,
+                        quantity: quantitySelection,
+                    });
+
+                    setCookie(`Product-${productData[0]?.ID}`, cookievalue, null, '/')}}>ADD TO CART</button>
+                    {/* Made to make a cookie with product, id, keep cookie till browser closed, path '/' which means entire website so every page can see. Check cookies.js for more info */}
             </div>
             <div>
                 <p>{productData[0]?.Description}</p>

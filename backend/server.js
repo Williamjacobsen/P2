@@ -74,7 +74,8 @@ app.get("/product/:id", async (req, res) => {
       `SELECT 
         p2.Product.*, 
         p2.Vendor.Name AS StoreName, 
-        p2.productimage.Path
+        p2.productimage.Path,
+        p2.Vendor.Address AS StoreAddress
         FROM p2.Product
         JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
         LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
@@ -97,9 +98,9 @@ app.get("/faq", async (req, res) => {
 app.get("/products", async (req, res) => {
   try {
     const [result] = await pool.query(`
-      SELECT p2.product.*, p2.store.Name AS StoreName
+      SELECT p2.product.*, p2.vendor.Name AS StoreName
       FROM p2.product
-      JOIN p2.store ON p2.product.StoreID = p2.store.ID;
+      JOIN p2.vendor ON p2.product.StoreID = p2.vendor.ID;
     `);
     res.status(200).json(result);
   }
