@@ -9,6 +9,7 @@ import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
 import FAQ from "./pages/FAQ";
 import Vendor from "./pages/Vendor/Vendor";
+import Coupons from "./pages/Vendor/Coupons/Coupons";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
 import Cart from "./pages/Cart/Cart";
@@ -27,9 +28,10 @@ export default function App() {
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<Vendor />} />
         <Route path="/vendor/add-product" element={<AddProduct />} />
+        <Route path="/vendor/coupons" element={<Coupons />} />
         <Route path="*" element={<NoPage />} />
       </Routes>
-    </BrowserRouter>
+    </BrowserRouter >
   );
 }
 

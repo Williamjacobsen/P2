@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 
-function CreateCoupon() {
+export default function CreateCoupon() {
   const [form, setForm] = useState({
     coupon_code: '',
     discount_value: '',
@@ -20,9 +19,30 @@ function CreateCoupon() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/coupons', form); // no token needed
+      // Extract data from form
+      const coupon_code = form.coupon_code;
+      const discount_value = form.discount_value;
+      const is_percentage = form.is_percentage;
+      const is_active = form.is_active;
+      // Post data from the form to server
+      const response = await fetch("http://localhost:3001/profile/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          is_active,
+          discount_value,
+          is_percentage,
+          is_active
+        }),
+      });
+      // Handle server response
+      const data = await response.json();
+      if (!response.ok) return Promise.reject("Oh nooooo! There was an error!");
       alert('Coupon created successfully!');
-    } catch (error) {
+    }
+    catch (error) {
       console.error(error);
       alert('Error creating coupon.');
     }
@@ -44,5 +64,3 @@ function CreateCoupon() {
     </form>
   );
 }
-
-export default CreateCoupon;
