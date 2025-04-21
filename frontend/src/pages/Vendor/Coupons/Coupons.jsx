@@ -25,7 +25,7 @@ export default function CreateCoupon() {
       const is_percentage = form.is_percentage;
       const is_active = form.is_active;
       // Post data from the form to server
-      const response = await fetch("http://localhost:3001/profile/create", {
+      const response = await fetch("http://localhost:3001/create-coupon", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
