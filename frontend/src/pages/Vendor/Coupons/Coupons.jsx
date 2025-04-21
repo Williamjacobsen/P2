@@ -31,14 +31,14 @@ export default function CreateCoupon() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          is_active,
+          coupon_code,
           discount_value,
           is_percentage,
           is_active
         }),
       });
       // Handle server response
-      const data = await response.json();
+      const data = await response.json(); // In case you need to get read a response from the server
       if (!response.ok) return Promise.reject("Oh nooooo! There was an error!");
       alert('Coupon created successfully!');
     }
