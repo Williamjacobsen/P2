@@ -14,11 +14,13 @@ import {
   errorTriedToDeleteVendorProfile,
 } from "../errorMessage.js"
 import jwt from "jsonwebtoken";
+import nodeSchedule from "node-schedule"
 
 // JWT tokens
 const accessTokenSecretKey = "aGoodSecret1"; // This is essentially a password, so it should be more complex than this placeholder.
 const refreshTokenSecretKey = "aGoodSecret2"; // This is essentially a password, so it should be more complex than this placeholder.
 const accessTokenExpirationAge = "10m";
+const refreshTokenExpirationAgeInDays = 7;
 
 // Hashing
 // The bigger this is, the more processing power the salting needs 
@@ -88,7 +90,7 @@ router.post("/sign-out", async (req, res) => {
   }
 })
 
-//y TODO: Make sign out for all refresh tokens for all accounts
+//y TODO: Make sign out for all (sign-out-all) refresh tokens for all accounts
 
 router.post("/get", async (req, res) => {
   try {
@@ -118,10 +120,12 @@ router.post("/create", async (req, res) => {
     // Salt and hash password
     const passwordHash = await bcrypt.hash(password, saltingRounds);
     // Add profile to database
+    const currentDateTime = new Date();
+    currentDateTime.getUTCDate();
     await pool.query(`INSERT INTO p2.Profile 
-      (Email, PasswordHash, PhoneNumber) 
-      VALUES (?, ?, ?)`,
-      [email, passwordHash, phoneNumber]);
+      (Email, PasswordHash, PhoneNumber, LatestRefreshTokenGenerationDateTime) 
+      VALUES (?, ?, ?, ?)`,
+      [email, passwordHash, phoneNumber, currentDateTime]);
     [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Send back response
     res.status(201).json({ profile: profile[0] }); // 201 = Created
@@ -167,17 +171,17 @@ router.post("/modify", async (req, res) => {
       throw Error(errorWrongPassword);
     }
     // Property-specific cases
-    let otherProfile;
+    let anotherProfileRows;
     switch (propertyName) {
       case "Email":
-        [otherProfile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${newValue}';`);
-        if (Object.keys(otherProfile).length !== 0) {
+        [anotherProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${newValue}';`);
+        if (Object.keys(anotherProfileRows).length !== 0) {
           throw Error(errorProfileEmailAlreadyExists);
         }
         break;
       case "PhoneNumber":
-        [otherProfile] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${newValue}';`);
-        if (Object.keys(otherProfile).length !== 0) {
+        [anotherProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${newValue}';`);
+        if (Object.keys(anotherProfileRows).length !== 0) {
           throw Error(errorProfilePhoneNumberAlreadyExists);
         }
         break;
@@ -202,7 +206,20 @@ router.post("/modify", async (req, res) => {
   }
 });
 
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+// Job schedules (using the package "node-schedule")
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
+// Job for deleting expired refresh tokens in the MySQL database
+const rule = new nodeSchedule.RecurrenceRule();
+// Recurs every day at 3:00 AM (Denmark is +2 hours from UTC time) (because this is the time where the servers are most likely to not be under heavy load).
+rule.hour = 1;
+rule.minute = 0;
+rule.tz = 'Etc/UTC';
+nodeSchedule.scheduleJob(rule, async function () {
+  console.log('SCHEDULE TASK STARTED: Deleting expired refresh tokens from database.');
+  await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ExpirationDateTime < CURDATE();`);
+});
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Helpers
@@ -238,11 +255,15 @@ async function generateRefreshToken(profileID) {
   const refreshToken = jwt.sign(payload, refreshTokenSecretKey);
   // Add new refresh token to database
   const expirationDateTime = new Date();
-  expirationDateTime.getUTCDate(); //r this might need to be changed to not UTC, so just getDate().
+  expirationDateTime.setDate(expirationDateTime.getUTCDate() + refreshTokenExpirationAgeInDays);
   await pool.query(`INSERT INTO p2.ProfileRefreshToken 
     (ProfileID, ExpirationDateTime, Token) 
     VALUES (?, ?, ?)`,
     [profileID, expirationDateTime, refreshToken]);
+  // Update LatestSignInDateTime for the profile
+  const currentDateTime = new Date();
+  currentDateTime.getUTCDate();
+  await pool.query(`UPDATE p2.Profile SET LatestRefreshTokenGenerationDateTime=? WHERE (ID='${profileID}')`, currentDateTime);
   // Return refresh token
   return refreshToken;
 }

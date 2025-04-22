@@ -47,7 +47,7 @@ export default function ProfileProductOrders() {
           {order.IsResolved}
           <br />
           <b>Time of purchase: </b>
-          {order.Datetime}
+          {order.DateTime}
           {/* NOTE: A MySQL Datetime also factors in daylight savings time (DST). */}
           <br />
           <b>Product ID: </b>
