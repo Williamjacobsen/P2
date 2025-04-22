@@ -1,22 +1,25 @@
 // Tutorial on how to use forms in React: https://www.youtube.com/watch?v=SaEc7jLWvGY
 
 import React from "react";
-import Modal from "../Modal/Modal"
-import { setCookie, deleteCookie } from "../../utils/cookies"
+import nodeOS from "os";
 import { useNavigate } from "react-router-dom";
-import useCheckLoginValidity from "./useCheckLoginValidity";
+
+import Modal from "../Modal/Modal"
+import { setCookie, deleteCookie, getCookie } from "../../utils/cookies"
+import { useGetProfile } from "./useGetProfile";
+
 
 export default function SignIn() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
+  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
 
   // Is the user already signed in?
-  if (isLoadingLogin) {
+  if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
-  else if (isLoginValid) {
+  else if (profile !== null) {
     navigate("/profile");
   }
 
@@ -82,9 +85,9 @@ async function signIn(event) {
     const email = formData.get("email");
     const password = formData.get("password");
     // Get profile from server
-    const profile = await RequestProfile(email, password);
+    const tokens = await requestSignIn(email, password);
     // Create sign in cookie
-    createProfileCookies(profile, password);
+    setLoginCookies(tokens.refreshToken, tokens.accessToken);
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
   }
@@ -105,9 +108,9 @@ async function signUp(event) {
     const password = formData.get("password");
     const phoneNumber = formData.get("phoneNumber");
     // Add profile to server
-    const profile = await requestProfileCreation(email, password, phoneNumber);
-    // Create sign in cookie
-    createProfileCookies(profile, password);
+    const tokens = await requestProfileCreation(email, password, phoneNumber);
+    // Create sign in cookies
+    setLoginCookies(tokens.refreshToken, tokens.accessToken);
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
   }
@@ -125,37 +128,8 @@ async function signUp(event) {
  * Tries to get a profile from the server using email and password.
  * @param {*} email string
  * @param {*} password string
- * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
- */
-export async function RequestProfile(email, password) {
-  try {
-    // Post data from the form to server
-    const response = await fetch("http://localhost:3001/profile/get", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
-    // Handle server response
-    const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
-    return data.profile;
-  }
-  catch (error) {
-    return Promise.reject(error);
-  }
-}
-
-/**
- * Tries to get a profile from the server using email and password.
- * @param {*} email string
- * @param {*} password string
  * @param {*} phoneNumber int
- * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either an object { refreshToken, accessToken }, or a Promise.reject() with an error message.
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {
@@ -174,7 +148,38 @@ async function requestProfileCreation(email, password, phoneNumber) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) return Promise.reject(data.errorMessage);
-    return data.profile;
+    const tokens = await requestSignIn(email, password);
+    return tokens;
+  }
+  catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Tries to get a profile from the server using email and password.
+ * @returns either an object { refreshToken, accessToken }, or a Promise.reject() with an error message.
+ */
+async function requestSignIn(email, password) {
+  try {
+    // Get device name
+    const deviceName = nodeOS.hostname();
+    // Post data from the form to server
+    const response = await fetch("http://localhost:3001/profile/sign-in", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        deviceName
+      }),
+    });
+    // Handle server response
+    const data = await response.json();
+    if (!response.ok) return Promise.reject(data.errorMessage);
+    return data; // Contains the tokens
   }
   catch (error) {
     return Promise.reject(error);
@@ -185,20 +190,14 @@ async function requestProfileCreation(email, password, phoneNumber) {
 // Cookies
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
-//r
-export function createProfileCookies(databaseProfile, password) {
-  setCookie("profileEmail", databaseProfile.Email, 7);
-  setCookie("profilePassword", password, 7);
-  setCookie("profilePhoneNumber", databaseProfile.PhoneNumber, 7);
-  setCookie("profileVendorID", databaseProfile.VendorID, 7);
+export function setLoginCookies(refreshToken, accessToken) {
+  setCookie("profileRefreshToken", refreshToken, 7);
+  setCookie("profileAccessToken", accessToken, 7);
 }
 
-//r
-export function deleteProfileCookies() {
-  deleteCookie("profileEmail");
-  deleteCookie("profilePassword");
-  deleteCookie("profilePhoneNumber");
-  deleteCookie("profileVendorID");
+export function deleteLoginCookies() {
+  deleteCookie("profileRefreshToken");
+  deleteCookie("profileAccessToken");
 }
 
 

@@ -1,7 +1,8 @@
 import express from "express";
+import bcrypt from "bcrypt";
+
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
-import bcrypt from "bcrypt";
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router

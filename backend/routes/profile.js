@@ -3,14 +3,15 @@
 // Video explaining JWT tokens vs. Sessions for authentification: https://www.youtube.com/watch?v=fyTxwIa-1U0
 
 import express from "express";
-import pool from "../db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+import pool from "../db.js";
 import nodeSchedule from "node-schedule"
 
 // JWT tokens
-const accessTokenSecretKey = "aGoodSecret1"; // This is essentially a password, so it should be more complex than this placeholder.
-const refreshTokenSecretKey = "aGoodSecret2"; // This is essentially a password, so it should be more complex than this placeholder.
+const accessTokenSecretKey = "aGoodSecret1"; //y This is essentially a password, so it should be more complex than this placeholder.
+const refreshTokenSecretKey = "aGoodSecret2"; //y This is essentially a password, so it should be more complex than this placeholder.
 const accessTokenExpirationAge = "10m";
 const refreshTokenExpirationAgeInDays = 7;
 
@@ -146,9 +147,8 @@ router.post("/create", async (req, res) => {
       (Email, PasswordHash, PhoneNumber, LatestRefreshTokenGenerationDateTime) 
       VALUES (?, ?, ?, ?)`,
       [email, passwordHash, phoneNumber, currentDateTime]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
-    [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Send back response
-    res.status(201).json({ profile: profile[0] }); // 201 = Created
+    res.status(201).json({}); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
