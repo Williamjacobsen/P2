@@ -5,7 +5,7 @@
 import express from "express";
 import pool from "../db.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import nodeSchedule from "node-schedule"
 
 // JWT tokens
@@ -47,7 +47,10 @@ router.post("/sign-in", async (req, res) => {
     // Create an access token containing the user's profile ID
     const profileID = profileRows[0].ID;
     const refreshToken = await generateRefreshToken(profileID, deviceName);
-    const accessToken = await generateAccessToken(refreshToken);
+    const accessToken = await tryGenerateAccessToken(res, refreshToken);
+    if (accessToken === null) {
+      return;
+    }
     // Send back response with access token
     res.status(200).json({ refreshToken: refreshToken, accessToken: accessToken }); // 200 = OK
   } catch (error) {
@@ -60,9 +63,12 @@ router.post("/generate-access-token", async (req, res) => {
     // Get data from body
     const { refreshToken } = req.body;
     // Create a new access token using the refresh token
-    const newAccessToken = await generateAccessToken(refreshToken);
+    const accessToken = await tryGenerateAccessToken(res, refreshToken);
+    if (accessToken === null) {
+      return;
+    }
     // Response. Send back access token.
-    res.status(201).json({ accessToken: newAccessToken }); // 201 = Created
+    res.status(201).json({ accessToken: accessToken }); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -88,9 +94,13 @@ router.post("/sign-out-all-devices", async (req, res) => {
     // Get data from body
     const { refreshToken } = req.body;
     // Extract payload from refresh token
-    //R const profileID;
+    const decodedRefreshToken = decodeRefreshToken(res, refreshToken);
+    if (decodedRefreshToken === null) {
+      return;
+    }
+    const profileID = decodedRefreshToken.profileID;
     // Remove refresh tokens from the server
-    //R await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${profileID}';`);
+    await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${profileID}';`);
     // Response. No message. 
     res.status(204).json({}); // 204 = No content
   } catch (error) {
@@ -101,7 +111,10 @@ router.post("/sign-out-all-devices", async (req, res) => {
 router.post("/get", async (req, res) => {
   try {
     const { accessToken } = req.body; // Get data from body
-    const profile = await getProfile(accessToken);
+    const profile = await tryGetProfile(res, accessToken);
+    if (profile === null) {
+      return;
+    }
     res.status(200).json({ profile: profile }); // Send back response. 200 = OK
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
@@ -146,7 +159,10 @@ router.post("/delete", async (req, res) => {
     // Get data from body
     const { accessToken, password, } = req.body;
     // Tries to get the profile from the database
-    const profile = await getProfile(accessToken);
+    const profile = await tryGetProfile(res, accessToken);
+    if (profile === null) {
+      return;
+    }
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
     if (profile.VendorID !== null) {
       res.status(401).json({ error: "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile." }); // 401 = Unauthorized
@@ -171,7 +187,10 @@ router.post("/modify", async (req, res) => {
     // Get data from body
     const { accessToken, password, propertyName, newValue } = req.body;
     // Check that profile exists and password is right
-    const profile = await getProfile(accessToken);
+    const profile = await tryGetProfile(res, accessToken);
+    if (profile === null) {
+      return;
+    }
     const profileID = profile.ID;
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
@@ -237,16 +256,15 @@ nodeSchedule.scheduleJob(rule, async function () {
 
 /**
  * Tries to get a profile from the database using a JWT access token.
- * @returns either a JSON object with the profile (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either a JSON object with the profile (from the MySQL database), 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
  */
-export async function getProfile(accessToken) {
+export async function tryGetProfile(httpResponse, accessToken) {
   // Verify access token
-  let decodedAccessToken;
-  try {
-    decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); // This throws an error if the validation fails.
-  }
-  catch {
-    return Promise.reject("Access token has expired");
+  const decodedAccessToken = decodeAccessToken(httpResponse, accessToken);
+  if (decodedAccessToken === null) {
+    return null;
   }
   // Extract profile ID from the token
   const profileID = decodedAccessToken.profileID;
@@ -254,7 +272,8 @@ export async function getProfile(accessToken) {
   const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
   // Check that profile exists
   if (Object.keys(profileRows).length === 0) {
-    return Promise.reject("Profile does not exist in database.");
+    httpResponse.status(404).json({ error: "Profile does not exist in database." }); // 404 = Not found
+    return null;
   }
   // Return profile
   return profileRows[0];
@@ -299,22 +318,58 @@ async function generateRefreshToken(profileID, deviceName) {
 }
 
 /**
- * @returns either a JWT access token containing the profileID, or a Promise.reject() with an error message.
+ * @returns either a JWT access token containing the profileID, 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
  */
-async function generateAccessToken(refreshToken) {
+async function tryGenerateAccessToken(httpResponse, refreshToken) {
   // Verify validity of refresh token
-  let decodedRefreshToken;
-  try { decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); } // This throws an error if the validation fails.
-  catch { return Promise.reject("Refresh token has expired"); }
+  const decodedRefreshToken = decodeRefreshToken(httpResponse, refreshToken);
+  if (decodedRefreshToken === null) {
+    return null;
+  }
   // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database via a schedule job)
   const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
   if (Object.keys(refreshTokenRows).length === 0) {
-    return Promise.reject("Profile refresh token does not exist in database.");
+    httpResponse.status(404).json({ error: "Refresh token does not exist in the database." }); // 404 = Not found
+    return null;
   }
   // Create and return a new access token
   const profileID = decodedRefreshToken.profileID;
   const tokenPayload = { profileID };
   const accessToken = jwt.sign(tokenPayload, accessTokenSecretKey, { expiresIn: accessTokenExpirationAge });
   return accessToken;
+}
+
+/**
+ * @returns either a decoded JWT refresh token containing the profileID, 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
+ */
+function decodeRefreshToken(httpResponse, refreshToken) {
+  try {
+    const decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); // This throws an error if the validation fails.
+    return decodedRefreshToken;
+  }
+  catch {
+    httpResponse.status(401).json({ error: "Refresh token is expired." }); // 401 = Unauthorized
+    return null;
+  }
+}
+
+/**
+ * @returns either a decoded JWT access token containing the profileID, 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
+ */
+function decodeAccessToken(httpResponse, accessToken) {
+  try {
+    const decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); // This throws an error if the validation fails.
+    return decodedAccessToken;
+  }
+  catch {
+    httpResponse.status(401).json({ error: "Access token is expired." }); // 401 = Unauthorized
+    return null;
+  }
 }
 

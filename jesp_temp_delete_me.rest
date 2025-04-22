@@ -5,9 +5,9 @@ POST http://localhost:3001/profile/create
 Content-Type: application/json
 
 {
-  "email": "1@1",
-  "password": "1",
-  "phoneNumber": "12345678"
+  "email": "2@2",
+  "password": "2",
+  "phoneNumber": "22224456"
 }
 
 POST http://localhost:3001/profile/sign-in
@@ -16,7 +16,7 @@ Content-Type: application/json
 {
   "email": "1@1",
   "password": "1",
-  "deviceName": "JESP-PC"
+  "deviceName": "JESP-PHONE"
 }
 
 
@@ -24,14 +24,14 @@ POST http://localhost:3001/profile/generate-access-token
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzg0MjR9.kpTupdaLTZh_on6OjNWR_KfQ5E_5ZuuopqEwsahB0u4"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjMsImlhdCI6MTc0NTM0MjQ5NH0.edzJouTwNUBttxJix3mY0wd8upg_z-gVw6tSmDICwi8"
 }
 
 POST http://localhost:3001/profile/get
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzkwNDYsImV4cCI6MTc0NTEzOTA3Nn0.SO5UcqKEddd0PY3HWxx9RJ8PtGdLCkpiqpTqPTT6OJ0"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjMsImlhdCI6MTc0NTM0MjU1MCwiZXhwIjoxNzQ1MzQzMTUwfQ.rbIKSt9JeclXElV40AItR6rD-QLxhG9xdfrISavl90M"
 }
 
 
@@ -39,18 +39,18 @@ POST http://localhost:3001/profile/modify
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzkxMDgsImV4cCI6MTc0NTEzOTEzOH0.VnZXsjExGwISllb2TvT8wnQK_HcXW9ES4FT_LTJKonM",
-  "password": "5",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjMsImlhdCI6MTc0NTM0MjU1MCwiZXhwIjoxNzQ1MzQzMTUwfQ.rbIKSt9JeclXElV40AItR6rD-QLxhG9xdfrISavl90M",
+  "password": "2",
   "propertyName": "PhoneNumber",
-  "newValue": "88884444"
+  "newValue": "11114444"
 }
 
 POST http://localhost:3001/profile/delete
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzkxMDgsImV4cCI6MTc0NTEzOTEzOH0.VnZXsjExGwISllb2TvT8wnQK_HcXW9ES4FT_LTJKonM",
-  "password": "5"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjMsImlhdCI6MTc0NTM0MjU1MCwiZXhwIjoxNzQ1MzQzMTUwfQ.rbIKSt9JeclXElV40AItR6rD-QLxhG9xdfrISavl90M",
+  "password": "2"
 }
 
 ### Testing of productOrder.js
@@ -59,7 +59,7 @@ POST http://localhost:3001/productOrder/getProfileProductOrders
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzY0MjcsImV4cCI6MTc0NTEzNjQzMn0.YXeG2G4TPmktQdNEpMnDk9mbt5hQdBUyoQjCZ841pmk"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjIsImlhdCI6MTc0NTM0MjY4NiwiZXhwIjoxNzQ1MzQzMjg2fQ.OSr6fJIsAeOD0DMFaxywKYZJO1G-mOy3Ds5Z1Erhd8k"
 }
 
 ### Testing of vendor.js
@@ -75,8 +75,8 @@ POST http://localhost:3001/vendor/modify
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjE0LCJpYXQiOjE3NDUxMzY0MjcsImV4cCI6MTc0NTEzNjQzMn0.YXeG2G4TPmktQdNEpMnDk9mbt5hQdBUyoQjCZ841pmk",
-  "password": "5",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjIsImlhdCI6MTc0NTM0MjY4NiwiZXhwIjoxNzQ1MzQzMjg2fQ.OSr6fJIsAeOD0DMFaxywKYZJO1G-mOy3Ds5Z1Erhd8k",
+  "password": "1",
   "propertyName": "Name",
   "newValue": "Lui Fendi Prada Designer"
 }

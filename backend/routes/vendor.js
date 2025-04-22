@@ -1,12 +1,7 @@
 import express from "express";
 import pool from "../db.js";
-import { getProfile } from "./profile.js";
+import { tryGetProfile } from "./profile.js";
 import bcrypt from "bcrypt";
-import {
-  getErrorCode,
-  errorWrongVendorID,
-  errorWrongPassword
-} from "../errorMessage.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -19,11 +14,14 @@ router.post("/get", async (req, res) => {
   try {
     const { vendorID } = req.body; // Get data from body
     // Get vendor
-    const vendor = await getVendor(vendorID);
+    const vendor = await getVendor(res, vendorID);
+    if (vendor === null) {
+      return;
+    }
     // Send back response
     res.status(200).json({ vendor: vendor }); // 200 = OK
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 });
 
@@ -31,23 +29,29 @@ router.post("/modify", async (req, res) => {
   try {
     const { accessToken, password, propertyName, newValue } = req.body; // Get data from body
     // Check that profile exists and password is right
-    const profile = await getProfile(accessToken);
+    const profile = await tryGetProfile(res, accessToken);
+    if (profile === null) {
+      return;
+    }
     const vendorID = profile.VendorID;
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
-      throw Error(errorWrongPassword);
+      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
+      return;
     }
     // Check that vendor ID exists
-    await getVendor(vendorID);
+    const vendor = await getVendor(res, vendorID);
+    if (vendor === null) {
+      return;
+    }
     // Update property with the new value
     await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
     // Return profile
     const [updatedVendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
     // Send back response
-    res.status(201).json({ vendor: updatedVendorRows[0] }); // 201 Created
+    res.status(201).json({ vendor: updatedVendorRows[0] }); // 201 = Created
   } catch (error) {
-    console.log(error);
-    res.status(getErrorCode(error)).json({ errorMessage: error });
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 });
 
@@ -57,14 +61,17 @@ router.post("/modify", async (req, res) => {
 
 /**
  * Tries to get a vendor from the database using a vendor ID.
- * @returns either a JSON object with the vendor (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either a JSON object with the vendor (from the MySQL database), 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
  */
-async function getVendor(vendorID) {
+async function getVendor(httpResponse, vendorID) {
   // Get an array of vendors with the corresponding ID from the database
   const [vendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
   // Check that vendor exists
   if (Object.keys(vendorRows).length === 0) {
-    return Promise.reject(errorWrongVendorID);
+    httpResponse.status(404).json({ error: "Vendor ID does not exist in the database." }); // 404 = Not found
+    return null;
   }
   // Return vendor
   return vendorRows[0];
