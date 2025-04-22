@@ -16,7 +16,7 @@ router.post("/get", async (req, res) => {
     const { vendorID } = req.body; // Get data from body
     // Get vendor
     const vendor = await getVendor(res, vendorID);
-    if (vendor === null) {
+    if (vendor === undefined) {
       return;
     }
     // Send back response
@@ -31,7 +31,7 @@ router.post("/modify", async (req, res) => {
     const { accessToken, password, propertyName, newValue } = req.body; // Get data from body
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
-    if (profile === null) {
+    if (profile === undefined) {
       return;
     }
     const vendorID = profile.VendorID;
@@ -42,15 +42,13 @@ router.post("/modify", async (req, res) => {
     }
     // Check that vendor ID exists
     const vendor = await getVendor(res, vendorID);
-    if (vendor === null) {
+    if (vendor === undefined) {
       return;
     }
     // Update property with the new value
     await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
-    // Return profile
-    const [updatedVendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
     // Send back response
-    res.status(201).json({ vendor: updatedVendorRows[0] }); // 201 = Created
+    res.status(201).json({}); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -63,7 +61,7 @@ router.post("/modify", async (req, res) => {
 /**
  * Tries to get a vendor from the database using a vendor ID.
  * @returns either a JSON object with the vendor (from the MySQL database), 
- * or null if a specific error occurs 
+ * or undefined if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
 async function getVendor(httpResponse, vendorID) {
@@ -72,7 +70,7 @@ async function getVendor(httpResponse, vendorID) {
   // Check that vendor exists
   if (Object.keys(vendorRows).length === 0) {
     httpResponse.status(404).json({ error: "Vendor ID does not exist in the database." }); // 404 = Not found
-    return null;
+    return undefined;
   }
   // Return vendor
   return vendorRows[0];

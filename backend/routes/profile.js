@@ -32,7 +32,8 @@ export default router;
 router.post("/sign-in", async (req, res) => {
   try {
     // Get data from body
-    const { email, password, deviceName } = req.body;
+    const { email, password } = req.body;
+    //r GET DEVICE OR SOMETHING
     // Get an array of profiles with the corresponding email from the database
     const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Verify that profile exists
@@ -49,7 +50,7 @@ router.post("/sign-in", async (req, res) => {
     const profileID = profileRows[0].ID;
     const refreshToken = await generateRefreshToken(profileID, deviceName);
     const accessToken = await generateAccessToken(res, refreshToken);
-    if (accessToken === null) {
+    if (accessToken === undefined) {
       return;
     }
     // Send back response with access token
@@ -65,7 +66,7 @@ router.post("/generate-access-token", async (req, res) => {
     const { refreshToken } = req.body;
     // Create a new access token using the refresh token
     const accessToken = await generateAccessToken(res, refreshToken);
-    if (accessToken === null) {
+    if (accessToken === undefined) {
       return;
     }
     // Response. Send back access token.
@@ -96,7 +97,7 @@ router.post("/sign-out-all-devices", async (req, res) => {
     const { refreshToken } = req.body;
     // Extract payload from refresh token
     const decodedRefreshToken = decodeRefreshToken(res, refreshToken);
-    if (decodedRefreshToken === null) {
+    if (decodedRefreshToken === undefined) {
       return;
     }
     const profileID = decodedRefreshToken.profileID;
@@ -113,7 +114,7 @@ router.post("/get", async (req, res) => {
   try {
     const { accessToken } = req.body; // Get data from body
     const profile = await getProfile(res, accessToken);
-    if (profile === null) {
+    if (profile === undefined) {
       return;
     }
     res.status(200).json({ profile: profile }); // Send back response. 200 = OK
@@ -157,10 +158,10 @@ router.post("/create", async (req, res) => {
 router.post("/delete", async (req, res) => {
   try {
     // Get data from body
-    const { accessToken, password, } = req.body;
+    const { accessToken, password } = req.body;
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
-    if (profile === null) {
+    if (profile === undefined) {
       return;
     }
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
@@ -188,7 +189,7 @@ router.post("/modify", async (req, res) => {
     const { accessToken, password, propertyName, newValue } = req.body;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
-    if (profile === null) {
+    if (profile === undefined) {
       return;
     }
     const profileID = profile.ID;
@@ -226,10 +227,8 @@ router.post("/modify", async (req, res) => {
     }
     // Update property with the new value
     await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
-    // Return profile
-    const [updatedProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
     // Send back response.
-    res.status(201).json({ profile: updatedProfileRows[0] }); // 201 = Created
+    res.status(201).json({}); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -256,7 +255,7 @@ nodeSchedule.scheduleJob(rule, async function () {
 
 /**
  * @returns either a decoded JWT refresh token containing the profileID, 
- * or null if a specific error occurs 
+ * or undefined if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
 function decodeRefreshToken(httpResponse, refreshToken) {
@@ -266,13 +265,13 @@ function decodeRefreshToken(httpResponse, refreshToken) {
   }
   catch {
     httpResponse.status(401).json({ error: "Refresh token is expired." }); // 401 = Unauthorized
-    return null;
+    return undefined;
   }
 }
 
 /**
  * @returns either a decoded JWT access token containing the profileID, 
- * or null if a specific error occurs 
+ * or undefined if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
 function decodeAccessToken(httpResponse, accessToken) {
@@ -282,7 +281,7 @@ function decodeAccessToken(httpResponse, accessToken) {
   }
   catch {
     httpResponse.status(401).json({ error: "Access token is expired." }); // 401 = Unauthorized
-    return null;
+    return undefined;
   }
 }
 
@@ -293,14 +292,14 @@ function decodeAccessToken(httpResponse, accessToken) {
 /**
  * Tries to get a profile from the database using a JWT access token.
  * @returns either a JSON object with the profile (from the MySQL database), 
- * or null if a specific error occurs 
+ * or undefined if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
 export async function getProfile(httpResponse, accessToken) {
   // Verify access token
   const decodedAccessToken = decodeAccessToken(httpResponse, accessToken);
-  if (decodedAccessToken === null) {
-    return null;
+  if (decodedAccessToken === undefined) {
+    return undefined;
   }
   // Extract profile ID from the token
   const profileID = decodedAccessToken.profileID;
@@ -309,7 +308,7 @@ export async function getProfile(httpResponse, accessToken) {
   // Check that profile exists
   if (Object.keys(profileRows).length === 0) {
     httpResponse.status(404).json({ error: "Profile does not exist in database." }); // 404 = Not found
-    return null;
+    return undefined;
   }
   // Return profile
   return profileRows[0];
@@ -355,20 +354,20 @@ async function generateRefreshToken(profileID, deviceName) {
 
 /**
  * @returns either a JWT access token containing the profileID, 
- * or null if a specific error occurs 
+ * or undefined if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
 async function generateAccessToken(httpResponse, refreshToken) {
   // Verify validity of refresh token
   const decodedRefreshToken = decodeRefreshToken(httpResponse, refreshToken);
-  if (decodedRefreshToken === null) {
-    return null;
+  if (decodedRefreshToken === undefined) {
+    return undefined;
   }
   // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database via a schedule job)
   const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
   if (Object.keys(refreshTokenRows).length === 0) {
     httpResponse.status(404).json({ error: "Refresh token does not exist in the database." }); // 404 = Not found
-    return null;
+    return undefined;
   }
   // Create and return a new access token
   const profileID = decodedRefreshToken.profileID;

@@ -15,7 +15,7 @@ router.post("/getProfileProductOrders", async (req, res) => {
     const { accessToken } = req.body;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
-    if (profile === null) {
+    if (profile === undefined) {
       return;
     }
     const profileID = profile.ID;

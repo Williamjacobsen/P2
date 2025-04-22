@@ -1,12 +1,12 @@
 // Tutorial on how to use forms in React: https://www.youtube.com/watch?v=SaEc7jLWvGY
 
 import React from "react";
-import nodeOS from "os";
+import { nodeOS } from "os";
 import { useNavigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import { setCookie, deleteCookie, getCookie } from "../../utils/cookies"
-import { useGetProfile } from "./useGetProfile";
+import useGetProfile from "./useGetProfile";
 
 
 export default function SignIn() {
@@ -77,7 +77,6 @@ function SignUpModal() {
 
 async function signIn(event) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
     // Extract data from the form
@@ -99,7 +98,6 @@ async function signIn(event) {
 
 async function signUp(event) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
     // Extract data from the form
@@ -147,7 +145,7 @@ async function requestProfileCreation(email, password, phoneNumber) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
+    if (!response.ok) return Promise.reject(data.error);
     const tokens = await requestSignIn(email, password);
     return tokens;
   }
@@ -162,8 +160,6 @@ async function requestProfileCreation(email, password, phoneNumber) {
  */
 async function requestSignIn(email, password) {
   try {
-    // Get device name
-    const deviceName = nodeOS.hostname();
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-in", {
       method: "POST",
@@ -172,13 +168,12 @@ async function requestSignIn(email, password) {
       },
       body: JSON.stringify({
         email,
-        password,
-        deviceName
+        password
       }),
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
+    if (!response.ok) return Promise.reject(data.error);
     return data; // Contains the tokens
   }
   catch (error) {

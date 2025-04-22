@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useCheckLoginValidity from "./useCheckLoginValidity";
+
+import useGetProfile from "./useGetProfile";
 import { getCookie } from "../../utils/cookies"
 
 export default function ProfileProductOrders() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
-  const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoginValid);
+  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
+  const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoadingProfile);
 
   // Is the user signed in?
-  if (isLoadingLogin) {
+  if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
-  else if (!isLoginValid) {
+  else if (profile === null) {
     navigate("/sign-in");
   }
 
@@ -66,9 +67,9 @@ export default function ProfileProductOrders() {
 
 /**
  * Custom hook (which is why the function name starts with "use"). 
- * @returns the object [isLoading (a boolean), orders (an array of objects with orders)].
+ * @returns the object [isLoading (a boolean), orders (an array of JSON objects with orders)].
  */
-function useGetProfileProductOrders(isLoginValidated) {
+function useGetProfileProductOrders(isLoadingProfile) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [orders, setOrders] = useState(null);
@@ -76,9 +77,8 @@ function useGetProfileProductOrders(isLoginValidated) {
   useEffect(() => {
     (async () => {
       try {
-        if (isLoginValidated) { // Before we can use the profile's information, we must ensure that the user is logged in.
-          const profileAccessToken = getCookie("profileAccessToken");
-          setOrders(await requestProfileProductOrders(profileAccessToken));
+        if (!isLoadingProfile) { // Before we can use the profile's information, we must ensure that the user is logged in.
+          setOrders(await requestProfileProductOrders(getCookie("profileAccessToken")));
           setIsLoading(false);
         }
       }
@@ -86,7 +86,7 @@ function useGetProfileProductOrders(isLoginValidated) {
         alert(error);
       }
     })();
-  }, [isLoginValidated]); // If the state "isLoginValidated" changes (so, once the profile gets validated), we must run this useEffect again. 
+  }, [isLoadingProfile]); // If the state "isLoadingProfile" changes (so, once the profile gets validated), we must run this useEffect again. 
 
   return [isLoading, orders];
 }
@@ -100,7 +100,6 @@ function useGetProfileProductOrders(isLoginValidated) {
  */
 async function requestProfileProductOrders(accessToken) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/productOrder/getProfileProductOrders", {
       method: "POST",
@@ -113,7 +112,7 @@ async function requestProfileProductOrders(accessToken) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
+    if (!response.ok) return Promise.reject(data.error);
     return data.productOrders;
   }
   catch (error) {

@@ -5,17 +5,17 @@ POST http://localhost:3001/profile/create
 Content-Type: application/json
 
 {
-  "email": "2@2",
-  "password": "2",
-  "phoneNumber": "22224456"
+  "email": "4@4",
+  "password": "4",
+  "phoneNumber": "234224456"
 }
 
 POST http://localhost:3001/profile/sign-in
 Content-Type: application/json
 
 {
-  "email": "1@1",
-  "password": "1",
+  "email": "4@4",
+  "password": "4",
   "deviceName": "JESP-PHONE"
 }
 
@@ -24,7 +24,7 @@ POST http://localhost:3001/profile/generate-access-token
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjMsImlhdCI6MTc0NTM0MjQ5NH0.edzJouTwNUBttxJix3mY0wd8upg_z-gVw6tSmDICwi8"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjQsImlhdCI6MTc0NTM0NzM3NSwiZXhwIjoxNzQ1MzQ3OTc1fQ.-Uf5gZFPTycges7XjV01vAforijVntOHicqWyaZ8rD8"
 }
 
 POST http://localhost:3001/profile/get

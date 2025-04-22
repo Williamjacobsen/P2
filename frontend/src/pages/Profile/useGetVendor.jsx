@@ -5,11 +5,9 @@ import { useState, useEffect } from "react";
 /**
  * React hook (which is why the function name starts with "use").
  * Gets a vendor JSON object from the server's database.
- * @param vendorID string.
- * @param bypass boolean. Defaults to false. If true, getting the vendor will be skipped and the loading will instantly finish.
  * @returns the object [isLoading (a boolean), vendor (a JSON object)].
  */
-export default function useGetVendor(vendorID, bypass = false) {
+export default function useGetVendor(vendorID) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [vendor, setVendor] = useState(null);
@@ -23,9 +21,7 @@ export default function useGetVendor(vendorID, bypass = false) {
   useEffect(() => {
     (async () => {
       try {
-        if (!bypass) { // This needs to be placed here (though I would have liked to have placed it outside of this useEffect) because React hooks cannot be called conditionally.
-          setVendor(await requestVendor(vendorID));
-        }
+        setVendor(await requestVendor(vendorID));
         setIsLoading();
       }
       catch (error) {
