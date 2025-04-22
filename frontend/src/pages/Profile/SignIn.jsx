@@ -185,6 +185,7 @@ async function requestProfileCreation(email, password, phoneNumber) {
 // Cookies
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
+//r
 export function createProfileCookies(databaseProfile, password) {
   setCookie("profileEmail", databaseProfile.Email, 7);
   setCookie("profilePassword", password, 7);
@@ -192,6 +193,7 @@ export function createProfileCookies(databaseProfile, password) {
   setCookie("profileVendorID", databaseProfile.VendorID, 7);
 }
 
+//r
 export function deleteProfileCookies() {
   deleteCookie("profileEmail");
   deleteCookie("profilePassword");

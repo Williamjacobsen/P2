@@ -1,6 +1,6 @@
 import express from "express";
 import pool from "../db.js";
-import { tryGetProfile } from "./profile.js";
+import { getProfile } from "./profile.js";
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -13,7 +13,7 @@ router.post("/getProfileProductOrders", async (req, res) => {
     // Get data from body
     const { accessToken } = req.body;
     // Check that profile exists and password is right
-    const profile = await tryGetProfile(res, accessToken);
+    const profile = await getProfile(res, accessToken);
     if (profile === null) {
       return;
     }

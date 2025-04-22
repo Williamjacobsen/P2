@@ -1,6 +1,6 @@
 import express from "express";
 import pool from "../db.js";
-import { tryGetProfile } from "./profile.js";
+import { getProfile } from "./profile.js";
 import bcrypt from "bcrypt";
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
@@ -29,7 +29,7 @@ router.post("/modify", async (req, res) => {
   try {
     const { accessToken, password, propertyName, newValue } = req.body; // Get data from body
     // Check that profile exists and password is right
-    const profile = await tryGetProfile(res, accessToken);
+    const profile = await getProfile(res, accessToken);
     if (profile === null) {
       return;
     }

@@ -47,7 +47,7 @@ router.post("/sign-in", async (req, res) => {
     // Create an access token containing the user's profile ID
     const profileID = profileRows[0].ID;
     const refreshToken = await generateRefreshToken(profileID, deviceName);
-    const accessToken = await tryGenerateAccessToken(res, refreshToken);
+    const accessToken = await generateAccessToken(res, refreshToken);
     if (accessToken === null) {
       return;
     }
@@ -63,7 +63,7 @@ router.post("/generate-access-token", async (req, res) => {
     // Get data from body
     const { refreshToken } = req.body;
     // Create a new access token using the refresh token
-    const accessToken = await tryGenerateAccessToken(res, refreshToken);
+    const accessToken = await generateAccessToken(res, refreshToken);
     if (accessToken === null) {
       return;
     }
@@ -111,7 +111,7 @@ router.post("/sign-out-all-devices", async (req, res) => {
 router.post("/get", async (req, res) => {
   try {
     const { accessToken } = req.body; // Get data from body
-    const profile = await tryGetProfile(res, accessToken);
+    const profile = await getProfile(res, accessToken);
     if (profile === null) {
       return;
     }
@@ -159,7 +159,7 @@ router.post("/delete", async (req, res) => {
     // Get data from body
     const { accessToken, password, } = req.body;
     // Tries to get the profile from the database
-    const profile = await tryGetProfile(res, accessToken);
+    const profile = await getProfile(res, accessToken);
     if (profile === null) {
       return;
     }
@@ -187,7 +187,7 @@ router.post("/modify", async (req, res) => {
     // Get data from body
     const { accessToken, password, propertyName, newValue } = req.body;
     // Check that profile exists and password is right
-    const profile = await tryGetProfile(res, accessToken);
+    const profile = await getProfile(res, accessToken);
     if (profile === null) {
       return;
     }
@@ -251,6 +251,42 @@ nodeSchedule.scheduleJob(rule, async function () {
 });
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+// JWT decoding
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+/**
+ * @returns either a decoded JWT refresh token containing the profileID, 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
+ */
+function decodeRefreshToken(httpResponse, refreshToken) {
+  try {
+    const decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); // This throws an error if the validation fails.
+    return decodedRefreshToken;
+  }
+  catch {
+    httpResponse.status(401).json({ error: "Refresh token is expired." }); // 401 = Unauthorized
+    return null;
+  }
+}
+
+/**
+ * @returns either a decoded JWT access token containing the profileID, 
+ * or null if a specific error occurs 
+ * (also handles sending back an error message to the client via the http response).
+ */
+function decodeAccessToken(httpResponse, accessToken) {
+  try {
+    const decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); // This throws an error if the validation fails.
+    return decodedAccessToken;
+  }
+  catch {
+    httpResponse.status(401).json({ error: "Access token is expired." }); // 401 = Unauthorized
+    return null;
+  }
+}
+
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Helpers
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
@@ -260,7 +296,7 @@ nodeSchedule.scheduleJob(rule, async function () {
  * or null if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
-export async function tryGetProfile(httpResponse, accessToken) {
+export async function getProfile(httpResponse, accessToken) {
   // Verify access token
   const decodedAccessToken = decodeAccessToken(httpResponse, accessToken);
   if (decodedAccessToken === null) {
@@ -322,7 +358,7 @@ async function generateRefreshToken(profileID, deviceName) {
  * or null if a specific error occurs 
  * (also handles sending back an error message to the client via the http response).
  */
-async function tryGenerateAccessToken(httpResponse, refreshToken) {
+async function generateAccessToken(httpResponse, refreshToken) {
   // Verify validity of refresh token
   const decodedRefreshToken = decodeRefreshToken(httpResponse, refreshToken);
   if (decodedRefreshToken === null) {
@@ -341,35 +377,4 @@ async function tryGenerateAccessToken(httpResponse, refreshToken) {
   return accessToken;
 }
 
-/**
- * @returns either a decoded JWT refresh token containing the profileID, 
- * or null if a specific error occurs 
- * (also handles sending back an error message to the client via the http response).
- */
-function decodeRefreshToken(httpResponse, refreshToken) {
-  try {
-    const decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); // This throws an error if the validation fails.
-    return decodedRefreshToken;
-  }
-  catch {
-    httpResponse.status(401).json({ error: "Refresh token is expired." }); // 401 = Unauthorized
-    return null;
-  }
-}
-
-/**
- * @returns either a decoded JWT access token containing the profileID, 
- * or null if a specific error occurs 
- * (also handles sending back an error message to the client via the http response).
- */
-function decodeAccessToken(httpResponse, accessToken) {
-  try {
-    const decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); // This throws an error if the validation fails.
-    return decodedAccessToken;
-  }
-  catch {
-    httpResponse.status(401).json({ error: "Access token is expired." }); // 401 = Unauthorized
-    return null;
-  }
-}
 
