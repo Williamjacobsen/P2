@@ -1,5 +1,5 @@
 
 
-const time = new Date();
-time.getUTCDate();
-console.log(time);
+import os, { userInfo } from "os";
+
+console.log(os.hostname());

@@ -5,14 +5,6 @@
 import express from "express";
 import pool from "../db.js";
 import bcrypt from "bcrypt";
-import {
-  getErrorCode,
-  errorWrongEmail,
-  errorWrongPassword,
-  errorProfileEmailAlreadyExists,
-  errorProfilePhoneNumberAlreadyExists,
-  errorTriedToDeleteVendorProfile,
-} from "../errorMessage.js"
 import jwt from "jsonwebtoken";
 import nodeSchedule from "node-schedule"
 
@@ -39,26 +31,27 @@ export default router;
 router.post("/sign-in", async (req, res) => {
   try {
     // Get data from body
-    const { email, password } = req.body;
+    const { email, password, deviceName } = req.body;
     // Get an array of profiles with the corresponding email from the database
     const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Verify that profile exists
     if (Object.keys(profileRows).length === 0) {
-      throw Error(errorWrongEmail);
+      res.status(404).json({ error: "Email does not have a profile." }); // 404 = Not Found
+      return;
     }
     // Verify password
     if (await bcrypt.compare(password, profileRows[0].PasswordHash) === false) {
-      throw Error(errorWrongPassword);
+      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
+      return;
     }
     // Create an access token containing the user's profile ID
     const profileID = profileRows[0].ID;
-    const refreshToken = await generateRefreshToken(profileID);
+    const refreshToken = await generateRefreshToken(profileID, deviceName);
     const accessToken = await generateAccessToken(refreshToken);
     // Send back response with access token
     res.status(200).json({ refreshToken: refreshToken, accessToken: accessToken }); // 200 = OK
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 })
 
@@ -71,26 +64,39 @@ router.post("/generate-access-token", async (req, res) => {
     // Response. Send back access token.
     res.status(201).json({ accessToken: newAccessToken }); // 201 = Created
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 })
 
-router.post("/sign-out", async (req, res) => {
+router.post("/sign-out-device", async (req, res) => {
+  //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Get data from body
     const { refreshToken } = req.body;
-    //y Remove refresh tokens from server
-    //y invalidate older access tokens
+    // Remove refresh tokens from the server
+    await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
     // Response. No message. 
     res.status(204).json({}); // 204 = No content
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 })
 
-//y TODO: Make sign out for all (sign-out-all) refresh tokens for all accounts
+router.post("/sign-out-all-devices", async (req, res) => {
+  //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
+  try {
+    // Get data from body
+    const { refreshToken } = req.body;
+    // Extract payload from refresh token
+    //R const profileID;
+    // Remove refresh tokens from the server
+    //R await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${profileID}';`);
+    // Response. No message. 
+    res.status(204).json({}); // 204 = No content
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error: " + error });
+  }
+})
 
 router.post("/get", async (req, res) => {
   try {
@@ -98,8 +104,7 @@ router.post("/get", async (req, res) => {
     const profile = await getProfile(accessToken);
     res.status(200).json({ profile: profile }); // Send back response. 200 = OK
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 });
 
@@ -110,12 +115,14 @@ router.post("/create", async (req, res) => {
     // Check if the email is already used by an existing profile
     let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     if (Object.keys(profile).length !== 0) {
-      throw Error(errorProfileEmailAlreadyExists);
+      res.status(409).json({ error: "Another profile already uses that email." }); // 409 = Conflict
+      return;
     }
     // Check if the phone number is already used by an existing profile
     [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${phoneNumber}';`);
     if (Object.keys(profile).length !== 0) {
-      throw Error(errorProfilePhoneNumberAlreadyExists);
+      res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
+      return;
     }
     // Salt and hash password
     const passwordHash = await bcrypt.hash(password, saltingRounds);
@@ -125,13 +132,12 @@ router.post("/create", async (req, res) => {
     await pool.query(`INSERT INTO p2.Profile 
       (Email, PasswordHash, PhoneNumber, LatestRefreshTokenGenerationDateTime) 
       VALUES (?, ?, ?, ?)`,
-      [email, passwordHash, phoneNumber, currentDateTime]);
+      [email, passwordHash, phoneNumber, currentDateTime]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
     [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Send back response
     res.status(201).json({ profile: profile[0] }); // 201 = Created
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 });
 
@@ -139,23 +145,24 @@ router.post("/delete", async (req, res) => {
   try {
     // Get data from body
     const { accessToken, password, } = req.body;
-    // Tries to get the profile from the database (if it does not exist, this returns a promise reject)
+    // Tries to get the profile from the database
     const profile = await getProfile(accessToken);
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
     if (profile.VendorID !== null) {
-      throw Error(errorTriedToDeleteVendorProfile);
+      res.status(401).json({ error: "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile." }); // 401 = Unauthorized
+      return;
     }
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
-      throw Error(errorWrongPassword);
+      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
+      return;
     }
     // Delete the profile
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
     // Response. No message. 
     res.status(204).json({}); // 204 = No Content
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 });
 
@@ -168,7 +175,8 @@ router.post("/modify", async (req, res) => {
     const profileID = profile.ID;
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
-      throw Error(errorWrongPassword);
+      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
+      return;
     }
     // Property-specific cases
     let anotherProfileRows;
@@ -176,13 +184,15 @@ router.post("/modify", async (req, res) => {
       case "Email":
         [anotherProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${newValue}';`);
         if (Object.keys(anotherProfileRows).length !== 0) {
-          throw Error(errorProfileEmailAlreadyExists);
+          res.status(409).json({ error: "Another profile already uses that email." }); // 409 = Conflict
+          return;
         }
         break;
       case "PhoneNumber":
         [anotherProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${newValue}';`);
         if (Object.keys(anotherProfileRows).length !== 0) {
-          throw Error(errorProfilePhoneNumberAlreadyExists);
+          res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
+          return;
         }
         break;
       // NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
@@ -192,7 +202,8 @@ router.post("/modify", async (req, res) => {
         const passwordHash = await bcrypt.hash(newValue, saltingRounds);
         newValue = passwordHash;
       case "VendorID":
-        throw Error("Users do not have permission to change the their profile vendor ID. Please contact the website administrators."); //R
+        res.status(401).json({ error: "Users do not have permission to change the their profile vendor ID. Please contact the website administrators." }); // 401 = Unauthorized
+        return;
     }
     // Update property with the new value
     await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
@@ -201,8 +212,7 @@ router.post("/modify", async (req, res) => {
     // Send back response.
     res.status(201).json({ profile: updatedProfileRows[0] }); // 201 = Created
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
-    //R needs "403 = forbidden" error code in case jwt.verify makes error
+    res.status(500).json({ error: "Internal server error: " + error });
   }
 });
 
@@ -232,55 +242,74 @@ nodeSchedule.scheduleJob(rule, async function () {
 export async function getProfile(accessToken) {
   // Verify access token
   let decodedAccessToken;
-  try { decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); } // This throws an error if the validation fails.
-  catch { return Promise.reject("Access token has expired"); } //R
+  try {
+    decodedAccessToken = jwt.verify(accessToken, accessTokenSecretKey); // This throws an error if the validation fails.
+  }
+  catch {
+    return Promise.reject("Access token has expired");
+  }
   // Extract profile ID from the token
   const profileID = decodedAccessToken.profileID;
   // Get an array of profiles with the corresponding profile ID from the database
   const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
   // Check that profile exists
   if (Object.keys(profileRows).length === 0) {
-    return Promise.reject(errorWrongEmail); //R it's not wrong email
+    return Promise.reject("Profile does not exist in database.");
   }
   // Return profile
   return profileRows[0];
 }
 
 /**
- * @returns a JWT access token.
+ * @returns a JWT refresh token containing the profileID.
  */
-async function generateRefreshToken(profileID) {
+async function generateRefreshToken(profileID, deviceName) {
   // Create refresh token
   const payload = { profileID };
   const refreshToken = jwt.sign(payload, refreshTokenSecretKey);
-  // Add new refresh token to database
+  // Add new refresh token to database, or update an existing one
   const expirationDateTime = new Date();
   expirationDateTime.setDate(expirationDateTime.getUTCDate() + refreshTokenExpirationAgeInDays);
-  await pool.query(`INSERT INTO p2.ProfileRefreshToken 
-    (ProfileID, ExpirationDateTime, Token) 
-    VALUES (?, ?, ?)`,
-    [profileID, expirationDateTime, refreshToken]);
+  const [tokenForDevice] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken 
+    WHERE ID='${profileID}' AND DeviceName='${deviceName}';`);
+  if (Object.keys(tokenForDevice).length === 0) {
+    // Insert new token for the device
+    await pool.query(`INSERT INTO p2.ProfileRefreshToken 
+    (ProfileID, DeviceName, ExpirationDateTime, Token) 
+    VALUES (?, ?, ?, ?)`,
+      [profileID, deviceName, expirationDateTime, refreshToken]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
+  }
+  else {
+    // Update existing token for the device
+    const tokenID = tokenForDevice[0].ID;
+    await pool.query(`UPDATE p2.ProfileRefreshToken 
+      SET ExpirationDateTime=?, Token='${refreshToken}'
+      WHERE (ID='${tokenID}')`,
+      expirationDateTime); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
+  }
   // Update LatestSignInDateTime for the profile
   const currentDateTime = new Date();
   currentDateTime.getUTCDate();
-  await pool.query(`UPDATE p2.Profile SET LatestRefreshTokenGenerationDateTime=? WHERE (ID='${profileID}')`, currentDateTime);
+  await pool.query(`UPDATE p2.Profile 
+    SET LatestRefreshTokenGenerationDateTime=?
+    WHERE (ID='${profileID}')`,
+    currentDateTime); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
   // Return refresh token
   return refreshToken;
 }
 
 /**
- * Throws an error if validation of the refresh token fails.
- * @returns a JWT access token.
+ * @returns either a JWT access token containing the profileID, or a Promise.reject() with an error message.
  */
 async function generateAccessToken(refreshToken) {
   // Verify validity of refresh token
   let decodedRefreshToken;
   try { decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); } // This throws an error if the validation fails.
-  catch { return Promise.reject("Refresh token has expired"); } //r
-  // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database) //r need to implement this automatic deletion
+  catch { return Promise.reject("Refresh token has expired"); }
+  // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database via a schedule job)
   const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
   if (Object.keys(refreshTokenRows).length === 0) {
-    return Promise.reject("Profile refresh token does not exist in database."); //r 
+    return Promise.reject("Profile refresh token does not exist in database.");
   }
   // Create and return a new access token
   const profileID = decodedRefreshToken.profileID;
