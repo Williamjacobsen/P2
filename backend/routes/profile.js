@@ -5,7 +5,7 @@
 import express from "express";
 import pool from "../db.js";
 import bcrypt from "bcrypt";
-import jwt, { decode } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import nodeSchedule from "node-schedule"
 
 // JWT tokens
