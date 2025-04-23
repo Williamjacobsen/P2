@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import useGetProfile from "./useGetProfile";
 import { getCookie } from "../../utils/cookies"
+import { requestAccessToken } from "./SignIn";
 
 export default function ProfileProductOrders() {
 
@@ -112,7 +113,15 @@ async function requestProfileProductOrders(accessToken) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        return await requestProfileProductOrders(newAccessToken);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
     return data.productOrders;
   }
   catch (error) {

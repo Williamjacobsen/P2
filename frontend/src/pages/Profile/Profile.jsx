@@ -6,6 +6,7 @@ import { deleteLoginCookies } from "./SignIn"
 import { getCookie } from "../../utils/cookies"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
+import { requestAccessToken } from "./SignIn";
 
 export default function Profile() {
 
@@ -336,7 +337,15 @@ async function requestProfileDeletion(accessToken, password) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        return await requestProfileDeletion(newAccessToken, password);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
   }
   catch (error) {
     return Promise.reject(error);
@@ -365,7 +374,15 @@ async function requestProfileModification(accessToken, password, propertyName, n
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        return await requestProfileModification(newAccessToken, password, propertyName, newValue);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
   }
   catch (error) {
     return Promise.reject(error);
@@ -392,7 +409,15 @@ async function requestVendorModification(accessToken, password, propertyName, ne
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        return await requestVendorModification(newAccessToken, password, propertyName, newValue);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
   }
   catch (error) {
     return Promise.reject(error);
@@ -415,10 +440,10 @@ async function requestSignOut(refreshToken) {
       }),
     });
     // Handle server response
-    console.log("1"); //R 
     const data = await response.json();
-    console.log("2"); //R 
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      return Promise.reject(data.error);
+    }
   }
   catch (error) {
     return Promise.reject(error);
@@ -442,7 +467,9 @@ async function requestSignOutAllDevices(refreshToken) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      return Promise.reject(data.error);
+    }
   }
   catch (error) {
     return Promise.reject(error);

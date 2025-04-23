@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 
+import { requestAccessToken } from "./SignIn";
+import { getCookie } from "../../utils/cookies";
+
 /**
  * Custom hook (which is why the function name starts with "use"). 
  * Gets a profile JSON object from the server's database.
@@ -54,7 +57,15 @@ async function requestProfile(accessToken) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
+    if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        return await requestProfile(newAccessToken);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
     return data.profile;
   }
   catch (error) {

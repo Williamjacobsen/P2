@@ -143,7 +143,9 @@ async function requestProfileCreation(email, password, phoneNumber) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      return Promise.reject(data.error);
+    }
     const tokens = await requestSignIn(email, password);
     return tokens;
   }
@@ -173,9 +175,40 @@ async function requestSignIn(email, password) {
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.error);
+    if (!response.ok) {
+      return Promise.reject(data.error);
+    }
     const tokens = data; // This is just to make it easier to understand what the data contains.
     return tokens;
+  }
+  catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * Tries to get a new profile access token from the server.
+ * @returns either a JWT access token, or a Promise.reject() with an error message.
+ */
+export async function requestAccessToken(refreshToken) {
+  try {
+    // Post data from the form to server
+    const response = await fetch("http://localhost:3001/profile/generate-access-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        refreshToken
+      }),
+    });
+    // Handle server response
+    const data = await response.json();
+    if (!response.ok) {
+      //r ask for login via pop up (or opt to log out)
+      return Promise.reject(data.errorMessage);
+    }
+    return data.accessToken;
   }
   catch (error) {
     return Promise.reject(error);
