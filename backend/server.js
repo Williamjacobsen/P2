@@ -19,6 +19,12 @@ app.use("/product-images", productImagesRoute);
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
+import profileRoute from "./routes/profile.js";
+app.use("/profile", profileRoute);
+import vendorRoute from "./routes/vendor.js";
+app.use("/vendor", vendorRoute);
+import productOrderRoute from "./routes/productOrder.js";
+app.use("/productOrder", productOrderRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
@@ -59,9 +65,49 @@ app.post("/example/save-text", async (req, res) => {
   }
 });
 
+/** Gets all product data with related image paths and store name */
+app.get("/product/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [result] = await pool.query(
+      `SELECT 
+        p2.Product.*, 
+        p2.Vendor.Name AS StoreName, 
+        p2.productimage.Path,
+        p2.Vendor.Address AS StoreAddress
+        FROM p2.Product
+        JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+        LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
+        WHERE p2.Product.ID = ?;`,
+      [id]
+    );
+    res.status(200).json(result);
+  }
+  catch (err) {
+    console.error("Error fetching product:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
 app.get("/faq", async (req, res) => {
   const [result] = await pool.query("SELECT * FROM p2.faq;");
   res.status(200).json(result);
+});
+
+app.get("/products", async (req, res) => {
+  try {
+    const [result] = await pool.query(`
+      SELECT p2.product.*, p2.vendor.Name AS StoreName
+      FROM p2.product
+      JOIN p2.vendor ON p2.product.StoreID = p2.vendor.ID;
+    `);
+    res.status(200).json(result);
+  }
+  catch (err) {
+    console.error("Error fetching product:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
 });
 
 app.listen(port, () => {

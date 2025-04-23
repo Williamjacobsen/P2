@@ -1,8 +1,8 @@
 // This file contains various helper functions related to cookies.
 
-/****************************************************
-Basic functionality
-****************************************************/
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+// Export functions
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
  * @param {*} name string
@@ -31,7 +31,7 @@ export function deleteCookie(name, path = "/") {
 
 /**
  * @param {*} name string 
- * @returns Either the value of the cookie, or null if the cookie name cannot be found;
+ * @returns Either the value of the cookie (AS A STRING), or null if the cookie name cannot be found;
  */
 export function getCookie(name) {
   const nameValuePairs = document.cookie.split("; ");
@@ -47,3 +47,21 @@ export function getCookie(name) {
   return value;
 }
 
+export function getAllCookieProducts(){
+  const cookies = document.cookie.split("; ");
+  const products = [];
+
+  for (const cookie of cookies) {
+    const [name, value] = cookie.split('=');
+    if (name.startsWith('Product-') && value) {
+      try{
+        const parsed = JSON.parse(decodeURIComponent(value))
+        products.push(parsed)
+      }
+      catch (err){
+        console.log('error parsing cookie', err);
+      }
+    }
+  }
+  return products;
+}

@@ -1,7 +1,5 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
-import "./Header.css";
-import SearchBar from "../SearchBar";
 
 export default function Header() {
   return (
@@ -29,7 +27,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/products" className="hover:underline">
+          <Link to="/Product-Catalogue" className="hover:underline">
             Products
           </Link>
         </li>
@@ -51,8 +49,7 @@ const HeaderContent = () => {
       </ul>
 
       {/*Right Section - Cart */}
-      <SearchBar className="SearchBar"/> 
-      <div className="flex items-center space-x-4"> 
+      <div className="flex items-center space-x-2">
         <span className="text-sm font-bold">Cart</span>
       </div>
     </nav>

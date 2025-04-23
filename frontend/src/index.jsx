@@ -11,7 +11,11 @@ import FAQ from "./pages/FAQ";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
+import Product from "./pages/ProductID/Product"
+import Profile from "./pages/Profile/Profile";
+import SignIn from "./pages/Profile/SignIn";
 import Cart from "./pages/Cart/Cart";
+import ProfileProductOrders from "./pages/Profile/ProfileProductOrders"
 import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
 
 export default function App() {
@@ -27,7 +31,11 @@ export default function App() {
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
+          <Route path="/Product/:id" element={<Product />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/sign-in" element={<SignIn />} />
           <Route path="/Cart" element={<Cart />} />
+          <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
         </Route>
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<Vendor />} />

@@ -1,7 +1,5 @@
 .product-card h1 {
-   
     font-size: 20px;
-
 }
 
 .product-card {
@@ -38,13 +36,37 @@
     flex-wrap: wrap;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto; /* Centers grid */
+    margin:  auto; /* Centers grid */
     padding: 20px;
-    gap: 20px; /* Space between cards */
+    gap: 50px; /* Space between cards */
     justify-content: center;
 }
 
 .product-grid > * {
     width: calc(33.333% - 20px); /* Ensures 3 per row */
     min-width: 200px; /* Ensures they don't get too small */
+}
+.SortBox{
+    width: 100px;
+    padding: 10px;
+    font-size: small;
+}
+.FilterElements{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 4 columns per row */
+    flex-wrap: wrap;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.product-card-link{
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width:fit-content;
+}
+.SearchBox{
+    width: 300px;
+    padding: 10px;
+    font-size: small;
 }

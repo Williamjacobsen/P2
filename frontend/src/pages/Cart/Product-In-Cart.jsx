@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import "./Product-Card.css"
-import {Link} from "react-router-dom";
+import './Cart.css';
 
-export default function ProductCard({id, storeName, productName, price}) {
+function ProductInCart({id, storeName, storeAddress, quantity, size, productName, price, removeFunction}) {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -28,13 +27,21 @@ export default function ProductCard({id, storeName, productName, price}) {
     }, []);
 
     return (
-        <Link to={`/product/${id}`} className="product-card-link">
-            <div className="product-card">
-                <img src={images[0]?.Path || '/Img/MissingImgImg.jpg'} alt='Product Image'></img>
+        <div className={'cartProduct'}>
+            <img src={images[0]?.Path || '/Img/MissingImgImg.jpg'} className={'cartImg'} alt={productName}></img>
+            <div className={'cartText'}>
                 <h1>{storeName}</h1>
-                <h1>{productName}</h1>
-                <p>{`${price},00 kr`}</p>
+                <h2>{storeAddress}</h2>
+                <p>{productName}</p>
+                <p>{size}</p>
+                <h1>{`${price},00 kr`}</h1>
+                <h1>{quantity}</h1>
             </div>
-        </Link>
+            <div className={'cartRemove'}>
+                <button className={'cartRemoveButton'} onClick={removeFunction}>Remove</button>
+            </div>
+        </div>
     );
 }
+
+export default ProductInCart;
