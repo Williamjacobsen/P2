@@ -32,8 +32,11 @@ export default router;
 router.post("/sign-in", async (req, res) => {
   try {
     // Get data from body
-    const { email, password } = req.body;
-    //r GET DEVICE OR SOMETHING
+    const {
+      email,
+      password,
+      oldRefreshToken
+    } = req.body;
     // Get an array of profiles with the corresponding email from the database
     const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Verify that profile exists
@@ -48,13 +51,13 @@ router.post("/sign-in", async (req, res) => {
     }
     // Create an access token containing the user's profile ID
     const profileID = profileRows[0].ID;
-    const refreshToken = await generateRefreshToken(profileID, deviceName);
-    const accessToken = await generateAccessToken(res, refreshToken);
+    const newRefreshToken = await generateRefreshToken(profileID, oldRefreshToken);
+    const accessToken = await generateAccessToken(res, newRefreshToken);
     if (accessToken === undefined) {
       return;
     }
     // Send back response with access token
-    res.status(200).json({ refreshToken: refreshToken, accessToken: accessToken }); // 200 = OK
+    res.status(200).json({ refreshToken: newRefreshToken, accessToken: accessToken }); // 200 = OK
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -84,7 +87,7 @@ router.post("/sign-out-device", async (req, res) => {
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
     // Response. No message. 
-    res.status(204).json({}); // 204 = No content
+    res.status(204).json({ message: "Success!" }); // 204 = No content
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -104,7 +107,7 @@ router.post("/sign-out-all-devices", async (req, res) => {
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${profileID}';`);
     // Response. No message. 
-    res.status(204).json({}); // 204 = No content
+    res.status(204).json({ message: "Success!" }); // 204 = No content
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -149,7 +152,7 @@ router.post("/create", async (req, res) => {
       VALUES (?, ?, ?, ?)`,
       [email, passwordHash, phoneNumber, currentDateTime]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
     // Send back response
-    res.status(201).json({}); // 201 = Created
+    res.status(201).json({ message: "Success!" }); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -177,7 +180,7 @@ router.post("/delete", async (req, res) => {
     // Delete the profile
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
     // Response. No message. 
-    res.status(204).json({}); // 204 = No Content
+    res.status(204).json({ message: "Success!" }); // 204 = No Content
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -228,7 +231,7 @@ router.post("/modify", async (req, res) => {
     // Update property with the new value
     await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
     // Send back response.
-    res.status(201).json({}); // 201 = Created
+    res.status(201).json({ message: "Success!" }); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -315,31 +318,38 @@ export async function getProfile(httpResponse, accessToken) {
 }
 
 /**
+ * @param oldRefreshToken 
+ *    If null, a new refresh token will be added to the database.
+ *    If not null, an old refresh token entry in the database will be updated with a new token value.
  * @returns a JWT refresh token containing the profileID.
  */
-async function generateRefreshToken(profileID, deviceName) {
-  // Create refresh token
+async function generateRefreshToken(profileID, oldRefreshToken = null) {
+  // Create new refresh token
   const payload = { profileID };
-  const refreshToken = jwt.sign(payload, refreshTokenSecretKey);
-  // Add new refresh token to database, or update an existing one
+  const newRefreshToken = jwt.sign(payload, refreshTokenSecretKey);
+  // Check whether to update an old refresh token, or create a new refresh token
+  let shouldUpdateOldToken = false;
+  if (oldRefreshToken !== null) {
+    const [oldTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${oldRefreshToken}';`);
+    if (Object.keys(oldTokenRows).length !== 0) {
+      shouldUpdateOldToken = true;
+    }
+  }
+  // Add new refresh token to database as a new entry, or update an existing database entry
   const expirationDateTime = new Date();
   expirationDateTime.setDate(expirationDateTime.getUTCDate() + refreshTokenExpirationAgeInDays);
-  const [tokenForDevice] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken 
-    WHERE ID='${profileID}' AND DeviceName='${deviceName}';`);
-  if (Object.keys(tokenForDevice).length === 0) {
-    // Insert new token for the device
-    await pool.query(`INSERT INTO p2.ProfileRefreshToken 
-    (ProfileID, DeviceName, ExpirationDateTime, Token) 
-    VALUES (?, ?, ?, ?)`,
-      [profileID, deviceName, expirationDateTime, refreshToken]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
-  }
-  else {
-    // Update existing token for the device
-    const tokenID = tokenForDevice[0].ID;
+  if (shouldUpdateOldToken) {
+    // Update existing token
     await pool.query(`UPDATE p2.ProfileRefreshToken 
-      SET ExpirationDateTime=?, Token='${refreshToken}'
-      WHERE (ID='${tokenID}')`,
+      SET ExpirationDateTime=?, Token='${newRefreshToken}'
+      WHERE (Token='${oldRefreshToken}')`,
       expirationDateTime); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
+  } else {
+    // Insert new token
+    await pool.query(`INSERT INTO p2.ProfileRefreshToken 
+    (ProfileID, ExpirationDateTime, Token) 
+    VALUES (?, ?, ?)`,
+      [profileID, expirationDateTime, newRefreshToken]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
   }
   // Update LatestSignInDateTime for the profile
   const currentDateTime = new Date();
@@ -349,7 +359,7 @@ async function generateRefreshToken(profileID, deviceName) {
     WHERE (ID='${profileID}')`,
     currentDateTime); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
   // Return refresh token
-  return refreshToken;
+  return newRefreshToken;
 }
 
 /**

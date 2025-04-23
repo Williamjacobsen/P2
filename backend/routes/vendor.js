@@ -48,7 +48,7 @@ router.post("/modify", async (req, res) => {
     // Update property with the new value
     await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
     // Send back response
-    res.status(201).json({}); // 201 = Created
+    res.status(201).json({ message: "Success!" }); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }

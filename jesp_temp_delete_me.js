@@ -1,5 +1,6 @@
 
 
-import os from "os";
 
-console.log(os.hostname());
+let vendor = null;
+
+console.log(vendor?.bitch);

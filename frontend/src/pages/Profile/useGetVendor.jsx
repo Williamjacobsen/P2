@@ -7,28 +7,27 @@ import { useState, useEffect } from "react";
  * Gets a vendor JSON object from the server's database.
  * @returns the object [isLoading (a boolean), vendor (a JSON object)].
  */
-export default function useGetVendor(vendorID) {
+export default function useGetVendor(profile) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [vendor, setVendor] = useState(null);
 
-  if (vendorID === null) {
-    setProfile(null);
-    setIsLoading(false);
-    return [isLoading, profile];
-  }
-
   useEffect(() => {
     (async () => {
       try {
-        setVendor(await requestVendor(vendorID));
+        if (profile === null || profile.VendorID === null) {
+          setVendor(null);
+          setIsLoading(false);
+          return [isLoading, vendor];
+        }
+        setVendor(await requestVendor(profile.VendorID));
         setIsLoading();
       }
       catch (error) {
         alert(error);
       }
     })();
-  }, []);
+  }, [profile]);
 
   return [isLoading, vendor];
 }

@@ -12,15 +12,14 @@ export default function useGetProfile(accessToken) {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState(null);
 
-  if (accessToken === null) {
-    setProfile(null);
-    setIsLoading(false);
-    return [isLoading, profile];
-  }
-
   useEffect(() => {
     (async () => {
       try {
+        if (accessToken === null) {
+          setProfile(null);
+          setIsLoading(false);
+          return [isLoading, profile];
+        }
         setProfile(await requestProfile(accessToken));
         setIsLoading(false);
       }

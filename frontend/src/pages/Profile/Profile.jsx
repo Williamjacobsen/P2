@@ -11,8 +11,8 @@ export default function Profile() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessCookie"));
-  const [isLoadingVendor, vendor] = useGetVendor(profile !== null && profile.VendorID); //r this might create problems because it isn't a useState variable
+  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
+  const [isLoadingVendor, vendor] = useGetVendor(profile); //r this might create problems because it isn't a useState variable
 
   // Is the user signed in?
   if (isLoadingProfile) {
@@ -29,8 +29,12 @@ export default function Profile() {
 
   return (
     <>
-      <button onClick={signOut}>
+      <button onClick={await signOut}> //R
         Sign out
+      </button>
+      <br />
+      <button onClick={await signOutAllDevices}>  //R
+        Sign out on all devices
       </button>
       <br />
       <button onClick={() => navigate("/profile-product-orders")}>
@@ -192,7 +196,7 @@ export default function Profile() {
 function DeleteProfileModal() {
   return (
     <>
-      <form onSubmit={deleteProfile}>
+      <form onSubmit={await deleteProfile}> //r
         <b>
           Current password:
         </b> <br />
@@ -206,7 +210,7 @@ function DeleteProfileModal() {
 function ModifyModal({ modificationFunction, databasePropertyName, labelText, inputType = "text", theMinLength = 0, theMaxLength = 256 }) {
   return (
     <>
-      <form onSubmit={modificationFunction}>
+      <form onSubmit={await modificationFunction}> //r
         <input type="hidden" name="databasePropertyName" value={databasePropertyName} /> <br />
         <b>
           Current password:
@@ -383,7 +387,7 @@ async function requestSignOut(refreshToken) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refreshToken
+        refreshToken,
       }),
     });
     // Handle server response
@@ -407,7 +411,7 @@ async function requestSignOutAllDevices(refreshToken) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refreshToken
+        refreshToken,
       }),
     });
     // Handle server response
@@ -435,7 +439,7 @@ async function signOut() {
   }
 }
 
-async function signOutAllDevices() { //y not implemented yet
+async function signOutAllDevices() {
   try {
     await requestSignOutAllDevices(getCookie("profileRefreshToken"));
     deleteLoginCookies();

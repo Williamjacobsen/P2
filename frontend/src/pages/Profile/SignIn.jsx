@@ -1,7 +1,6 @@
 // Tutorial on how to use forms in React: https://www.youtube.com/watch?v=SaEc7jLWvGY
 
 import React from "react";
-import { nodeOS } from "os";
 import { useNavigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
@@ -26,7 +25,7 @@ export default function SignIn() {
   return (
     <>
       <h3>--- Sign In ---</h3>
-      <form onSubmit={signIn}>
+      <form onSubmit={await signIn}>  //r
         <b>
           Email address:
         </b> <br />
@@ -52,7 +51,7 @@ export default function SignIn() {
 function SignUpModal() {
   return (
     <>
-      <form onSubmit={signUp}>
+      <form onSubmit={await signUp}>  //r
         <b>
           Email address:
         </b> <br />
@@ -160,6 +159,7 @@ async function requestProfileCreation(email, password, phoneNumber) {
  */
 async function requestSignIn(email, password) {
   try {
+    const oldRefreshToken = getCookie("profileRefreshToken");
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-in", {
       method: "POST",
@@ -168,13 +168,15 @@ async function requestSignIn(email, password) {
       },
       body: JSON.stringify({
         email,
-        password
+        password,
+        oldRefreshToken,
       }),
     });
     // Handle server response
     const data = await response.json();
     if (!response.ok) return Promise.reject(data.error);
-    return data; // Contains the tokens
+    const tokens = data; // This is just to make it easier to understand what the data contains.
+    return tokens;
   }
   catch (error) {
     return Promise.reject(error);

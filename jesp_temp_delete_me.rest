@@ -15,8 +15,7 @@ Content-Type: application/json
 
 {
   "email": "4@4",
-  "password": "4",
-  "deviceName": "JESP-PHONE"
+  "password": "4"
 }
 
 
