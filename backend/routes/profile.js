@@ -87,7 +87,7 @@ router.post("/sign-out-device", async (req, res) => {
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
     // Response. No message. 
-    res.status(204).json({ message: "Success!" }); // 204 = No content
+    res.status(200).json({}); // 200 = OK
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -105,9 +105,9 @@ router.post("/sign-out-all-devices", async (req, res) => {
     }
     const profileID = decodedRefreshToken.profileID;
     // Remove refresh tokens from the server
-    await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${profileID}';`);
+    await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ProfileID='${profileID}';`);
     // Response. No message. 
-    res.status(204).json({ message: "Success!" }); // 204 = No content
+    res.status(200).json({}); // 200 = OK
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -152,7 +152,7 @@ router.post("/create", async (req, res) => {
       VALUES (?, ?, ?, ?)`,
       [email, passwordHash, phoneNumber, currentDateTime]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
     // Send back response
-    res.status(201).json({ message: "Success!" }); // 201 = Created
+    res.status(201).json({}); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -180,7 +180,7 @@ router.post("/delete", async (req, res) => {
     // Delete the profile
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
     // Response. No message. 
-    res.status(204).json({ message: "Success!" }); // 204 = No Content
+    res.status(200).json({}); // 200 = OK
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }
@@ -231,7 +231,7 @@ router.post("/modify", async (req, res) => {
     // Update property with the new value
     await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
     // Send back response.
-    res.status(201).json({ message: "Success!" }); // 201 = Created
+    res.status(201).json({}); // 201 = Created
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error });
   }

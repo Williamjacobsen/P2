@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
  * Gets a vendor JSON object from the server's database.
  * @returns the object [isLoading (a boolean), vendor (a JSON object)].
  */
-export default function useGetVendor(profile) {
+export default function useGetVendor(vendorID) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [vendor, setVendor] = useState(null);
@@ -15,19 +15,19 @@ export default function useGetVendor(profile) {
   useEffect(() => {
     (async () => {
       try {
-        if (profile === null || profile.VendorID === null) {
+        if (vendorID === undefined || vendorID === null) {
           setVendor(null);
           setIsLoading(false);
           return [isLoading, vendor];
         }
-        setVendor(await requestVendor(profile.VendorID));
+        setVendor(await requestVendor(vendorID));
         setIsLoading();
       }
       catch (error) {
         alert(error);
       }
     })();
-  }, [profile]);
+  }, [vendorID]);
 
   return [isLoading, vendor];
 }
@@ -41,7 +41,6 @@ export default function useGetVendor(profile) {
  */
 async function requestVendor(vendorID) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/vendor/get", {
       method: "POST",

@@ -1,7 +1,7 @@
 // Tutorial on how to use forms in React: https://www.youtube.com/watch?v=SaEc7jLWvGY
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import { setCookie, deleteCookie, getCookie } from "../../utils/cookies"
@@ -11,7 +11,6 @@ import useGetProfile from "./useGetProfile";
 export default function SignIn() {
 
   // Hooks
-  const navigate = useNavigate();
   const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
 
   // Is the user already signed in?
@@ -19,13 +18,13 @@ export default function SignIn() {
     return (<>Loading login...</>);
   }
   else if (profile !== null) {
-    navigate("/profile");
+    return (<Navigate to="/profile" replace />);
   }
 
   return (
     <>
       <h3>--- Sign In ---</h3>
-      <form onSubmit={await signIn}>  //r
+      <form onSubmit={signIn}>
         <b>
           Email address:
         </b> <br />
@@ -51,7 +50,7 @@ export default function SignIn() {
 function SignUpModal() {
   return (
     <>
-      <form onSubmit={await signUp}>  //r
+      <form onSubmit={signUp}>
         <b>
           Email address:
         </b> <br />

@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import { deleteLoginCookies } from "./SignIn"
@@ -12,14 +12,14 @@ export default function Profile() {
   // Hooks
   const navigate = useNavigate();
   const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
-  const [isLoadingVendor, vendor] = useGetVendor(profile); //r this might create problems because it isn't a useState variable
+  const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
 
   // Is the user signed in?
   if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
   else if (profile === null) {
-    navigate("/sign-in");
+    return (<Navigate to="/sign-in" replace />);
   }
 
   // Is the user a vendor?
@@ -29,11 +29,11 @@ export default function Profile() {
 
   return (
     <>
-      <button onClick={await signOut}> //R
+      <button onClick={signOut}>
         Sign out
       </button>
       <br />
-      <button onClick={await signOutAllDevices}>  //R
+      <button onClick={signOutAllDevices}>
         Sign out on all devices
       </button>
       <br />
@@ -196,7 +196,7 @@ export default function Profile() {
 function DeleteProfileModal() {
   return (
     <>
-      <form onSubmit={await deleteProfile}> //r
+      <form onSubmit={deleteProfile}>
         <b>
           Current password:
         </b> <br />
@@ -210,7 +210,7 @@ function DeleteProfileModal() {
 function ModifyModal({ modificationFunction, databasePropertyName, labelText, inputType = "text", theMinLength = 0, theMaxLength = 256 }) {
   return (
     <>
-      <form onSubmit={await modificationFunction}> //r
+      <form onSubmit={modificationFunction}>
         <input type="hidden" name="databasePropertyName" value={databasePropertyName} /> <br />
         <b>
           Current password:
@@ -282,6 +282,30 @@ async function modifyVendor(event) {
     const profileAccessToken = getCookie("profileAccessToken");
     // Modify profile in server
     await requestVendorModification(profileAccessToken, password, propertyName, newValue);
+    // Reload the page (to refresh changes)
+    window.location.reload();
+  }
+  catch (error) {
+    alert(error);
+  }
+}
+
+async function signOut() {
+  try {
+    await requestSignOut(getCookie("profileRefreshToken"));
+    deleteLoginCookies();
+    // Reload the page (to refresh changes)
+    window.location.reload();
+  }
+  catch (error) {
+    alert(error);
+  }
+}
+
+async function signOutAllDevices() {
+  try {
+    await requestSignOutAllDevices(getCookie("profileRefreshToken"));
+    deleteLoginCookies();
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -391,7 +415,9 @@ async function requestSignOut(refreshToken) {
       }),
     });
     // Handle server response
+    console.log("1"); //R 
     const data = await response.json();
+    console.log("2"); //R 
     if (!response.ok) return Promise.reject(data.error);
   }
   catch (error) {
@@ -420,34 +446,6 @@ async function requestSignOutAllDevices(refreshToken) {
   }
   catch (error) {
     return Promise.reject(error);
-  }
-}
-
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Helpers
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-
-async function signOut() {
-  try {
-    await requestSignOut(getCookie("profileRefreshToken"));
-    deleteLoginCookies();
-    // Reload the page (to refresh changes)
-    window.location.reload();
-  }
-  catch (error) {
-    alert(error);
-  }
-}
-
-async function signOutAllDevices() {
-  try {
-    await requestSignOutAllDevices(getCookie("profileRefreshToken"));
-    deleteLoginCookies();
-    // Reload the page (to refresh changes)
-    window.location.reload();
-  }
-  catch (error) {
-    alert(error);
   }
 }
 
