@@ -30,6 +30,16 @@ app.get("/test", (req, res) => {
   res.send("API is working!");
 });
 
+app.get("/BestSellers", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM p2.productstatistics ORDER BY AmountSold DESC;");
+    res.json(rows.slice(0, 4));
+  } catch (error) {
+    console.error("Error fetching productstatistics:", error);
+    res.status(500).json({ error: "Failed to fetch productstatistics" });
+  }
+});
+
 app.get("/example/get-text", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM p2.example;");
@@ -71,15 +81,7 @@ app.get("/product/:id", async (req, res) => {
     const { id } = req.params;
 
     const [result] = await pool.query(
-      `SELECT 
-        p2.Product.*, 
-        p2.Vendor.Name AS StoreName, 
-        p2.productimage.Path,
-        p2.Vendor.Address AS StoreAddress
-        FROM p2.Product
-        JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
-        LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
-        WHERE p2.Product.ID = ?;`,
+      "SELECT * FROM p2.product WHERE P2.product.ID = ?;",
       [id]
     );
     res.status(200).json(result);

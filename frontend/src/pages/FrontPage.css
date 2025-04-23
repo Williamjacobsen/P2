@@ -139,3 +139,7 @@
   .shop-circle:hover img {
     transform: scale(1.05);
   }
+
+.fp-products {
+  text-align: center;
+}
