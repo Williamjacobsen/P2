@@ -26,6 +26,9 @@ app.use("/vendor", vendorRoute);
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 
+import payment from "./routes/payment.js";
+app.use("/checkout", payment);
+
 app.get("/test", (req, res) => {
   res.send("API is working!");
 });
