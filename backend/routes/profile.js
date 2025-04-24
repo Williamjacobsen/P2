@@ -12,7 +12,7 @@ import nodeSchedule from "node-schedule"
 // JWT tokens
 const accessTokenSecretKey = "aGoodSecret1"; //y This is essentially a password, so it should be more complex than this placeholder.
 const refreshTokenSecretKey = "aGoodSecret2"; //y This is essentially a password, so it should be more complex than this placeholder.
-const accessTokenExpirationAge = "10m";
+const accessTokenExpirationAge = "5m";
 const refreshTokenExpirationAgeInDays = 7;
 
 // Hashing
@@ -243,7 +243,8 @@ router.post("/modify", async (req, res) => {
 
 // Job for deleting expired refresh tokens in the MySQL database
 const rule = new nodeSchedule.RecurrenceRule();
-// Recurs every day at 3:00 AM (Denmark is +2 hours from UTC time) (because this is the time where the servers are most likely to not be under heavy load).
+// Recurs every day at 3:00 AM (Denmark is +2 hours from UTC time) 
+// (because this is the time where the servers are most likely to not be under heavy load).
 rule.hour = 1;
 rule.minute = 0;
 rule.tz = 'Etc/UTC';

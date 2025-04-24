@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 
 import { requestAccessToken } from "./SignIn";
-import { getCookie } from "../../utils/cookies";
+import {
+  getCookie,
+  cookieName_ProfileRefreshToken
+} from "../../utils/cookies";
 
 /**
  * Custom hook (which is why the function name starts with "use"). 
@@ -59,7 +62,7 @@ async function requestProfile(accessToken) {
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
         return await requestProfile(newAccessToken);
       }
       else {

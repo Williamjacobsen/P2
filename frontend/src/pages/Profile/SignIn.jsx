@@ -4,14 +4,19 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
-import { setCookie, deleteCookie, getCookie } from "../../utils/cookies"
+import {
+  setCookie,
+  deleteCookie,
+  getCookie,
+  cookieName_ProfileAccessToken,
+  cookieName_ProfileRefreshToken
+} from "../../utils/cookies"
 import useGetProfile from "./useGetProfile";
-
 
 export default function SignIn() {
 
   // Hooks
-  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
+  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken));
 
   // Is the user already signed in?
   if (isLoadingProfile) {
@@ -160,7 +165,7 @@ async function requestProfileCreation(email, password, phoneNumber) {
  */
 async function requestSignIn(email, password) {
   try {
-    const oldRefreshToken = getCookie("profileRefreshToken");
+    const oldRefreshToken = getCookie(cookieName_ProfileRefreshToken);
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-in", {
       method: "POST",
@@ -205,7 +210,7 @@ export async function requestAccessToken(refreshToken) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      //r ask for login via pop up (or opt to log out)
+      //r ask for login via pop up that stops execution of other stuff (the user can also opt to log out)
       return Promise.reject(data.errorMessage);
     }
     return data.accessToken;
@@ -220,13 +225,13 @@ export async function requestAccessToken(refreshToken) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 export function setLoginCookies(refreshToken, accessToken) {
-  setCookie("profileRefreshToken", refreshToken, 7);
-  setCookie("profileAccessToken", accessToken, 7);
+  setCookie(cookieName_ProfileRefreshToken, refreshToken, 7);
+  setCookie(cookieName_ProfileAccessToken, accessToken, 7);
 }
 
 export function deleteLoginCookies() {
-  deleteCookie("profileRefreshToken");
-  deleteCookie("profileAccessToken");
+  deleteCookie(cookieName_ProfileRefreshToken);
+  deleteCookie(cookieName_ProfileAccessToken);
 }
 
 

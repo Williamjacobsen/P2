@@ -1,6 +1,13 @@
 // This file contains various helper functions related to cookies.
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+// Cookie names
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+export const cookieName_ProfileRefreshToken = "profileRefreshToken";
+export const cookieName_ProfileAccessToken = "profileAccessToken";
+
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Export functions
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 

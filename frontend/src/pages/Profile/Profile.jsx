@@ -3,7 +3,11 @@ import { useNavigate, Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import { deleteLoginCookies } from "./SignIn"
-import { getCookie } from "../../utils/cookies"
+import {
+  getCookie,
+  cookieName_ProfileAccessToken,
+  cookieName_ProfileRefreshToken
+} from "../../utils/cookies"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
 import { requestAccessToken } from "./SignIn";
@@ -12,7 +16,7 @@ export default function Profile() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
+  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken));
   const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
 
   // Is the user signed in?
@@ -238,7 +242,7 @@ async function deleteProfile(event) {
     // Get data
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password");
-    const profileAccessToken = getCookie("profileAccessToken");
+    const profileAccessToken = getCookie(cookieName_ProfileAccessToken);
     // Delete profile from server
     await requestProfileDeletion(profileAccessToken, password);
     // Delete sign in cookie
@@ -260,7 +264,7 @@ async function modifyProfile(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const profileAccessToken = getCookie("profileAccessToken");
+    const profileAccessToken = getCookie(cookieName_ProfileAccessToken);
     // Modify profile in server
     await requestProfileModification(profileAccessToken, password, propertyName, newValue);
     // Reload the page (to refresh changes)
@@ -280,7 +284,7 @@ async function modifyVendor(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const profileAccessToken = getCookie("profileAccessToken");
+    const profileAccessToken = getCookie(cookieName_ProfileAccessToken);
     // Modify profile in server
     await requestVendorModification(profileAccessToken, password, propertyName, newValue);
     // Reload the page (to refresh changes)
@@ -293,7 +297,7 @@ async function modifyVendor(event) {
 
 async function signOut() {
   try {
-    await requestSignOut(getCookie("profileRefreshToken"));
+    await requestSignOut(getCookie(cookieName_ProfileRefreshToken));
     deleteLoginCookies();
     // Reload the page (to refresh changes)
     window.location.reload();
@@ -305,7 +309,7 @@ async function signOut() {
 
 async function signOutAllDevices() {
   try {
-    await requestSignOutAllDevices(getCookie("profileRefreshToken"));
+    await requestSignOutAllDevices(getCookie(cookieName_ProfileRefreshToken));
     deleteLoginCookies();
     // Reload the page (to refresh changes)
     window.location.reload();
@@ -339,7 +343,7 @@ async function requestProfileDeletion(accessToken, password) {
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
         return await requestProfileDeletion(newAccessToken, password);
       }
       else {
@@ -376,7 +380,7 @@ async function requestProfileModification(accessToken, password, propertyName, n
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
         return await requestProfileModification(newAccessToken, password, propertyName, newValue);
       }
       else {
@@ -411,7 +415,7 @@ async function requestVendorModification(accessToken, password, propertyName, ne
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
         return await requestVendorModification(newAccessToken, password, propertyName, newValue);
       }
       else {

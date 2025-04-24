@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useGetProfile from "./useGetProfile";
-import { getCookie } from "../../utils/cookies"
+import {
+  getCookie,
+  cookieName_ProfileAccessToken,
+  cookieName_ProfileRefreshToken
+} from "../../utils/cookies"
 import { requestAccessToken } from "./SignIn";
 
 export default function ProfileProductOrders() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingProfile, profile] = useGetProfile(getCookie("profileAccessToken"));
+  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken));
   const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoadingProfile);
 
   // Is the user signed in?
@@ -79,7 +83,7 @@ function useGetProfileProductOrders(isLoadingProfile) {
     (async () => {
       try {
         if (!isLoadingProfile) { // Before we can use the profile's information, we must ensure that the user is logged in.
-          setOrders(await requestProfileProductOrders(getCookie("profileAccessToken")));
+          setOrders(await requestProfileProductOrders(getCookie(cookieName_ProfileAccessToken)));
           setIsLoading(false);
         }
       }
@@ -115,7 +119,7 @@ async function requestProfileProductOrders(accessToken) {
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie("profileRefreshToken"));
+        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
         return await requestProfileProductOrders(newAccessToken);
       }
       else {
