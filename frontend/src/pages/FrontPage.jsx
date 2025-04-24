@@ -94,9 +94,18 @@ export default function FrontPage() {
 
               console.log(data);
             }
-          )}
-            
+          )}   
+
+          <ProductCard
+            storeName="Shop 1"
+            productName = "Pants 1"
+            price={100}
+            imgURL="/Img/TestBillede.png"
+          />   
           </div>
+          
+          
+          
       </div>
   
     </section>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
 import "./Header.css";
+import SearchBar from "../SearchBar";
 
 export default function Header() {
   return (
@@ -50,6 +51,7 @@ const HeaderContent = () => {
       </ul>
 
       {/*Right Section - Cart */}
+      <SearchBar/>
       <div className="flex items-center space-x-2">
         <span className="text-sm font-bold">Cart</span>
       </div>
