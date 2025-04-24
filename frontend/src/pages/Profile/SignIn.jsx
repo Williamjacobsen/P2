@@ -210,8 +210,14 @@ export async function requestAccessToken(refreshToken) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      //r ask for login via pop up that stops execution of other stuff (the user can also opt to log out)
-      return Promise.reject(data.errorMessage);
+      if (data.error === "Refresh token is expired") {
+        const newRefreshToken = await popup();
+        return await requestAccessToken(newRefreshToken);
+        //r ask for login via pop up that stops execution of other stuff (the user can also opt to log out)
+      }
+      else {
+        return Promise.reject(data.errorMessage);
+      }
     }
     return data.accessToken;
   }
