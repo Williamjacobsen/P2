@@ -1,6 +1,7 @@
 // Video on storing password (encryption, hashing, salting, and using 3rd party authentification): https://www.youtube.com/watch?v=qgpsIBLvrGY
 // Video on authentification using JWT tokens: https://www.youtube.com/watch?v=mbsmsi7l3r4
 // Video explaining JWT tokens vs. Sessions for authentification: https://www.youtube.com/watch?v=fyTxwIa-1U0
+// Video explaining how to use bcrypt: https://www.youtube.com/watch?v=AzA_LTDoFqY
 
 import express from "express";
 import bcrypt from "bcrypt";
@@ -53,13 +54,12 @@ router.post("/sign-in", async (req, res) => {
     const profileID = profileRows[0].ID;
     const newRefreshToken = await generateRefreshToken(profileID, oldRefreshToken);
     const accessToken = await generateAccessToken(res, newRefreshToken);
-    if (accessToken === undefined) {
-      return;
-    }
     // Send back response with access token
     res.status(200).json({ refreshToken: newRefreshToken, accessToken: accessToken }); // 200 = OK
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 })
 
@@ -69,13 +69,12 @@ router.post("/generate-access-token", async (req, res) => {
     const { refreshToken } = req.body;
     // Create a new access token using the refresh token
     const accessToken = await generateAccessToken(res, refreshToken);
-    if (accessToken === undefined) {
-      return;
-    }
     // Response. Send back access token.
     res.status(201).json({ accessToken: accessToken }); // 201 = Created
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 })
 
@@ -89,7 +88,9 @@ router.post("/sign-out-device", async (req, res) => {
     // Response. No message. 
     res.status(200).json({}); // 200 = OK
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 })
 
@@ -100,16 +101,15 @@ router.post("/sign-out-all-devices", async (req, res) => {
     const { refreshToken } = req.body;
     // Extract payload from refresh token
     const decodedRefreshToken = decodeRefreshToken(res, refreshToken);
-    if (decodedRefreshToken === undefined) {
-      return;
-    }
     const profileID = decodedRefreshToken.profileID;
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ProfileID='${profileID}';`);
     // Response. No message. 
     res.status(200).json({}); // 200 = OK
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 })
 
@@ -117,12 +117,11 @@ router.post("/get", async (req, res) => {
   try {
     const { accessToken } = req.body; // Get data from body
     const profile = await getProfile(res, accessToken);
-    if (profile === undefined) {
-      return;
-    }
     res.status(200).json({ profile: profile }); // Send back response. 200 = OK
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 
@@ -154,7 +153,9 @@ router.post("/create", async (req, res) => {
     // Send back response
     res.status(201).json({}); // 201 = Created
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 
@@ -164,9 +165,6 @@ router.post("/delete", async (req, res) => {
     const { accessToken, password } = req.body;
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
-    if (profile === undefined) {
-      return;
-    }
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
     if (profile.VendorID !== null) {
       res.status(401).json({ error: "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile." }); // 401 = Unauthorized
@@ -182,7 +180,9 @@ router.post("/delete", async (req, res) => {
     // Response. No message. 
     res.status(200).json({}); // 200 = OK
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 
@@ -192,9 +192,6 @@ router.post("/modify", async (req, res) => {
     const { accessToken, password, propertyName, newValue } = req.body;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
-    if (profile === undefined) {
-      return;
-    }
     const profileID = profile.ID;
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
@@ -233,7 +230,9 @@ router.post("/modify", async (req, res) => {
     // Send back response.
     res.status(201).json({}); // 201 = Created
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 
@@ -259,8 +258,7 @@ nodeSchedule.scheduleJob(rule, async function () {
 
 /**
  * @returns either a decoded JWT refresh token containing the profileID, 
- * or undefined if a specific error occurs 
- * (also handles sending back an error message to the client via the http response).
+ * or throw an error.
  */
 function decodeRefreshToken(httpResponse, refreshToken) {
   try {
@@ -268,15 +266,15 @@ function decodeRefreshToken(httpResponse, refreshToken) {
     return decodedRefreshToken;
   }
   catch {
-    httpResponse.status(401).json({ error: "Refresh token is expired." }); // 401 = Unauthorized
-    return undefined;
+    const error = "Refresh token is expired.";
+    httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
+    throw Error(error);
   }
 }
 
 /**
  * @returns either a decoded JWT access token containing the profileID, 
- * or undefined if a specific error occurs 
- * (also handles sending back an error message to the client via the http response).
+ * or throw an error.
  */
 function decodeAccessToken(httpResponse, accessToken) {
   try {
@@ -284,8 +282,9 @@ function decodeAccessToken(httpResponse, accessToken) {
     return decodedAccessToken;
   }
   catch {
-    httpResponse.status(401).json({ error: "Access token is expired." }); // 401 = Unauthorized
-    return undefined;
+    const error = "Access token is expired.";
+    httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
+    throw Error(error);
   }
 }
 
@@ -296,23 +295,20 @@ function decodeAccessToken(httpResponse, accessToken) {
 /**
  * Tries to get a profile from the database using a JWT access token.
  * @returns either a JSON object with the profile (from the MySQL database), 
- * or undefined if a specific error occurs 
- * (also handles sending back an error message to the client via the http response).
+ * or a Promise.reject with an error message.
  */
 export async function getProfile(httpResponse, accessToken) {
   // Verify access token
   const decodedAccessToken = decodeAccessToken(httpResponse, accessToken);
-  if (decodedAccessToken === undefined) {
-    return undefined;
-  }
   // Extract profile ID from the token
   const profileID = decodedAccessToken.profileID;
   // Get an array of profiles with the corresponding profile ID from the database
   const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE ID='${profileID}';`);
   // Check that profile exists
   if (Object.keys(profileRows).length === 0) {
-    httpResponse.status(404).json({ error: "Profile does not exist in database." }); // 404 = Not found
-    return undefined;
+    const error = "Profile does not exist in database.";
+    httpResponse.status(404).json({ error: error }); // 404 = Not found
+    return Promise.reject(error);
   }
   // Return profile
   return profileRows[0];
@@ -365,20 +361,17 @@ async function generateRefreshToken(profileID, oldRefreshToken = null) {
 
 /**
  * @returns either a JWT access token containing the profileID, 
- * or undefined if a specific error occurs 
- * (also handles sending back an error message to the client via the http response).
+ * or a Promise.reject with an error message.
  */
 async function generateAccessToken(httpResponse, refreshToken) {
   // Verify validity of refresh token
   const decodedRefreshToken = decodeRefreshToken(httpResponse, refreshToken);
-  if (decodedRefreshToken === undefined) {
-    return undefined;
-  }
   // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database via a schedule job)
   const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
   if (Object.keys(refreshTokenRows).length === 0) {
-    httpResponse.status(404).json({ error: "Refresh token does not exist in the database." }); // 404 = Not found
-    return undefined;
+    const error = "Refresh token does not exist in the database."
+    httpResponse.status(404).json({ error: error }); // 404 = Not found
+    return Promise.reject(error);
   }
   // Create and return a new access token
   const profileID = decodedRefreshToken.profileID;

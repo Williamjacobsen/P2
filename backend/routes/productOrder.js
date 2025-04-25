@@ -15,16 +15,15 @@ router.post("/getProfileProductOrders", async (req, res) => {
     const { accessToken } = req.body;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
-    if (profile === undefined) {
-      return;
-    }
     const profileID = profile.ID;
     // Get product orders for that profile
     const [profileProductOrderRows] = await pool.query(`SELECT * FROM p2.ProductOrder WHERE CustomerID='${profileID}';`);
     // Send back response
     res.status(200).json({ productOrders: profileProductOrderRows }); // 200 = OK
   } catch (error) {
-    res.status(500).json({ error: "Internal server error: " + error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 

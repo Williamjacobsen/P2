@@ -211,8 +211,8 @@ export async function requestAccessToken(refreshToken) {
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Refresh token is expired") {
-        const newRefreshToken = await popup();
-        return await requestAccessToken(newRefreshToken);
+        // const newRefreshToken = await popup();
+        // return await requestAccessToken(newRefreshToken);
         //r ask for login via pop up that stops execution of other stuff (the user can also opt to log out)
       }
       else {
