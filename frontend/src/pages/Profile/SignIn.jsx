@@ -86,7 +86,7 @@ async function signIn(event) {
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email");
     const password = formData.get("password");
-    // Get profile from server
+    // Get authetification tokens from server
     const tokens = await requestSignIn(email, password);
     // Create sign in cookie
     setLoginCookies(tokens.refreshToken, tokens.accessToken);
@@ -163,7 +163,7 @@ async function requestProfileCreation(email, password, phoneNumber) {
  * Tries to get a profile from the server using email and password.
  * @returns either an object { refreshToken, accessToken }, or a Promise.reject() with an error message.
  */
-async function requestSignIn(email, password) {
+export async function requestSignIn(email, password) {
   try {
     const oldRefreshToken = getCookie(cookieName_ProfileRefreshToken);
     // Post data from the form to server
@@ -185,41 +185,6 @@ async function requestSignIn(email, password) {
     }
     const tokens = data; // This is just to make it easier to understand what the data contains.
     return tokens;
-  }
-  catch (error) {
-    return Promise.reject(error);
-  }
-}
-
-/**
- * Tries to get a new profile access token from the server.
- * @returns either a JWT access token, or a Promise.reject() with an error message.
- */
-export async function requestAccessToken(refreshToken) {
-  try {
-    // Post data from the form to server
-    const response = await fetch("http://localhost:3001/profile/generate-access-token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        refreshToken
-      }),
-    });
-    // Handle server response
-    const data = await response.json();
-    if (!response.ok) {
-      if (data.error === "Refresh token is expired") {
-        // const newRefreshToken = await popup();
-        // return await requestAccessToken(newRefreshToken);
-        //r ask for login via pop up that stops execution of other stuff (the user can also opt to log out)
-      }
-      else {
-        return Promise.reject(data.errorMessage);
-      }
-    }
-    return data.accessToken;
   }
   catch (error) {
     return Promise.reject(error);

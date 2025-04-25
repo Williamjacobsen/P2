@@ -7,7 +7,7 @@ import {
   cookieName_ProfileAccessToken,
   cookieName_ProfileRefreshToken
 } from "../../utils/cookies"
-import { requestAccessToken } from "./SignIn";
+import { requestAccessToken } from "./ReSignInPopUp";
 
 export default function ProfileProductOrders() {
 

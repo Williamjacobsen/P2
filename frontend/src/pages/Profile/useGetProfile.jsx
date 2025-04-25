@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { requestAccessToken } from "./SignIn";
+import { requestAccessToken } from "./ReSignInPopUp";
 import {
   getCookie,
   cookieName_ProfileRefreshToken

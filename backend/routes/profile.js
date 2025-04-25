@@ -100,7 +100,7 @@ router.post("/sign-out-all-devices", async (req, res) => {
     // Get data from body
     const { refreshToken } = req.body;
     // Extract payload from refresh token
-    const decodedRefreshToken = decodeRefreshToken(res, refreshToken);
+    const decodedRefreshToken = await decodeRefreshToken(res, refreshToken);
     const profileID = decodedRefreshToken.profileID;
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ProfileID='${profileID}';`);
@@ -249,7 +249,7 @@ rule.minute = 0;
 rule.tz = 'Etc/UTC';
 nodeSchedule.scheduleJob(rule, async function () {
   console.log('SCHEDULE TASK STARTED: Deleting expired refresh tokens from database.');
-  await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ExpirationDateTime < CURDATE();`);
+  await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ExpirationDateTime < NOW();`);
 });
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
@@ -258,17 +258,25 @@ nodeSchedule.scheduleJob(rule, async function () {
 
 /**
  * @returns either a decoded JWT refresh token containing the profileID, 
- * or throw an error.
+ * or a Promise.reject with an error message.
  */
-function decodeRefreshToken(httpResponse, refreshToken) {
+async function decodeRefreshToken(httpResponse, refreshToken) {
   try {
     const decodedRefreshToken = jwt.verify(refreshToken, refreshTokenSecretKey); // This throws an error if the validation fails.
+    // Check expiration date in database
+    const [unexpiredRefreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken 
+      WHERE Token='${refreshToken}' AND ExpirationDateTime >= NOW();`);
+    if (Object.keys(unexpiredRefreshTokenRows).length === 0) {
+      const error = "Refresh token is expired";
+      httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
+      return Promise.reject(error);
+    }
     return decodedRefreshToken;
   }
   catch {
-    const error = "Refresh token is expired.";
+    const error = "Refresh token is invalid.";
     httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
-    throw Error(error);
+    return Promise.reject(error);
   }
 }
 
@@ -365,7 +373,7 @@ async function generateRefreshToken(profileID, oldRefreshToken = null) {
  */
 async function generateAccessToken(httpResponse, refreshToken) {
   // Verify validity of refresh token
-  const decodedRefreshToken = decodeRefreshToken(httpResponse, refreshToken);
+  const decodedRefreshToken = await decodeRefreshToken(httpResponse, refreshToken);
   // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database via a schedule job)
   const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
   if (Object.keys(refreshTokenRows).length === 0) {

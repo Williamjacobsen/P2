@@ -10,7 +10,7 @@ import {
 } from "../../utils/cookies"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
-import { requestAccessToken } from "./SignIn";
+import { requestAccessToken } from "./ReSignInPopUp";
 
 export default function Profile() {
 
@@ -295,7 +295,7 @@ async function modifyVendor(event) {
   }
 }
 
-async function signOut() {
+export async function signOut() {
   try {
     await requestSignOut(getCookie(cookieName_ProfileRefreshToken));
     deleteLoginCookies();
