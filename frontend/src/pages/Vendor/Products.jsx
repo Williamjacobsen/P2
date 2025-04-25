@@ -16,13 +16,13 @@ const AddProductCard = () => {
 export default function Products() {
   return (
     <div className="product-grid">
+      <AddProductCard />
       <ProductCard
         storeName="Shop 1"
         productName="Pants 1"
         price={100}
         imgURL="/Img/TestBillede.png"
       />
-      <AddProductCard />
     </div>
   );
 }

@@ -43,7 +43,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/partners" className="hover:underline">
+          <Link to="/vendor" className="hover:underline">
             For Partners
           </Link>
         </li>
@@ -52,7 +52,7 @@ const HeaderContent = () => {
       {/*Right Section - Cart */}
       <div className="flex items-center space-x-2">
         <Link to="/Cart" className="hover:underline">
-        <span className="text-sm font-bold">Cart</span>
+          <span className="text-sm font-bold">Cart</span>
         </Link>
       </div>
     </nav>

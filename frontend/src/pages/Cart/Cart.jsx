@@ -80,7 +80,14 @@ export default function Cart() {
       </div>
       <CheckoutCard
         price={calculateTotalPrice(cartProducts)}
-        PaymentFunction={handleCheckout}
+        PaymentFunction={() =>
+          handleCheckout(
+            cartProducts.map((product) => ({
+              id: product.ID,
+              quantity: product.quantity,
+            }))
+          )
+        }
       />
     </div>
   );
