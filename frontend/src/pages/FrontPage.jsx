@@ -77,12 +77,11 @@ export default function FrontPage() {
         <h1>Best Sellers</h1>
         <div className="product-grid">
           {productData.map((Data, index) => {
-            const product = Data[0]; // because productData is an array of arrays
-            console.log(Data);
+            const product = Data[0];
             return (
               <ProductCard
                 key={index}
-                id={product.ProductID}
+                id={product.ID}
                 storeName={product.StoreName}
                 productName={product.Name}
                 price={product.Price}
