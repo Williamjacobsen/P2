@@ -1,44 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import './FrontPage.css';
+import "./FrontPage.css";
 import BoxShop from "./FrontPageStores";
 import ProductCard from "./ProductCatalogue/Product-Card";
 import { useState, useEffect } from "react";
-
 
 export default function FrontPage() {
   const navigate = useNavigate();
 
   const [BestSellers, SetBestSellers] = useState();
-  const [productData, setProductData] = useState([]); 
-  const [mainImage, setMainImage] = useState();
-  
-  useEffect(() => {
-    async function allProductData() {
-      if (!BestSellers) return;
-  
-      const allData = [];
-  
-      // Use Promise.all to wait for all fetches
-      await Promise.all(
-        BestSellers.map(async (product, index) => {
-          try {
-            const res = await fetch(`http://localhost:3001/product/${product.ProductID}`);
-            const data = await res.json();
-            allData[index] = data;
-          } catch (error) {
-            console.error(`Error fetching product ${product.ProductID}:`, error);
-          }
-        })
-      );
-      console.log(allData)
-      setProductData(allData); // Set once after all fetches are done
-    }
-    
-    allProductData();
-  }, [BestSellers]);
-  
-
+  const [productData, setProductData] = useState([]);
 
   useEffect(() => {
     const fetchBestSellers = async () => {
@@ -47,66 +18,85 @@ export default function FrontPage() {
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
         SetBestSellers(data);
-        console.log(data);
       } catch (error) {
         console.error("Error loading text:", error);
       }
-    }
+    };
     fetchBestSellers();
-  },[]);
+  }, []);
+
+  useEffect(() => {
+    const getDataOfBestSellers = async () => {
+      if (!BestSellers) {
+        return;
+      }
+
+      const allData = [];
+      await Promise.all(
+        BestSellers.map(async (product, index) => {
+          try {
+            const res = await fetch(
+              `http://localhost:3001/product/${product.ProductID}`
+            );
+            const data = await res.json();
+            allData[index] = data;
+          } catch (error) {
+            console.error(
+              `Error fetching product ${product.ProductID}:`,
+              error
+            );
+          }
+        })
+      );
+      setProductData(allData);
+    };
+    getDataOfBestSellers();
+  }, [BestSellers]);
 
   return (
-  <section>
-    <div className="background">
+    <section>
+      <div className="background">
         <div className="content">
-        <h1>Aalborg <span>Clothing Shops</span></h1>
+          <h1>
+            Aalborg <span>Clothing Shops</span>
+          </h1>
           <p>Lorem ipsum, dolor sit amet consectetur... </p>
-      
-      <div className="buttons"  >
-        <button 
-          className="primary-btn" 
-          onClick={() => navigate('/Product-Catalogue')}> Shop Now</button>
-        <button 
-          className="secondary-btn" 
-          onClick={() => navigate('/Sign-In')}>View Profile</button>
-      </div>
-        <BoxShop/>
-      </div>
+
+          <div className="buttons">
+            <button
+              className="primary-btn"
+              onClick={() => navigate("/Product-Catalogue")}
+            >
+              {" "}
+              Shop Now
+            </button>
+            <button
+              className="secondary-btn"
+              onClick={() => navigate("/Sign-In")}
+            >
+              View Profile
+            </button>
+          </div>
+          <BoxShop />
+        </div>
       </div>
       <div className="fp-products">
         <h1>Best Sellers</h1>
         <div className="product-grid">
           {productData.map((Data, index) => {
-            const product = Data[0]; // because productData is an array of arrays
-            console.log(Data);
+            const product = Data[0];
             return (
               <ProductCard
                 key={index}
-                id={product.ProductID}
+                id={product.ID}
                 storeName={product.StoreName}
                 productName={product.Name}
                 price={product.Price}
               />
             );
           })}
+        </div>
       </div>
-    </div>
-  
-  </section>
-  );
-};
-
-/* {BestSellers?.map((data, i) => {
-  return (
-    <div key={i}>
-      <h4>{data.ProductID}</h4>
-      <h4>{data.AmountSold}</h4>
-    </div>
+    </section>
   );
 }
-)} 
-{isLoaded && productData?.map((data, i) => {
-
-console.log(data);
-}
-)}  */
