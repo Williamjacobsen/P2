@@ -16,10 +16,10 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 20000, // 20 s instead of 10 s :contentReference[oaicite:4]{index=4}
+  connectTimeout: 20000,
   ssl: {
     ca: fs.readFileSync(path.resolve(__dirname, "eu-north-1-bundle.pem")),
-    rejectUnauthorized: true, // enforce valid cert
+    rejectUnauthorized: true,
   },
 });
 
