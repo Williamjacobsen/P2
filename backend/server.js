@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
 import pool from "./db.js";
 
 const app = express();
@@ -13,6 +15,7 @@ app.use(
 );
 app.use(express.json()); // This allows the app to use json.
 app.use("/uploads", express.static("uploads"));
+app.use(cookieParser());
 
 // Routes
 import productImagesRoute from "./routes/product-images-example-for-martin.js";

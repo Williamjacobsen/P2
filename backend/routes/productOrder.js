@@ -11,8 +11,8 @@ const router = express.Router();
 export default router;
 router.post("/getProfileProductOrders", async (req, res) => {
   try {
-    // Get data from body
-    const { accessToken } = req.body;
+    // Get data from request
+    const accessToken = req.cookies.profileAccessToken;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;

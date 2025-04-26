@@ -32,11 +32,10 @@ export default router;
 
 router.post("/sign-in", async (req, res) => {
   try {
-    // Get data from body
+    // Get data from request
     const {
       email,
-      password,
-      oldRefreshToken
+      password
     } = req.body;
     // Get an array of profiles with the corresponding email from the database
     const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
@@ -52,10 +51,13 @@ router.post("/sign-in", async (req, res) => {
     }
     // Create an access token containing the user's profile ID
     const profileID = profileRows[0].ID;
-    const newRefreshToken = await generateRefreshToken(profileID, oldRefreshToken);
-    const accessToken = await generateAccessToken(res, newRefreshToken);
-    // Send back response with access token
-    res.status(200).json({ refreshToken: newRefreshToken, accessToken: accessToken }); // 200 = OK
+    const refreshToken = await generateRefreshToken(req, profileID);
+    const accessToken = await generateAccessToken(res, refreshToken);
+    // Create response cookies
+    setSecureCookie(res, "profileRefreshToken", refreshToken, 60 * 60 * 24 * 7);
+    setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
+    // Send response
+    res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
       res.status(500).json({ error: "Internal server error: " + error });
@@ -65,12 +67,14 @@ router.post("/sign-in", async (req, res) => {
 
 router.post("/generate-access-token", async (req, res) => {
   try {
-    // Get data from body
-    const { refreshToken } = req.body;
+    // Get data from request
+    const refreshToken = req.cookies.profileRefreshToken;
     // Create a new access token using the refresh token
     const accessToken = await generateAccessToken(res, refreshToken);
-    // Response. Send back access token.
-    res.status(201).json({ accessToken: accessToken }); // 201 = Created
+    // Create response cookie
+    setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
+    // Send back response
+    res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
       res.status(500).json({ error: "Internal server error: " + error });
@@ -81,11 +85,14 @@ router.post("/generate-access-token", async (req, res) => {
 router.post("/sign-out-device", async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
-    // Get data from body
-    const { refreshToken } = req.body;
+    // Get data from request
+    const refreshToken = req.cookies.profileRefreshToken;
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
-    // Response. No message. 
+    // Delete client cookies
+    setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
+    setSecureCookie(res, "profileAccessToken", accessToken, 0);
+    // Send back response
     res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -97,14 +104,17 @@ router.post("/sign-out-device", async (req, res) => {
 router.post("/sign-out-all-devices", async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
-    // Get data from body
-    const { refreshToken } = req.body;
+    // Get data from request
+    const refreshToken = req.cookies.profileRefreshToken;
     // Extract payload from refresh token
     const decodedRefreshToken = await decodeRefreshToken(res, refreshToken);
     const profileID = decodedRefreshToken.profileID;
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ProfileID='${profileID}';`);
-    // Response. No message. 
+    // Delete client cookies (on the device that requests the sign-out-all-devices)
+    setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
+    setSecureCookie(res, "profileAccessToken", accessToken, 0);
+    // Send back response
     res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -115,9 +125,10 @@ router.post("/sign-out-all-devices", async (req, res) => {
 
 router.post("/get", async (req, res) => {
   try {
-    const { accessToken } = req.body; // Get data from body
+    const accessToken = req.cookies.profileAccessToken;
     const profile = await getProfile(res, accessToken);
-    res.status(200).json({ profile: profile }); // Send back response. 200 = OK
+    // Send back response.
+    res.status(200).json({ profile: profile }); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
       res.status(500).json({ error: "Internal server error: " + error });
@@ -127,7 +138,7 @@ router.post("/get", async (req, res) => {
 
 router.post("/create", async (req, res) => {
   try {
-    // Get data from body
+    // Get data from request
     const { email, password, phoneNumber } = req.body;
     // Check if the email is already used by an existing profile
     let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
@@ -161,8 +172,9 @@ router.post("/create", async (req, res) => {
 
 router.post("/delete", async (req, res) => {
   try {
-    // Get data from body
-    const { accessToken, password } = req.body;
+    // Get data from request
+    const { password } = req.body;
+    const accessToken = req.cookies.profileAccessToken;
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
@@ -188,8 +200,9 @@ router.post("/delete", async (req, res) => {
 
 router.post("/modify", async (req, res) => {
   try {
-    // Get data from body
-    const { accessToken, password, propertyName, newValue } = req.body;
+    // Get data from request
+    const { password, propertyName, newValue } = req.body;
+    const accessToken = req.cookies.profileAccessToken;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;
@@ -328,13 +341,14 @@ export async function getProfile(httpResponse, accessToken) {
  *    If not null, an old refresh token entry in the database will be updated with a new token value.
  * @returns a JWT refresh token containing the profileID.
  */
-async function generateRefreshToken(profileID, oldRefreshToken = null) {
+async function generateRefreshToken(httpRequest, profileID) {
   // Create new refresh token
   const payload = { profileID };
   const newRefreshToken = jwt.sign(payload, refreshTokenSecretKey);
   // Check whether to update an old refresh token, or create a new refresh token
+  const oldRefreshToken = httpRequest.cookies.profileRefreshToken; // If it does not exist, it returns "undefined"
   let shouldUpdateOldToken = false;
-  if (oldRefreshToken !== null) {
+  if (oldRefreshToken !== undefined) {
     const [oldTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${oldRefreshToken}';`);
     if (Object.keys(oldTokenRows).length !== 0) {
       shouldUpdateOldToken = true;
@@ -388,4 +402,15 @@ async function generateAccessToken(httpResponse, refreshToken) {
   return accessToken;
 }
 
+/**
+ * Sets a cookie with all the proper security features enabled in the HTTP response.
+ */
+function setSecureCookie(httpResponse, cookieName, value, maxAgeInSeconds) {
+  httpResponse.cookie(cookieName, value, {
+    httpOnly: true,                 // Effect: Cannot be accessed using Javascript (e.g. using "document.cookies").
+    secure: true,                   // Effect: Can only be sent using HTTPS (which is encrypted).
+    sameSite: "Strict",             // Effect: Can only be sent to the website's origin site, not third parties (e.g. protects against "cross-site request forgery" attacks).
+    maxAge: 1000 * maxAgeInSeconds   // Expiration (in milliseconds)
+  });
+}
 

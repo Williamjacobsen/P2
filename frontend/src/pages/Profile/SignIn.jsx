@@ -5,8 +5,6 @@ import { Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import {
-  setCookie,
-  deleteCookie,
   getCookie,
   cookieName_ProfileAccessToken,
   cookieName_ProfileRefreshToken
@@ -16,7 +14,7 @@ import useGetProfile from "./useGetProfile";
 export default function SignIn() {
 
   // Hooks
-  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken));
+  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken)); //r
 
   // Is the user already signed in?
   if (isLoadingProfile) {
@@ -87,9 +85,7 @@ async function signIn(event) {
     const email = formData.get("email");
     const password = formData.get("password");
     // Get authetification tokens from server
-    const tokens = await requestSignIn(email, password);
-    // Create sign in cookie
-    setLoginCookies(tokens.refreshToken, tokens.accessToken);
+    await requestSignIn(email, password);
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
   }
@@ -109,9 +105,7 @@ async function signUp(event) {
     const password = formData.get("password");
     const phoneNumber = formData.get("phoneNumber");
     // Add profile to server
-    const tokens = await requestProfileCreation(email, password, phoneNumber);
-    // Create sign in cookies
-    setLoginCookies(tokens.refreshToken, tokens.accessToken);
+    await requestProfileCreation(email, password, phoneNumber);
     // Reload the page (this navigates to the profile page because the user is now signed in)
     window.location.reload();
   }
@@ -126,7 +120,7 @@ async function signUp(event) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * Tries to get a profile from the server using email and password.
+ * Tries to create a new profile on the server.
  * @param {*} email string
  * @param {*} password string
  * @param {*} phoneNumber int
@@ -151,8 +145,6 @@ async function requestProfileCreation(email, password, phoneNumber) {
     if (!response.ok) {
       return Promise.reject(data.error);
     }
-    const tokens = await requestSignIn(email, password);
-    return tokens;
   }
   catch (error) {
     return Promise.reject(error);
@@ -183,26 +175,10 @@ export async function requestSignIn(email, password) {
     if (!response.ok) {
       return Promise.reject(data.error);
     }
-    const tokens = data; // This is just to make it easier to understand what the data contains.
-    return tokens;
   }
   catch (error) {
     return Promise.reject(error);
   }
-}
-
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Cookies
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-
-export function setLoginCookies(refreshToken, accessToken) {
-  setCookie(cookieName_ProfileRefreshToken, refreshToken, 7);
-  setCookie(cookieName_ProfileAccessToken, accessToken, 7);
-}
-
-export function deleteLoginCookies() {
-  deleteCookie(cookieName_ProfileRefreshToken);
-  deleteCookie(cookieName_ProfileAccessToken);
 }
 
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import "./ReSignInPopUp.css";
-import { requestSignIn, setLoginCookies } from "./SignIn";
+import { requestSignIn } from "./SignIn";
 import { signOut } from "./Profile";
 import { getCookie, cookieName_ProfileRefreshToken } from "../../utils/cookies"
 
@@ -101,9 +101,7 @@ async function ReSignIn(event) {
     const email = formData.get("email");
     const password = formData.get("password");
     // Get authetification tokens from server
-    const tokens = await requestSignIn(email, password);
-    // Create sign in cookie
-    setLoginCookies(tokens.refreshToken, tokens.accessToken);
+    await requestSignIn(email, password);
     // Hide pop up
     setPopUpVisibility(false);
     // Resolve promise
@@ -128,6 +126,7 @@ export async function requestAccessToken(refreshToken) {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/generate-access-token", {
       method: "POST",
+      credentials: "include", //r Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },

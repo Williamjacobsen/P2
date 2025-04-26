@@ -13,7 +13,7 @@ export default router;
 
 router.post("/get", async (req, res) => {
   try {
-    const { vendorID } = req.body; // Get data from body
+    const { vendorID } = req.body; // Get data // Get data from request
     // Get vendor
     const vendor = await getVendor(res, vendorID);
     // Send back response
@@ -27,7 +27,8 @@ router.post("/get", async (req, res) => {
 
 router.post("/modify", async (req, res) => {
   try {
-    const { accessToken, password, propertyName, newValue } = req.body; // Get data from body
+    const { password, propertyName, newValue } = req.body; // Get data // Get data from request
+    const accessToken = req.cookies.profileAccessToken;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const vendorID = profile.VendorID;
@@ -37,7 +38,7 @@ router.post("/modify", async (req, res) => {
       return;
     }
     // Check that vendor ID exists
-    const vendor = await getVendor(res, vendorID);
+    await getVendor(res, vendorID);
     // Update property with the new value
     await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
     // Send back response
