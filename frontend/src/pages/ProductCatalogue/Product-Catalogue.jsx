@@ -9,6 +9,7 @@ export default function ProductCatalogue (){
     const [genderFilter, setGenderFilter] = useState("");
     const [priceSort, setPriceSort] = useState("");
     const [clothingTypeFilter, setClothingTypeFilter] = useState("");
+    const [storeFilter, setStoreFilter] = useState("");
     const [search, setSearch] = useState("");
 
     //loadedProducts is the actual json of the products that we load in,
@@ -19,11 +20,47 @@ export default function ProductCatalogue (){
     const [loadedProducts, setLoadedProducts] = useState([]);
     const [shownProducts, setShownProducts] = useState([]);
 
+    const genderOptionArray = [
+        'Male','Female'
+    ]
+    const clothingOptionArray = [
+        'T-shirts',
+        'Shirts',
+        'Hoodies',
+        'Sweaters',
+        'Jackets',
+        'Coats',
+        'Pants',
+        'Jeans',
+        'Shorts',
+        'Skirts',
+        'Dresses',
+        'Underwear',
+        'Swimwear',
+        'Accessories',
+        'Footwear'
+    ];
+
+    const priceOptionArray = [
+        'Highest Price','Lowest Price'
+    ]
+
+    //this array is a list of storenames used to filter products by stores they are from,
+    //this looks like a crazy oneliner, but I broke it into parts, you should read the bottom step first then go up
+    //Step 3: then last we convert the set back into an array and save it into the variable
+    const storeOptionArray = Array.from(
+        //Step 2: since the array of storenames contain duplicated we convert it to a set with new Set(), sets cannot have duplicates
+        new Set(
+            //Step 1: we start by creating an array of store names with .map from our loadedProducts.
+            loadedProducts.map(
+                product => product.StoreName)));
+
     function clearFilters(){
         setSearch('')
         setClothingTypeFilter('')
         setPriceSort('')
         setGenderFilter('')
+        setStoreFilter('')
     }
 
     function filterAndSortProducts(products){
@@ -52,9 +89,9 @@ export default function ProductCatalogue (){
         return productIndices.filter(index => {
             const product = loadedProducts[index];
             return (genderFilter === '' || product.Gender === genderFilter) &&
-                (clothingTypeFilter === '' || product.ClothingType === clothingTypeFilter)
-                && (search === '' || product.Name.toLowerCase().includes(search.toLowerCase()))
-            //missing product size implementation
+                (storeFilter === '' || product.StoreName === storeFilter) &&
+                (clothingTypeFilter === '' || product.ClothingType === clothingTypeFilter) &&
+                (search === '' || product.Name.toLowerCase().includes(search.toLowerCase()))
         });
     }
 
@@ -86,32 +123,10 @@ export default function ProductCatalogue (){
     useEffect(() => {
         if (loadedProducts.length === 0) return;
         setShownProducts(filterAndSortProducts(loadedProducts));
-    }, [genderFilter,priceSort,clothingTypeFilter,search,]);
+    }, [genderFilter,priceSort,clothingTypeFilter,search,storeFilter]);
 
-    const genderOptionArray = [
-        'Male','Female'
-    ]
-    const clothingOptionArray = [
-        'T-shirts',
-        'Shirts',
-        'Hoodies',
-        'Sweaters',
-        'Jackets',
-        'Coats',
-        'Pants',
-        'Jeans',
-        'Shorts',
-        'Skirts',
-        'Dresses',
-        'Underwear',
-        'Swimwear',
-        'Accessories',
-        'Footwear'
-    ];
 
-    const priceOptionArray = [
-        'Highest Price','Lowest Price'
-    ]
+
 // filters take a lot of parameters (props technically) so we can update them when they change
     return (
         <div>
@@ -128,11 +143,15 @@ export default function ProductCatalogue (){
                                  FilterOptions={priceOptionArray}
                                  value={priceSort}
                                  onChange={event =>setPriceSort(event.target.value)}/>
+                <CatalogueFilter FilterName={'Store'}
+                                 FilterOptions={storeOptionArray}
+                                 value={storeFilter}
+                                 onChange={event => setStoreFilter(event.target.value)} />
                 <CatalogueSearch value={search} onChange={event => setSearch(event.target.value)}/>
                 {
                     // we use curly braces to enter JS inside the html (part of React functionality)
                     // then we use a short circuit logic expression that only displays this button if the filters is enabled
-                    (genderFilter || search || clothingTypeFilter || priceSort) &&
+                    (genderFilter || search || clothingTypeFilter || priceSort || storeFilter) &&
                     (<button className={'ClearFilterButton'} onClick={clearFilters}>
                         ❌
                     </button>)

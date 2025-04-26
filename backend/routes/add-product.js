@@ -17,11 +17,6 @@ const storage = multer.diskStorage({
     const safeFilename = file.originalname
       .replace(/\s+/g, "_")
       .replace(/#/g, "");
-    /* 
-      \s+ matches one or more whitespace chars
-      g means global, so instead of replacing the first one, it replaces everyone
-      /#/ matches '#'
-      */
     cb(null, `${Date.now()}-${safeFilename}`);
   },
 });
@@ -32,6 +27,16 @@ const fileFilter = (req, file, cb) => {
   } else {
     cb(new Error("Only image files are allowed"), false);
   }
+};
+
+const ensureArray = (val) => {
+  if (Array.isArray(val)) {
+    return val;
+  }
+  if (val != null) {
+    return [val];
+  }
+  return [];
 };
 
 const upload = multer({ storage, fileFilter });
@@ -50,8 +55,8 @@ router.post("/", upload.array("images", 10), async (req, res) => {
     } = req.body;
 
     const [result] = await pool.query(
-      `INSERT INTO p2.Product 
-        (StoreID, Name, Price, DiscountProcent, Description, ClothingType, Brand, Gender)
+      `INSERT INTO p2.Product
+         (StoreID, Name, Price, DiscountProcent, Description, ClothingType, Brand, Gender)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         storeID,
@@ -66,30 +71,35 @@ router.post("/", upload.array("images", 10), async (req, res) => {
     );
 
     const productId = result.insertId;
-    let imageUrls = [];
 
-    if (req.files && req.files.length > 0) {
+    if (req.files.length != 0) {
       for (const file of req.files) {
-        const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${
-          file.filename
-        }`;
-        imageUrls.push(imageUrl);
-
+        const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
         await pool.query(
-          `INSERT INTO p2.ProductImage (ProductID, Path)
-           VALUES (?, ?)`,
+          `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`,
           [productId, imageUrl]
         );
       }
     }
 
+    const sizes = ensureArray(req.body.size);
+    const stocks = ensureArray(req.body.stock);
+
+    for (let i = 0; i < sizes.length; i++) {
+      const size = sizes[i];
+      const stock = parseInt(stocks[i]);
+      await pool.query(
+        `INSERT INTO p2.ProductSize (ProductID, Size, Stock) VALUES (?, ?, ?)`,
+        [productId, size, stock]
+      );
+    }
+
     res.status(201).json({
       message: "Product added successfully",
       productId,
-      imageUrls,
     });
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Error adding product:", error);
     res.status(500).json({ message: "Error adding product to database" });
   }
 });

@@ -19,10 +19,13 @@ app.use("/product-images", productImagesRoute);
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
+
 import profileRoute from "./routes/profile.js";
 app.use("/profile", profileRoute);
+
 import vendorRoute from "./routes/vendor.js";
 app.use("/vendor", vendorRoute);
+
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 
@@ -88,8 +91,7 @@ app.get("/product/:id", async (req, res) => {
       [id]
     );
     res.status(200).json(result);
-  }
-  catch (err) {
+  } catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
@@ -108,8 +110,7 @@ app.get("/products", async (req, res) => {
       JOIN p2.vendor ON p2.product.StoreID = p2.vendor.ID;
     `);
     res.status(200).json(result);
-  }
-  catch (err) {
+  } catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
