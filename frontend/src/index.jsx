@@ -7,7 +7,8 @@ import Header from "./pages/Header/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
-import FAQ from "./pages/FAQ";
+import FAQ from "./pages/FAQ/FAQ";
+import VenderHeader from "./pages/Vendor/VenderHeader";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
         </Route>
         {/* todo: add header to vendor route */}
+        <Route path="/vendor" element={<VenderHeader />} />
         <Route path="/vendor" element={<Vendor />} />
         <Route path="/vendor/add-product" element={<AddProduct />} />
         <Route path="*" element={<NoPage />} />
