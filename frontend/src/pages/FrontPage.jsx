@@ -73,7 +73,7 @@ export default function FrontPage() {
           onClick={() => navigate('/Product-Catalogue')}> Shop Now</button>
         <button 
           className="secondary-btn" 
-          onClick={() => navigate('/')}>View Profile</button>
+          onClick={() => navigate('/Sign-In')}>View Profile</button>
       </div>
         <BoxShop/>
       </div>
@@ -81,21 +81,22 @@ export default function FrontPage() {
       <div className="fp-products">
         <h1>Best Sellers</h1>
         <div className="product-grid">
-            {BestSellers?.map((data, i) => {
-                return (
-                  <div key={i}>
-                    <h4>{data.ProductID}</h4>
-                    <h4>{data.AmountSold}</h4>
-                  </div>
-                );
-              }
-            )}
-            {isLoaded && productData?.map((data, i) => {
-
-              console.log(data);
-            }
-          )}   
-
+        <ProductCard
+            storeName="Shop 1"
+            productName = "Pants 1"
+            price={100}
+            imgURL="/Img/TestBillede.png"
+          />   <ProductCard
+          storeName="Shop 1"
+          productName = "Pants 1"
+          price={100}
+          imgURL="/Img/TestBillede.png"
+          />   <ProductCard
+            storeName="Shop 1"
+            productName = "Pants 1"
+            price={100}
+            imgURL="/Img/TestBillede.png"
+          />   
           <ProductCard
             storeName="Shop 1"
             productName = "Pants 1"
@@ -103,9 +104,6 @@ export default function FrontPage() {
             imgURL="/Img/TestBillede.png"
           />   
           </div>
-          
-          
-          
       </div>
   
     </section>
@@ -118,3 +116,18 @@ productName = {data.Name}
 price={100}
 imgURL="/Img/TestBillede.png"
 /> */
+
+/* {BestSellers?.map((data, i) => {
+  return (
+    <div key={i}>
+      <h4>{data.ProductID}</h4>
+      <h4>{data.AmountSold}</h4>
+    </div>
+  );
+}
+)} 
+{isLoaded && productData?.map((data, i) => {
+
+console.log(data);
+}
+)}  */
