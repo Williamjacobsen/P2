@@ -6,10 +6,20 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { body, cookie, validationResult } from "express-validator"; // Link to docs and API: https://express-validator.github.io/docs/, or alternatively: https://github.com/validatorjs/validator.js
+import { validationResult } from "express-validator"; // Link to docs and API: https://express-validator.github.io/docs/, or alternatively: https://github.com/validatorjs/validator.js
+import nodeSchedule from "node-schedule"
 
 import pool from "../db.js";
-import nodeSchedule from "node-schedule"
+import {
+  validateEmail,
+  validatePassword,
+  validateProfileRefreshToken,
+  validateProfileAccessToken,
+  validatePhoneNumber,
+  validateProfilePropertyName,
+  validateProfileNewValue
+} from "../utils/inputValidation.js"
+
 
 // JWT tokens
 const accessTokenSecretKey = "aGoodSecret1"; //y This is essentially a password, so it should be more complex than this placeholder.
@@ -32,15 +42,8 @@ const router = express.Router();
 export default router;
 
 router.post("/sign-in", [
-  body("email")
-    .notEmpty()
-    .isEmail()
-    .normalizeEmail()
-    .escape(),
-  body("password")
-    .notEmpty()
-    .isString()
-    .escape()
+  validateEmail,
+  validatePassword
 ], async (req, res) => {
   try {
     // Handle validation errors
@@ -80,10 +83,7 @@ router.post("/sign-in", [
 })
 
 router.post("/generate-access-token", [
-  cookie("profileRefreshToken")
-    .notEmpty()
-    .isString()
-    .escape()
+  validateProfileRefreshToken
 ], async (req, res) => {
   try {
     // Handle validation errors
@@ -106,30 +106,20 @@ router.post("/generate-access-token", [
   }
 })
 
-//p NOT FINISHED YET. START FROM HERE
 router.post("/sign-out-device", [
-  cookie("profileRefreshToken")
-    .notEmpty()
-    .isString()
-    .escape(),
-  cookie("profileAccessToken")
-    .notEmpty()
-    .isString()
-    .escape()
+  validateProfileRefreshToken,
+  validateProfileAccessToken
 ], async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Handle validation errors
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      if (validationErrors.array().some(error => error.path === "profileAccessToken")) {
-        return res.status(400).json({ error: "Access token cookie is empty." }); // 400 = Bad request
-      }
       return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
     }
     // Get data from request
-    const refreshToken = getRefreshTokenFromCookie(req, res);
-    const accessToken = getAccessTokenFromCookie(req, res);
+    const refreshToken = req.cookies.profileRefreshToken;
+    const accessToken = req.cookies.profileAccessToken;
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
     // Send back response
@@ -145,20 +135,19 @@ router.post("/sign-out-device", [
 })
 
 router.post("/sign-out-all-devices", [
-  cookie("profileRefreshToken")
-    .notEmpty()
-    .isString()
-    .escape(),
-  cookie("profileAccessToken")
-    .notEmpty()
-    .isString()
-    .escape()
+  validateProfileRefreshToken,
+  validateProfileAccessToken
 ], async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
     // Get data from request
-    const refreshToken = getRefreshTokenFromCookie(req, res);
-    const accessToken = getAccessTokenFromCookie(req, res);
+    const refreshToken = req.cookies.profileRefreshToken;
+    const accessToken = req.cookies.profileAccessToken;
     // Extract payload from refresh token
     const decodedRefreshToken = await decodeRefreshToken(res, refreshToken);
     const profileID = decodedRefreshToken.profileID;
@@ -176,9 +165,21 @@ router.post("/sign-out-all-devices", [
   }
 })
 
-router.get("/get", async (req, res) => {
+router.get("/get", [
+  validateProfileAccessToken
+], async (req, res) => {
   try {
-    const accessToken = getAccessTokenFromCookie(req, res);
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      if (validationErrors.array().some(error => error.path === "profileAccessToken")) {
+        return res.status(400).json({ error: "Access token cookie is empty." }); // 400 = Bad request
+      }
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
+    // Get data from response
+    const accessToken = req.cookies.profileAccessToken;
+    // Get profile
     const profile = await getProfile(res, accessToken);
     // Send back response.
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
@@ -190,10 +191,23 @@ router.get("/get", async (req, res) => {
   }
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", [
+  validateEmail,
+  validatePassword,
+  validatePhoneNumber
+], async (req, res) => {
   try {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
     // Get data from request
-    const { email, password, phoneNumber } = req.body;
+    const {
+      email,
+      password,
+      phoneNumber
+    } = req.body;
     // Check if the email is already used by an existing profile
     let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     if (Object.keys(profile).length !== 0) {
@@ -222,11 +236,21 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.post("/delete", async (req, res) => {
+router.post("/delete", [
+  validatePassword,
+  validateProfileAccessToken
+], async (req, res) => {
   try {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
     // Get data from request
-    const { password } = req.body;
-    const accessToken = getAccessTokenFromCookie(req, res);
+    const {
+      password
+    } = req.body;
+    const accessToken = req.cookies.profileAccessToken;
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
@@ -248,11 +272,20 @@ router.post("/delete", async (req, res) => {
   }
 });
 
-router.post("/modify", async (req, res) => {
+router.post("/modify", [
+  validatePassword,
+  validateProfilePropertyName,
+  validateProfileNewValue,
+  validateProfileAccessToken
+], async (req, res) => {
   try {
     // Get data from request
-    const { password, propertyName, newValue } = req.body;
-    const accessToken = getAccessTokenFromCookie(req, res);
+    const {
+      password,
+      propertyName,
+      newValue
+    } = req.body;
+    const accessToken = req.cookies.profileAccessToken;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;
@@ -460,30 +493,6 @@ function setSecureCookie(httpResponse, cookieName, value, maxAgeInSeconds) {
   });
 }
 
-export function getRefreshTokenFromCookie(httpRequest, httpResponse) { //r
-  const refreshToken = httpRequest.cookies?.profileRefreshToken;
-  // Check request validity
-  if (refreshToken === undefined) {
-    const error = "Refresh token cookie is undefined.";
-    httpResponse.status(400).json({ error: error }); // 400 = Bad request
-    throw Error(error);
-  }
-  else {
-    return refreshToken;
-  }
-}
 
-export function getAccessTokenFromCookie(httpRequest, httpResponse) { //R
-  const accessToken = httpRequest.cookies?.profileAccessToken;
-  // Check request validity
-  if (accessToken === undefined) {
-    const error = "Access token cookie is undefined.";
-    httpResponse.status(400).json({ error: error }); // 400 = Bad request
-    throw Error(error);
-  }
-  else {
-    return accessToken;
-  }
-}
 
 

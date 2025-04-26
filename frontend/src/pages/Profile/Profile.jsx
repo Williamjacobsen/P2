@@ -430,10 +430,6 @@ async function requestSignOut() {
         await requestAccessToken();
         return await requestSignOut();
       }
-      else if (data.error === "Refresh token is expired") {
-        await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
-        return await requestSignOut();
-      }
       return Promise.reject(data.error);
     }
   }
@@ -457,10 +453,6 @@ async function requestSignOutAllDevices() {
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
         await requestAccessToken();
-        return await requestSignOutAllDevices();
-      }
-      else if (data.error === "Refresh token is expired") {
-        await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
         return await requestSignOutAllDevices();
       }
       return Promise.reject(data.error);

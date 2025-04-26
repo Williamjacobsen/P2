@@ -1,8 +1,16 @@
 import express from "express";
 import bcrypt from "bcrypt";
+import { validationResult } from "express-validator";
 
 import pool from "../db.js";
-import { getProfile, getAccessTokenFromCookie } from "./profile.js";
+import { getProfile } from "./profile.js";
+import {
+  validatePassword,
+  validateProfileAccessToken,
+  validateVendorID,
+  validateVendorPropertyName,
+  validateVendorNewValue
+} from "../utils/inputValidation.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -11,9 +19,19 @@ import { getProfile, getAccessTokenFromCookie } from "./profile.js";
 const router = express.Router();
 export default router;
 
-router.get("/get", async (req, res) => {
+router.get("/get", [
+  validateVendorID
+], async (req, res) => {
   try {
-    const { vendorID } = req.query; // Get data from request
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
+    // Get data from request
+    const {
+      vendorID
+    } = req.query;
     // Get vendor
     const vendor = await getVendor(res, vendorID);
     // Send back response
@@ -25,10 +43,25 @@ router.get("/get", async (req, res) => {
   }
 });
 
-router.post("/modify", async (req, res) => {
+router.post("/modify", [
+  validatePassword,
+  validateVendorPropertyName,
+  validateVendorNewValue,
+  validateProfileAccessToken
+], async (req, res) => {
   try {
-    const { password, propertyName, newValue } = req.body; // Get data // Get data from request
-    const accessToken = getAccessTokenFromCookie(req, res);
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
+    // Get data from request
+    const {
+      password,
+      propertyName,
+      newValue
+    } = req.body;
+    const accessToken = req.cookies.profileAccessToken;
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const vendorID = profile.VendorID;
