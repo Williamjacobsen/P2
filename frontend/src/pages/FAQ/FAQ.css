@@ -1,0 +1,27 @@
+.faq-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: sans-serif;
+  }
+  
+  .faq-item {
+    background: #f5f5f5;
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .faq-question {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .faq-answer {
+    margin: 0;
+    font-size: 16px;
+    color: #555;
+  }
+  
