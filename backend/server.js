@@ -16,7 +16,7 @@ app.use(
 );
 app.use(express.json()); // This allows the app to use json.
 app.use("/uploads", express.static("uploads"));
-app.use(cookieParser());
+app.use(cookieParser()); // This allows reading cookies from incoming requests.
 
 // Routes
 import productImagesRoute from "./routes/product-images-example-for-martin.js";
@@ -30,7 +30,7 @@ app.use("/vendor", vendorRoute);
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 
-// Stuff that needs to be made into seperate files in the "route" directory
+// Stuff that needs to be made into separate files in the "route" directory
 
 app.get("/test", (req, res) => {
   res.send("API is working!");

@@ -46,16 +46,14 @@ async function requestProfile() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token cookie is undefined.") {
+      if (data.error === "Access token cookie is empty.") {
         return undefined;
       }
       else if (data.error === "Access token is expired.") {
         await requestAccessToken();
         return await requestProfile();
       }
-      else {
-        return Promise.reject(data.error);
-      }
+      return Promise.reject(data.error);
     }
     return data.profile;
   }

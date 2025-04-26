@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
-import { requestAccessToken } from "./ReSignInPopUp";
+import { requestAccessToken, promptReSignIn } from "./ReSignInPopUp";
 
 export default function Profile() {
 
@@ -405,9 +405,7 @@ async function requestVendorModification(password, propertyName, newValue) {
         await requestAccessToken();
         return await requestVendorModification(password, propertyName, newValue);
       }
-      else {
-        return Promise.reject(data.error);
-      }
+      return Promise.reject(data.error);
     }
   }
   catch (error) {
@@ -428,6 +426,14 @@ async function requestSignOut() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        await requestAccessToken();
+        return await requestSignOut();
+      }
+      else if (data.error === "Refresh token is expired") {
+        await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
+        return await requestSignOut();
+      }
       return Promise.reject(data.error);
     }
   }
@@ -449,6 +455,14 @@ async function requestSignOutAllDevices() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        await requestAccessToken();
+        return await requestSignOutAllDevices();
+      }
+      else if (data.error === "Refresh token is expired") {
+        await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
+        return await requestSignOutAllDevices();
+      }
       return Promise.reject(data.error);
     }
   }

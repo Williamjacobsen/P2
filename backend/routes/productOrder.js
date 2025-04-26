@@ -20,10 +20,10 @@ router.get("/getProfileProductOrders", async (req, res) => {
     const [profileProductOrderRows] = await pool.query(`SELECT * FROM p2.ProductOrder WHERE CustomerID='${profileID}';`);
     // Send back response
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
-    res.status(200).json({ productOrders: profileProductOrderRows }); // 200 = OK
+    return res.status(200).json({ productOrders: profileProductOrderRows }); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });

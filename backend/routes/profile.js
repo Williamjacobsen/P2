@@ -6,6 +6,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { body, cookie, validationResult } from "express-validator"; // Link to docs and API: https://express-validator.github.io/docs/, or alternatively: https://github.com/validatorjs/validator.js
 
 import pool from "../db.js";
 import nodeSchedule from "node-schedule"
@@ -30,8 +31,23 @@ const saltingRounds = 11;
 const router = express.Router();
 export default router;
 
-router.post("/sign-in", async (req, res) => {
+router.post("/sign-in", [
+  body("email")
+    .notEmpty()
+    .isEmail()
+    .normalizeEmail()
+    .escape(),
+  body("password")
+    .notEmpty()
+    .isString()
+    .escape()
+], async (req, res) => {
   try {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
     // Get data from request
     const {
       email,
@@ -41,13 +57,11 @@ router.post("/sign-in", async (req, res) => {
     const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     // Verify that profile exists
     if (Object.keys(profileRows).length === 0) {
-      res.status(404).json({ error: "Email does not have a profile." }); // 404 = Not Found
-      return;
+      return res.status(404).json({ error: "Email does not have a profile." }); // 404 = Not Found
     }
     // Verify password
     if (await bcrypt.compare(password, profileRows[0].PasswordHash) === false) {
-      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
-      return;
+      return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
     }
     // Create an access token containing the user's profile ID
     const profileID = profileRows[0].ID;
@@ -57,34 +71,62 @@ router.post("/sign-in", async (req, res) => {
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileRefreshToken", refreshToken, 60 * 60 * 24 * 7);
     setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
-    res.status(200).json({}); // 200 = OK
+    return res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 })
 
-router.post("/generate-access-token", async (req, res) => {
+router.post("/generate-access-token", [
+  cookie("profileRefreshToken")
+    .notEmpty()
+    .isString()
+    .escape()
+], async (req, res) => {
   try {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
     // Get data from request
-    const refreshToken = getRefreshTokenFromCookie(req, res);
+    const refreshToken = req.cookies.profileRefreshToken;
     // Create a new access token using the refresh token
     const accessToken = await generateAccessToken(res, refreshToken);
     // Send back response
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
-    res.status(201).json({}); // 201 = Created
+    return res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 })
 
-router.post("/sign-out-device", async (req, res) => {
+//p NOT FINISHED YET. START FROM HERE
+router.post("/sign-out-device", [
+  cookie("profileRefreshToken")
+    .notEmpty()
+    .isString()
+    .escape(),
+  cookie("profileAccessToken")
+    .notEmpty()
+    .isString()
+    .escape()
+], async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      if (validationErrors.array().some(error => error.path === "profileAccessToken")) {
+        return res.status(400).json({ error: "Access token cookie is empty." }); // 400 = Bad request
+      }
+      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+    }
     // Get data from request
     const refreshToken = getRefreshTokenFromCookie(req, res);
     const accessToken = getAccessTokenFromCookie(req, res);
@@ -94,15 +136,24 @@ router.post("/sign-out-device", async (req, res) => {
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
     setSecureCookie(res, "profileAccessToken", accessToken, 0);
-    res.status(200).json({}); // 200 = OK
+    return res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 })
 
-router.post("/sign-out-all-devices", async (req, res) => {
+router.post("/sign-out-all-devices", [
+  cookie("profileRefreshToken")
+    .notEmpty()
+    .isString()
+    .escape(),
+  cookie("profileAccessToken")
+    .notEmpty()
+    .isString()
+    .escape()
+], async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Get data from request
@@ -117,10 +168,10 @@ router.post("/sign-out-all-devices", async (req, res) => {
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
     setSecureCookie(res, "profileAccessToken", accessToken, 0);
-    res.status(200).json({}); // 200 = OK
+    return res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 })
@@ -131,10 +182,10 @@ router.get("/get", async (req, res) => {
     const profile = await getProfile(res, accessToken);
     // Send back response.
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
-    res.status(200).json({ profile: profile }); // 200 = OK
+    return res.status(200).json({ profile: profile }); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });
@@ -146,14 +197,12 @@ router.post("/create", async (req, res) => {
     // Check if the email is already used by an existing profile
     let [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
     if (Object.keys(profile).length !== 0) {
-      res.status(409).json({ error: "Another profile already uses that email." }); // 409 = Conflict
-      return;
+      return res.status(409).json({ error: "Another profile already uses that email." }); // 409 = Conflict
     }
     // Check if the phone number is already used by an existing profile
     [profile] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${phoneNumber}';`);
     if (Object.keys(profile).length !== 0) {
-      res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
-      return;
+      return res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
     }
     // Salt and hash password
     const passwordHash = await bcrypt.hash(password, saltingRounds);
@@ -165,10 +214,10 @@ router.post("/create", async (req, res) => {
       VALUES (?, ?, ?, ?)`,
       [email, passwordHash, phoneNumber, currentDateTime]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
     // Send back response
-    res.status(201).json({}); // 201 = Created
+    return res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });
@@ -182,21 +231,19 @@ router.post("/delete", async (req, res) => {
     const profile = await getProfile(res, accessToken);
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
     if (profile.VendorID !== null) {
-      res.status(401).json({ error: "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile." }); // 401 = Unauthorized
-      return;
+      return res.status(401).json({ error: "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile." }); // 401 = Unauthorized
     }
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
-      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
-      return;
+      return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
     }
     // Delete the profile
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
     // Send back response
-    res.status(200).json({}); // 200 = OK
+    return res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });
@@ -211,8 +258,7 @@ router.post("/modify", async (req, res) => {
     const profileID = profile.ID;
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
-      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
-      return;
+      return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
     }
     // Property-specific cases
     let anotherProfileRows;
@@ -220,15 +266,13 @@ router.post("/modify", async (req, res) => {
       case "Email":
         [anotherProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${newValue}';`);
         if (Object.keys(anotherProfileRows).length !== 0) {
-          res.status(409).json({ error: "Another profile already uses that email." }); // 409 = Conflict
-          return;
+          return res.status(409).json({ error: "Another profile already uses that email." }); // 409 = Conflict
         }
         break;
       case "PhoneNumber":
         [anotherProfileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE PhoneNumber='${newValue}';`);
         if (Object.keys(anotherProfileRows).length !== 0) {
-          res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
-          return;
+          return res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
         }
         break;
       // NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
@@ -238,16 +282,15 @@ router.post("/modify", async (req, res) => {
         const passwordHash = await bcrypt.hash(newValue, saltingRounds);
         newValue = passwordHash;
       case "VendorID":
-        res.status(401).json({ error: "Users do not have permission to change the their profile vendor ID. Please contact the website administrators." }); // 401 = Unauthorized
-        return;
+        return res.status(401).json({ error: "Users do not have permission to change the their profile vendor ID. Please contact the website administrators." }); // 401 = Unauthorized
     }
     // Update property with the new value
     await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
     // Send back response.
-    res.status(201).json({}); // 201 = Created
+    return res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });
@@ -417,7 +460,7 @@ function setSecureCookie(httpResponse, cookieName, value, maxAgeInSeconds) {
   });
 }
 
-export function getRefreshTokenFromCookie(httpRequest, httpResponse) {
+export function getRefreshTokenFromCookie(httpRequest, httpResponse) { //r
   const refreshToken = httpRequest.cookies?.profileRefreshToken;
   // Check request validity
   if (refreshToken === undefined) {
@@ -430,7 +473,7 @@ export function getRefreshTokenFromCookie(httpRequest, httpResponse) {
   }
 }
 
-export function getAccessTokenFromCookie(httpRequest, httpResponse) {
+export function getAccessTokenFromCookie(httpRequest, httpResponse) { //R
   const accessToken = httpRequest.cookies?.profileAccessToken;
   // Check request validity
   if (accessToken === undefined) {
@@ -442,4 +485,5 @@ export function getAccessTokenFromCookie(httpRequest, httpResponse) {
     return accessToken;
   }
 }
+
 

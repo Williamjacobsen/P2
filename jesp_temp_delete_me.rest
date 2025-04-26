@@ -5,7 +5,7 @@ POST http://localhost:3001/profile/create
 Content-Type: application/json
 
 {
-  "email": "1@1",
+  "email": "1@1.com",
   "password": "1",
   "phoneNumber": "234224456"
 }
@@ -14,12 +14,12 @@ POST http://localhost:3001/profile/sign-in
 Content-Type: application/json
 
 {
-  "email": "1@1",
-  "password": "1"
+  "email": "1@1.com",
+  "password": "1",
 }
 
 POST http://localhost:3001/profile/generate-access-token
-Cookie: profileRefreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjQsImlhdCI6MTc0NTY0OTgwM30.k9ooK_Os1svO--brwbA4yPVscArWaKMS6GF0x8GXKbY
+Cookie: profileRefreshToken=
 
 POST http://localhost:3001/profile/get
 Cookie:  profileAccessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjQsImlhdCI6MTc0NTY0OTg5NiwiZXhwIjoxNzQ1NjUwMTk2fQ.W9gAxEdw6hBq5tON94-5EFemJTxd9Ms-UkJic04IQ3c

@@ -17,10 +17,10 @@ router.get("/get", async (req, res) => {
     // Get vendor
     const vendor = await getVendor(res, vendorID);
     // Send back response
-    res.status(200).json({ vendor: vendor }); // 200 = OK
+    return res.status(200).json({ vendor: vendor }); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });
@@ -34,18 +34,17 @@ router.post("/modify", async (req, res) => {
     const vendorID = profile.VendorID;
     // Verify password
     if (await bcrypt.compare(password, profile.PasswordHash) === false) {
-      res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
-      return;
+      return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
     }
     // Check that vendor ID exists
     await getVendor(res, vendorID);
     // Update property with the new value
     await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
     // Send back response
-    res.status(201).json({}); // 201 = Created
+    return res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-      res.status(500).json({ error: "Internal server error: " + error });
+      return res.status(500).json({ error: "Internal server error: " + error });
     }
   }
 });

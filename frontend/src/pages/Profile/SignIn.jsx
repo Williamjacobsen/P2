@@ -169,6 +169,7 @@ export async function requestSignIn(email, password) {
     // Handle server response
     const data = await response?.json();
     if (!response.ok) {
+
       return Promise.reject(data.error);
     }
   }

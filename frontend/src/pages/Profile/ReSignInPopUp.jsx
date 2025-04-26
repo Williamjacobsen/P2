@@ -75,7 +75,7 @@ function createReSignInPromise() {
  * or they log out (which refreshes the page).
  * @returns Either nothing, or a Promise.reject with an error message.
  */
-async function promptReSignIn() {
+export async function promptReSignIn() {
   try {
     setPopUpVisibility(true);
     createReSignInPromise();
@@ -133,9 +133,7 @@ export async function requestAccessToken() {
         await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
         return await requestAccessToken();
       }
-      else {
-        return Promise.reject(data.errorMessage);
-      }
+      return Promise.reject(data.errorMessage);
     }
   }
   catch (error) {
