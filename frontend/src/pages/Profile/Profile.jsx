@@ -2,12 +2,6 @@ import React from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
-import { deleteLoginCookies } from "./SignIn"
-import {
-  getCookie,
-  cookieName_ProfileAccessToken,
-  cookieName_ProfileRefreshToken
-} from "../../utils/cookies"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
 import { requestAccessToken } from "./ReSignInPopUp";
@@ -16,14 +10,14 @@ export default function Profile() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken));
+  const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
 
   // Is the user signed in?
   if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
-  else if (profile === null) {
+  else if (profile === undefined) {
     return (<Navigate to="/sign-in" replace />);
   }
 
@@ -242,11 +236,8 @@ async function deleteProfile(event) {
     // Get data
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password");
-    const profileAccessToken = getCookie(cookieName_ProfileAccessToken);
     // Delete profile from server
-    await requestProfileDeletion(profileAccessToken, password);
-    // Delete sign in cookie
-    deleteLoginCookies();
+    await requestProfileDeletion(password);
     // Reload the page (this navigates to the sign in page because the user is now signed out)
     window.location.reload();
   }
@@ -264,9 +255,8 @@ async function modifyProfile(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const profileAccessToken = getCookie(cookieName_ProfileAccessToken);
     // Modify profile in server
-    await requestProfileModification(profileAccessToken, password, propertyName, newValue);
+    await requestProfileModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -284,9 +274,8 @@ async function modifyVendor(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const profileAccessToken = getCookie(cookieName_ProfileAccessToken);
     // Modify profile in server
-    await requestVendorModification(profileAccessToken, password, propertyName, newValue);
+    await requestVendorModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -297,8 +286,7 @@ async function modifyVendor(event) {
 
 export async function signOut() {
   try {
-    await requestSignOut(getCookie(cookieName_ProfileRefreshToken));
-    deleteLoginCookies();
+    await requestSignOut();
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -309,8 +297,7 @@ export async function signOut() {
 
 async function signOutAllDevices() {
   try {
-    await requestSignOutAllDevices(getCookie(cookieName_ProfileRefreshToken));
-    deleteLoginCookies();
+    await requestSignOutAllDevices();
     // Reload the page (to refresh changes)
     window.location.reload();
   }
@@ -326,16 +313,16 @@ async function signOutAllDevices() {
 /**
  * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestProfileDeletion(accessToken, password) {
+async function requestProfileDeletion(password) {
   try {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/delete", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        accessToken,
         password,
       }),
     });
@@ -343,8 +330,8 @@ async function requestProfileDeletion(accessToken, password) {
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
-        return await requestProfileDeletion(newAccessToken, password);
+        await requestAccessToken();
+        return await requestProfileDeletion(password);
       }
       else {
         return Promise.reject(data.error);
@@ -359,18 +346,18 @@ async function requestProfileDeletion(accessToken, password) {
 /**
  * NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
  * but instead just a password in plain text, since the server handles the hashing itself.
- * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestProfileModification(accessToken, password, propertyName, newValue) {
+async function requestProfileModification(password, propertyName, newValue) {
   try {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/modify", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        accessToken,
         password,
         propertyName,
         newValue,
@@ -380,43 +367,8 @@ async function requestProfileModification(accessToken, password, propertyName, n
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
-        return await requestProfileModification(newAccessToken, password, propertyName, newValue);
-      }
-      else {
-        return Promise.reject(data.error);
-      }
-    }
-  }
-  catch (error) {
-    return Promise.reject(error);
-  }
-}
-
-/**
- * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
- */
-async function requestVendorModification(accessToken, password, propertyName, newValue) {
-  try {
-    // Post data from the form to server
-    const response = await fetch("http://localhost:3001/vendor/modify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        accessToken,
-        password,
-        propertyName,
-        newValue,
-      }),
-    });
-    // Handle server response
-    const data = await response.json();
-    if (!response.ok) {
-      if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
-        return await requestVendorModification(newAccessToken, password, propertyName, newValue);
+        await requestAccessToken();
+        return await requestProfileModification(password, propertyName, newValue);
       }
       else {
         return Promise.reject(data.error);
@@ -431,17 +383,47 @@ async function requestVendorModification(accessToken, password, propertyName, ne
 /**
  * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestSignOut(refreshToken) {
+async function requestVendorModification(password, propertyName, newValue) {
   try {
     // Post data from the form to server
-    const response = await fetch("http://localhost:3001/profile/sign-out-device", {
+    const response = await fetch("http://localhost:3001/vendor/modify", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refreshToken,
+        password,
+        propertyName,
+        newValue,
       }),
+    });
+    // Handle server response
+    const data = await response.json();
+    if (!response.ok) {
+      if (data.error === "Access token is expired.") {
+        await requestAccessToken();
+        return await requestVendorModification(password, propertyName, newValue);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
+  }
+  catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * @returns either nothing, or a Promise.reject() with an error message.
+ */
+async function requestSignOut() {
+  try {
+    // Post data from the form to server
+    const response = await fetch("http://localhost:3001/profile/sign-out-device", {
+      method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
     });
     // Handle server response
     const data = await response.json();
@@ -457,17 +439,12 @@ async function requestSignOut(refreshToken) {
 /**
  * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestSignOutAllDevices(refreshToken) {
+async function requestSignOutAllDevices() {
   try {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-out-all-devices", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        refreshToken,
-      }),
+      credentials: "include", // Ensures cookies are sent with the request
     });
     // Handle server response
     const data = await response.json();

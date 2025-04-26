@@ -53,10 +53,10 @@ router.post("/sign-in", async (req, res) => {
     const profileID = profileRows[0].ID;
     const refreshToken = await generateRefreshToken(req, profileID);
     const accessToken = await generateAccessToken(res, refreshToken);
-    // Create response cookies
+    // Send back response
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileRefreshToken", refreshToken, 60 * 60 * 24 * 7);
     setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
-    // Send response
     res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -68,12 +68,12 @@ router.post("/sign-in", async (req, res) => {
 router.post("/generate-access-token", async (req, res) => {
   try {
     // Get data from request
-    const refreshToken = req.cookies.profileRefreshToken;
+    const refreshToken = getRefreshTokenFromCookie(req, res);
     // Create a new access token using the refresh token
     const accessToken = await generateAccessToken(res, refreshToken);
-    // Create response cookie
-    setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
     // Send back response
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
+    setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
     res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -86,13 +86,14 @@ router.post("/sign-out-device", async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Get data from request
-    const refreshToken = req.cookies.profileRefreshToken;
+    const refreshToken = getRefreshTokenFromCookie(req, res);
+    const accessToken = getAccessTokenFromCookie(req, res);
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
-    // Delete client cookies
+    // Send back response
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
     setSecureCookie(res, "profileAccessToken", accessToken, 0);
-    // Send back response
     res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -105,16 +106,17 @@ router.post("/sign-out-all-devices", async (req, res) => {
   //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Get data from request
-    const refreshToken = req.cookies.profileRefreshToken;
+    const refreshToken = getRefreshTokenFromCookie(req, res);
+    const accessToken = getAccessTokenFromCookie(req, res);
     // Extract payload from refresh token
     const decodedRefreshToken = await decodeRefreshToken(res, refreshToken);
     const profileID = decodedRefreshToken.profileID;
     // Remove refresh tokens from the server
     await pool.query(`DELETE FROM p2.ProfileRefreshToken WHERE ProfileID='${profileID}';`);
-    // Delete client cookies (on the device that requests the sign-out-all-devices)
+    // Send back response
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
     setSecureCookie(res, "profileAccessToken", accessToken, 0);
-    // Send back response
     res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -123,11 +125,12 @@ router.post("/sign-out-all-devices", async (req, res) => {
   }
 })
 
-router.post("/get", async (req, res) => {
+router.get("/get", async (req, res) => {
   try {
-    const accessToken = req.cookies.profileAccessToken;
+    const accessToken = getAccessTokenFromCookie(req, res);
     const profile = await getProfile(res, accessToken);
     // Send back response.
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     res.status(200).json({ profile: profile }); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -174,7 +177,7 @@ router.post("/delete", async (req, res) => {
   try {
     // Get data from request
     const { password } = req.body;
-    const accessToken = req.cookies.profileAccessToken;
+    const accessToken = getAccessTokenFromCookie(req, res);
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
     // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
@@ -189,7 +192,7 @@ router.post("/delete", async (req, res) => {
     }
     // Delete the profile
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
-    // Response. No message. 
+    // Send back response
     res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -202,7 +205,7 @@ router.post("/modify", async (req, res) => {
   try {
     // Get data from request
     const { password, propertyName, newValue } = req.body;
-    const accessToken = req.cookies.profileAccessToken;
+    const accessToken = getAccessTokenFromCookie(req, res);
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;
@@ -391,7 +394,7 @@ async function generateAccessToken(httpResponse, refreshToken) {
   // Verify that refresh token exists in the MySQL database (expired refresh tokens are automatically removed from the database via a schedule job)
   const [refreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken WHERE Token='${refreshToken}';`);
   if (Object.keys(refreshTokenRows).length === 0) {
-    const error = "Refresh token does not exist in the database."
+    const error = "Refresh token does not exist in the database.";
     httpResponse.status(404).json({ error: error }); // 404 = Not found
     return Promise.reject(error);
   }
@@ -412,5 +415,31 @@ function setSecureCookie(httpResponse, cookieName, value, maxAgeInSeconds) {
     sameSite: "Strict",             // Effect: Can only be sent to the website's origin site, not third parties (e.g. protects against "cross-site request forgery" attacks).
     maxAge: 1000 * maxAgeInSeconds   // Expiration (in milliseconds)
   });
+}
+
+export function getRefreshTokenFromCookie(httpRequest, httpResponse) {
+  const refreshToken = httpRequest.cookies?.profileRefreshToken;
+  // Check request validity
+  if (refreshToken === undefined) {
+    const error = "Refresh token cookie is undefined.";
+    httpResponse.status(400).json({ error: error }); // 400 = Bad request
+    throw Error(error);
+  }
+  else {
+    return refreshToken;
+  }
+}
+
+export function getAccessTokenFromCookie(httpRequest, httpResponse) {
+  const accessToken = httpRequest.cookies?.profileAccessToken;
+  // Check request validity
+  if (accessToken === undefined) {
+    const error = "Access token cookie is undefined.";
+    httpResponse.status(400).json({ error: error }); // 400 = Bad request
+    throw Error(error);
+  }
+  else {
+    return accessToken;
+  }
 }
 

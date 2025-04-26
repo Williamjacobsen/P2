@@ -11,6 +11,7 @@ const port = 3001;
 app.use(
   cors({
     origin: "http://localhost:3000",
+    credentials: true, // allows cookies and credentials to be sent to the backend
   })
 );
 app.use(express.json()); // This allows the app to use json.

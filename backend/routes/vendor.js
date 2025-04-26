@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 
 import pool from "../db.js";
-import { getProfile } from "./profile.js";
+import { getProfile, getAccessTokenFromCookie } from "./profile.js";
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -11,9 +11,9 @@ import { getProfile } from "./profile.js";
 const router = express.Router();
 export default router;
 
-router.post("/get", async (req, res) => {
+router.get("/get", async (req, res) => {
   try {
-    const { vendorID } = req.body; // Get data // Get data from request
+    const { vendorID } = req.query; // Get data from request
     // Get vendor
     const vendor = await getVendor(res, vendorID);
     // Send back response
@@ -28,7 +28,7 @@ router.post("/get", async (req, res) => {
 router.post("/modify", async (req, res) => {
   try {
     const { password, propertyName, newValue } = req.body; // Get data // Get data from request
-    const accessToken = req.cookies.profileAccessToken;
+    const accessToken = getAccessTokenFromCookie(req, res);
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const vendorID = profile.VendorID;

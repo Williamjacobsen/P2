@@ -2,25 +2,20 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useGetProfile from "./useGetProfile";
-import {
-  getCookie,
-  cookieName_ProfileAccessToken,
-  cookieName_ProfileRefreshToken
-} from "../../utils/cookies"
 import { requestAccessToken } from "./ReSignInPopUp";
 
 export default function ProfileProductOrders() {
 
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken));
+  const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoadingProfile);
 
   // Is the user signed in?
   if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
-  else if (profile === null) {
+  else if (profile === undefined) {
     navigate("/sign-in");
   }
 
@@ -83,7 +78,7 @@ function useGetProfileProductOrders(isLoadingProfile) {
     (async () => {
       try {
         if (!isLoadingProfile) { // Before we can use the profile's information, we must ensure that the user is logged in.
-          setOrders(await requestProfileProductOrders(getCookie(cookieName_ProfileAccessToken)));
+          setOrders(await requestProfileProductOrders());
           setIsLoading(false);
         }
       }
@@ -101,26 +96,21 @@ function useGetProfileProductOrders(isLoadingProfile) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either null, an array of product order objects (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestProfileProductOrders(accessToken) {
+async function requestProfileProductOrders() {
   try {
-    // Post data from the form to server
+    // Get data from the form to server
     const response = await fetch("http://localhost:3001/productOrder/getProfileProductOrders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        accessToken
-      }),
+      method: "GET",
+      credentials: "include", // Ensures cookies are sent with the request
     });
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
-        return await requestProfileProductOrders(newAccessToken);
+        await requestAccessToken();
+        return await requestProfileProductOrders();
       }
       else {
         return Promise.reject(data.error);

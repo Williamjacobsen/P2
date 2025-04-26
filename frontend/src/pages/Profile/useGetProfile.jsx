@@ -3,17 +3,13 @@
 import { useState, useEffect } from "react";
 
 import { requestAccessToken } from "./ReSignInPopUp";
-import {
-  getCookie,
-  cookieName_ProfileRefreshToken
-} from "../../utils/cookies";
 
 /**
  * Custom hook (which is why the function name starts with "use"). 
  * Gets a profile JSON object from the server's database.
  * @returns the object [isLoading (a boolean), profile (a JSON object)].
  */
-export default function useGetProfile(accessToken) {
+export default function useGetProfile() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -21,12 +17,7 @@ export default function useGetProfile(accessToken) {
   useEffect(() => {
     (async () => {
       try {
-        if (accessToken === null) {
-          setProfile(null);
-          setIsLoading(false);
-          return [isLoading, profile];
-        }
-        setProfile(await requestProfile(accessToken));
+        setProfile(await requestProfile());
         setIsLoading(false);
       }
       catch (error) {
@@ -44,26 +35,23 @@ export default function useGetProfile(accessToken) {
 
 /**
  * Tries to get a profile from the server.
- * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either undefined, or a profile object (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestProfile(accessToken) {
+async function requestProfile() {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/get", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        accessToken
-      }),
+      method: "GET",
+      credentials: "include", // Ensures cookies are sent with the request
     });
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
-        const newAccessToken = await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
-        return await requestProfile(newAccessToken);
+      if (data.error === "Access token cookie is undefined.") {
+        return undefined;
+      }
+      else if (data.error === "Access token is expired.") {
+        await requestAccessToken();
+        return await requestProfile();
       }
       else {
         return Promise.reject(data.error);

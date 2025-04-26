@@ -4,23 +4,18 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
-import {
-  getCookie,
-  cookieName_ProfileAccessToken,
-  cookieName_ProfileRefreshToken
-} from "../../utils/cookies"
 import useGetProfile from "./useGetProfile";
 
 export default function SignIn() {
 
   // Hooks
-  const [isLoadingProfile, profile] = useGetProfile(getCookie(cookieName_ProfileAccessToken)); //r
+  const [isLoadingProfile, profile] = useGetProfile();
 
   // Is the user already signed in?
   if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
-  else if (profile !== null) {
+  else if (profile !== undefined) {
     return (<Navigate to="/profile" replace />);
   }
 
@@ -120,17 +115,19 @@ async function signUp(event) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * Tries to create a new profile on the server.
+ * Tries to create a new profile on the server and then get 
+ * a profile refresh token cookie and a profile access token cookie from the backend.
  * @param {*} email string
  * @param {*} password string
  * @param {*} phoneNumber int
- * @returns either an object { refreshToken, accessToken }, or a Promise.reject() with an error message.
+ * @returns either nothing, or a Promise.reject() with an error message.
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/create", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
@@ -152,26 +149,25 @@ async function requestProfileCreation(email, password, phoneNumber) {
 }
 
 /**
- * Tries to get a profile from the server using email and password.
- * @returns either an object { refreshToken, accessToken }, or a Promise.reject() with an error message.
+ * Tries to get a profile refresh token cookie and a profile access token cookie from the backend.
+ * @returns either nothing, or a Promise.reject() with an error message.
  */
 export async function requestSignIn(email, password) {
   try {
-    const oldRefreshToken = getCookie(cookieName_ProfileRefreshToken);
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-in", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email,
-        password,
-        oldRefreshToken,
+        password
       }),
     });
     // Handle server response
-    const data = await response.json();
+    const data = await response?.json();
     if (!response.ok) {
       return Promise.reject(data.error);
     }

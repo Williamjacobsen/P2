@@ -37,19 +37,14 @@ export default function useGetVendor(vendorID) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * @returns either a JSON object with the vendor (from the MySQL database), or a Promise.reject() with an error message.
+ * Tries to get a vendor from the server.
+ * @returns either null, a vendor object (from the MySQL database), or a Promise.reject() with an error message.
  */
 async function requestVendor(vendorID) {
   try {
     // Post data from the form to server
-    const response = await fetch("http://localhost:3001/vendor/get", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        vendorID
-      }),
+    const response = await fetch(`http://localhost:3001/vendor/get?vendorID=${vendorID}`, {
+      method: "GET",
     });
     // Handle server response
     const data = await response.json();

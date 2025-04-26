@@ -4,7 +4,6 @@ import { useState } from "react";
 import "./ReSignInPopUp.css";
 import { requestSignIn } from "./SignIn";
 import { signOut } from "./Profile";
-import { getCookie, cookieName_ProfileRefreshToken } from "../../utils/cookies"
 
 /** This is a function that sets the pop up visibility using useState() hooks inside the React component. */
 let setPopUpVisibility;
@@ -118,34 +117,26 @@ async function ReSignIn(event) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * Tries to get a new profile access token from the server.
- * @returns either a JWT access token, or a Promise.reject() with an error message.
+ * Tries to get an profile access token cookie from the backend.
+ * @returns either nothing, or a Promise.reject() with an error message.
  */
-export async function requestAccessToken(refreshToken) {
+export async function requestAccessToken() {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/generate-access-token", {
       method: "POST",
-      credentials: "include", //r Ensures cookies are sent with the request
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        refreshToken
-      }),
+      credentials: "include", // Ensures cookies are sent with the request
     });
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Refresh token is expired") {
         await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
-        return await requestAccessToken(getCookie(cookieName_ProfileRefreshToken));
+        return await requestAccessToken();
       }
       else {
         return Promise.reject(data.errorMessage);
       }
     }
-    return data.accessToken;
   }
   catch (error) {
     return Promise.reject(error);
