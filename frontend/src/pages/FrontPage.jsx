@@ -10,8 +10,7 @@ export default function FrontPage() {
   const navigate = useNavigate();
 
   const [BestSellers, SetBestSellers] = useState();
-  const [productData, setProductData] = useState([]); // Now will be array of arrays
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [productData, setProductData] = useState([]); 
   const [mainImage, setMainImage] = useState();
   
   useEffect(() => {
@@ -39,10 +38,6 @@ export default function FrontPage() {
     allProductData();
   }, [BestSellers]);
   
-  useEffect (() => {
-    setIsLoaded(true);
-    console.log(productData)
-  }, [productData]);
 
 
   useEffect(() => {
@@ -81,41 +76,25 @@ export default function FrontPage() {
       <div className="fp-products">
         <h1>Best Sellers</h1>
         <div className="product-grid">
-        <ProductCard
-            storeName="Shop 1"
-            productName = "Pants 1"
-            price={100}
-            imgURL="/Img/TestBillede.png"
-          />   <ProductCard
-          storeName="Shop 1"
-          productName = "Pants 1"
-          price={100}
-          imgURL="/Img/TestBillede.png"
-          />   <ProductCard
-            storeName="Shop 1"
-            productName = "Pants 1"
-            price={100}
-            imgURL="/Img/TestBillede.png"
-          />   
-          <ProductCard
-            storeName="Shop 1"
-            productName = "Pants 1"
-            price={100}
-            imgURL="/Img/TestBillede.png"
-          />   
-          </div>
+          {productData.map((Data, index) => {
+            const product = Data[0]; // because productData is an array of arrays
+            console.log(Data);
+            return (
+              <ProductCard
+                key={index}
+                id={product.ProductID}
+                storeName={product.StoreName}
+                productName={product.Name}
+                price={product.Price}
+              />
+            );
+          })}
       </div>
+    </div>
   
-    </section>
+  </section>
   );
 };
-/*
-<ProductCard
-storeName="Shop 1"
-productName = {data.Name}
-price={100}
-imgURL="/Img/TestBillede.png"
-/> */
 
 /* {BestSellers?.map((data, i) => {
   return (
