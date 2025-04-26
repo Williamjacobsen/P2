@@ -39,9 +39,10 @@ export default function App() {
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
         </Route>
         {/* todo: add header to vendor route */}
-        <Route path="/vendor" element={<VenderHeader />} />
-        <Route path="/vendor" element={<Vendor />} />
-        <Route path="/vendor/add-product" element={<AddProduct />} />
+        <Route path="/vendor" element={<VenderHeader />}>
+          <Route index element={<Vendor />} />
+          <Route path="add-product" element={<AddProduct />} />
+        </Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>

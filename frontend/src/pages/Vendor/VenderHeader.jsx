@@ -1,9 +1,11 @@
 import React from "react";
-import './Vender-header.css';
+import './VenderHeader.css';
 import { Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 const VenderHeader = () => {
     return (
+        <div>
         <header className="vendor-header"> 
             <nav>
                 <ul className="nav-list">
@@ -19,6 +21,8 @@ const VenderHeader = () => {
                 </ul>
             </nav>
         </header>
+    <Outlet />
+        </div>
     );
 };
 
