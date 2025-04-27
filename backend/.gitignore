@@ -1,3 +1,4 @@
 /uploads/*
 .env
 /eu-north-1-bundle.pem
+.vercel
