@@ -4,8 +4,6 @@ import "./Product-Card.css";
 import { CatalogueFilter, CatalogueSearch } from "./Catalogue-Filter";
 
 export default function ProductCatalogue() {
-  console.log(process.env.REACT_APP_BACKEND_URL);
-
   // Filters and sorts needs usestate to react to selections
   const [genderFilter, setGenderFilter] = useState("");
   const [priceSort, setPriceSort] = useState("");

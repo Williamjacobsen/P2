@@ -8,13 +8,16 @@ const stripePromise = loadStripe(
 export default async function handleCheckout(products) {
   const stripe = await stripePromise;
 
-  const response = await fetch("http://localhost:3001/checkout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ products }),
-  });
+  const response = await fetch(
+    `${process.env.REACT_APP_BACKEND_URL}/checkout`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ products }),
+    }
+  );
 
   const session = await response.json();
 

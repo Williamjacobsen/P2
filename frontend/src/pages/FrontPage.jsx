@@ -14,7 +14,9 @@ export default function FrontPage() {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await fetch("http://localhost:3001/BestSellers");
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/BestSellers`
+        );
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
         SetBestSellers(data);
@@ -36,7 +38,7 @@ export default function FrontPage() {
         BestSellers.map(async (product, index) => {
           try {
             const res = await fetch(
-              `http://localhost:3001/product/${product.ProductID}`
+              `${process.env.REACT_APP_BACKEND_URL}/product/${product.ProductID}`
             );
             const data = await res.json();
             allData[index] = data;

@@ -13,7 +13,9 @@ export default function ProductPage() {
   /** Finds all data relevant see server.js for database interaction */
   useEffect(() => {
     async function allProductData() {
-      const res = await fetch(`http://localhost:3001/product/${id}`);
+      const res = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/product/${id}`
+      );
       await res.json().then((productData) => {
         console.log(productData);
         setProductData(productData);

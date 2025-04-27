@@ -18,7 +18,7 @@ export default function Cart() {
       try {
         const products = await Promise.all(
           cookieProducts.map((product) =>
-            fetch(`http://localhost:3001/product/${product.id}`)
+            fetch(`${process.env.REACT_APP_BACKEND_URL}/product/${product.id}`)
               .then((res) => res.json())
               .then((data) => {
                 const dbProduct = data[0];
