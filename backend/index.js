@@ -7,7 +7,7 @@ const port = 3001;
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://p2-client.vercel.app/",
   })
 );
 app.use(express.json());

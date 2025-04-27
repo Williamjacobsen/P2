@@ -7,7 +7,7 @@ function FetchImage(id) {
     async function fetchImage() {
       try {
         const response = await fetch(
-          `http://localhost:3001/product-images/${id}/primary`
+          `${process.env.BACKEND_URL}/product-images/${id}/primary`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch primary image");
