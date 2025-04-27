@@ -2,13 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
-  "engines": {
-    "node": "22.x"
-  },
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "run": "node server.js"
+    "run": "node index.js",
+    "run build": "node index.js"
   },
   "keywords": [],
   "author": "",
