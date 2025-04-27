@@ -4,7 +4,7 @@ import "./Product-Card.css";
 import { CatalogueFilter, CatalogueSearch } from "./Catalogue-Filter";
 
 export default function ProductCatalogue() {
-  console.log(process.env.BACKEND_URL);
+  console.log(process.env.REACT_APP_BACKEND_URL);
 
   // Filters and sorts needs usestate to react to selections
   const [genderFilter, setGenderFilter] = useState("");
@@ -109,7 +109,9 @@ export default function ProductCatalogue() {
   useEffect(() => {
     async function loadInitialProducts() {
       try {
-        const response = await fetch(`${process.env.BACKEND_URL}/products`);
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/products`
+        );
         if (!response.ok) {
           throw new Error("Failed to load products");
         }
