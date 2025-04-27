@@ -10,6 +10,9 @@ const VenderHeader = () => {
             <nav>
                 <ul className="nav-list">
                     <li>
+                        <Link to="/">Back</Link>
+                    </li>
+                    <li>
                         <Link to="/products">Products</Link>
                     </li>
                     <li>

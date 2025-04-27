@@ -60,7 +60,7 @@ export default function FrontPage() {
           <h1>
             Aalborg <span>Clothing Shops</span>
           </h1>
-          <p>Lorem ipsum, dolor sit amet consectetur... </p>
+          <p>Discover and shop your favorite local stores — all in one place. Find the styles you love and pick them up in-store, ready when you are!</p>
 
           <div className="buttons">
             <button

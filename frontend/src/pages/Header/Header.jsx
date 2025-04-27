@@ -17,7 +17,9 @@ const HeaderContent = () => {
     <nav className="flex justify-between items-center px-6 py-3 border-b shadow-md">
       {/* Left Section - Website */}
       <div className="flex items-center">
-        <span className="text-lf font-bold">Insert Cool Website Name</span>
+        <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+            <span className="text-lf font-bold">Aalborg Clothing Shops</span>
+        </Link>
         <span className="mx-4 border-l h-6"></span> {/* Vertical Separator */}
       </div>
 
