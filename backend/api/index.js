@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import pool from "./db.js";
+import pool from "../db.js";
+import serverless from "serverless-http";
 
 const app = express();
 const port = 3001;
@@ -11,25 +12,25 @@ app.use(
   })
 );
 app.use(express.json());
- 
+
 app.use("/uploads", express.static("uploads"));
 
-import productImagesRoute from "./routes/product-images-example-for-martin.js";
+import productImagesRoute from "../routes/product-images-example-for-martin.js";
 app.use("/product-images", productImagesRoute);
 
-import addProductRoute from "./routes/add-product.js";
+import addProductRoute from "../routes/add-product.js";
 app.use("/add-product", addProductRoute);
 
-import profileRoute from "./routes/profile.js";
+import profileRoute from "../routes/profile.js";
 app.use("/profile", profileRoute);
 
-import vendorRoute from "./routes/vendor.js";
+import vendorRoute from "../routes/vendor.js";
 app.use("/vendor", vendorRoute);
 
-import productOrderRoute from "./routes/productOrder.js";
+import productOrderRoute from "../routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 
-import payment from "./routes/payment.js";
+import payment from "../routes/payment.js";
 app.use("/checkout", payment);
 
 app.get("/test", (req, res) => {
@@ -127,6 +128,4 @@ app.get("/products", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+export default serverless(app);
