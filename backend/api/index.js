@@ -4,7 +4,7 @@ import pool from "../db.js";
 import serverless from "serverless-http";
 
 const app = express();
-const port = 3001;
+/*const port = 3001;
 
 app.use(
   cors({
@@ -84,7 +84,6 @@ app.post("/example/save-text", async (req, res) => {
   }
 });
 
-/** Gets all product data with related image paths and store name */
 app.get("/product/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,6 +125,11 @@ app.get("/products", async (req, res) => {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
+});
+*/
+
+app.get("/test", (req, res) => {
+  res.send("API is working!");
 });
 
 export default serverless(app);
