@@ -75,7 +75,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
     console.log("image path:");
     console.log(process.env.BACKEND_URL);
 
-    if (req.files.length != 0) {
+    if (req.files?.length) {
       for (const file of req.files) {
         const imageUrl = `${process.env.BACKEND_URL}/uploads/${file.filename}`;
         await pool.query(
