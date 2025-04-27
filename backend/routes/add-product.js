@@ -103,7 +103,9 @@ router.post("/", upload.array("images", 10), async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding product:", error);
-    res.status(500).json({ error: "Error adding product to database" });
+    res
+      .status(500)
+      .json({ message: "Error adding product to database", error: error });
   }
 });
 
