@@ -2,10 +2,13 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "description": "",
   "main": "server.js",
   "scripts": {
-    "run": "nodemon server.js"
+    "run": "node server.js"
   },
   "keywords": [],
   "author": "",
