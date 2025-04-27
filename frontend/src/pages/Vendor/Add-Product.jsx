@@ -65,10 +65,13 @@ export default function AddProduct() {
       });
       images.forEach((image) => formData.append("images", image));
 
-      const response = await fetch("http://localhost:3001/add-product", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/add-product`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       if (!response.ok) throw new Error("Failed to add product");
 
       setName("");
