@@ -108,7 +108,7 @@ async function requestProfileProductOrders() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
+      if (data.error === "Access token is invalid") {
         await requestAccessToken();
         return await requestProfileProductOrders();
       }

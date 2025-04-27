@@ -73,7 +73,7 @@ export default function Profile() {
         openButtonText="Change password?"
         modalContent={<ModifyModal
           modificationFunction={modifyProfile}
-          databasePropertyName="PasswordHash" // Note that this is not an actual property in the database. 
+          databasePropertyName="Password" // Note that this is not an actual property in the database (but PasswordHash is).
           labelText="New password "
           inputType="password"
           theMaxLength={500}
@@ -329,7 +329,7 @@ async function requestProfileDeletion(password) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
+      if (data.error === "Access token is invalid") {
         await requestAccessToken();
         return await requestProfileDeletion(password);
       }
@@ -344,8 +344,8 @@ async function requestProfileDeletion(password) {
 }
 
 /**
- * NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
- * but instead just a password in plain text, since the server handles the hashing itself.
+ * NOTE: When the propetyName is "Password", there is not an actual property in the database called "Password",
+ * but instead a "PasswordHash", but the server handles the hashing itself.
  * @returns either nothing, or a Promise.reject() with an error message.
  */
 async function requestProfileModification(password, propertyName, newValue) {
@@ -366,7 +366,7 @@ async function requestProfileModification(password, propertyName, newValue) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
+      if (data.error === "Access token is invalid") {
         await requestAccessToken();
         return await requestProfileModification(password, propertyName, newValue);
       }
@@ -401,7 +401,7 @@ async function requestVendorModification(password, propertyName, newValue) {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
+      if (data.error === "Access token is invalid") {
         await requestAccessToken();
         return await requestVendorModification(password, propertyName, newValue);
       }
@@ -426,7 +426,7 @@ async function requestSignOut() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
+      if (data.error === "Access token is invalid") {
         await requestAccessToken();
         return await requestSignOut();
       }
@@ -451,7 +451,7 @@ async function requestSignOutAllDevices() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) {
-      if (data.error === "Access token is expired.") {
+      if (data.error === "Access token is invalid") {
         await requestAccessToken();
         return await requestSignOutAllDevices();
       }

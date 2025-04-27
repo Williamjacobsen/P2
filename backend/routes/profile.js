@@ -6,25 +6,27 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator"; // Link to docs and API: https://express-validator.github.io/docs/, or alternatively: https://github.com/validatorjs/validator.js
+import { validationResult } from "express-validator";
 import nodeSchedule from "node-schedule"
 
 import pool from "../db.js";
 import {
+  handleValidationErrors,
   validateEmail,
   validatePassword,
   validateProfileRefreshToken,
   validateProfileAccessToken,
   validatePhoneNumber,
   validateProfilePropertyName,
-  validateProfileNewValue
+  validateProfileNewValue_Part1Of2,
+  validateProfileNewValue_Part2Of2
 } from "../utils/inputValidation.js"
 
 
 // JWT tokens
-const accessTokenSecretKey = "aGoodSecret1"; //y This is essentially a password, so it should be more complex than this placeholder.
-const refreshTokenSecretKey = "aGoodSecret2"; //y This is essentially a password, so it should be more complex than this placeholder.
-const accessTokenExpirationAge = "5m";
+const accessTokenSecretKey = "placeholderSecret1"; // This is essentially a password, so it should be more complex than this placeholder.
+const refreshTokenSecretKey = "placeholderSecret2"; // This is essentially a password, so it should be more complex than this placeholder.
+const accessTokenExpirationAge = "5s"; //R
 const refreshTokenExpirationAgeInDays = 7;
 
 // Hashing
@@ -47,10 +49,7 @@ router.post("/sign-in", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const {
       email,
@@ -87,10 +86,7 @@ router.post("/generate-access-token", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const refreshToken = req.cookies.profileRefreshToken;
     // Create a new access token using the refresh token
@@ -110,13 +106,10 @@ router.post("/sign-out-device", [
   validateProfileRefreshToken,
   validateProfileAccessToken
 ], async (req, res) => {
-  //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
+  // NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const refreshToken = req.cookies.profileRefreshToken;
     const accessToken = req.cookies.profileAccessToken;
@@ -138,13 +131,10 @@ router.post("/sign-out-all-devices", [
   validateProfileRefreshToken,
   validateProfileAccessToken
 ], async (req, res) => {
-  //y NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
+  // NOTE: This does not invalidate non-expired ACCESS tokens, only REFRESH tokens.
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const refreshToken = req.cookies.profileRefreshToken;
     const accessToken = req.cookies.profileAccessToken;
@@ -170,13 +160,13 @@ router.get("/get", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
+    handleValidationErrors(req, res, validationResult, function (validationErrors) {
       if (validationErrors.array().some(error => error.path === "profileAccessToken")) {
-        return res.status(400).json({ error: "Access token cookie is empty." }); // 400 = Bad request
+        const errorMessage = "Access token cookie is empty";
+        res.status(400).json({ error: errorMessage }); // 400 = Bad request
+        throw Error(errorMessage);
       }
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    });
     // Get data from response
     const accessToken = req.cookies.profileAccessToken;
     // Get profile
@@ -198,10 +188,7 @@ router.post("/create", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const {
       email,
@@ -242,10 +229,7 @@ router.post("/delete", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const {
       password
@@ -275,17 +259,21 @@ router.post("/delete", [
 router.post("/modify", [
   validatePassword,
   validateProfilePropertyName,
-  validateProfileNewValue,
+  validateProfileNewValue_Part1Of2, // This does not take into account the property name.
   validateProfileAccessToken
 ], async (req, res) => {
   try {
+    // Handle validation errors
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
-    const {
+    let {
       password,
       propertyName,
       newValue
     } = req.body;
     const accessToken = req.cookies.profileAccessToken;
+    // Do additional validation for the newValue depending on the propertyName
+    validateProfileNewValue_Part2Of2(res, propertyName, newValue);
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;
@@ -308,14 +296,14 @@ router.post("/modify", [
           return res.status(409).json({ error: "Another profile already uses that phone number." }); // 409 = Conflict
         }
         break;
-      // NOTE: When the propetyName is "PasswordHash", the newValue is not actually a hashed password,
-      // but instead just a password in plain text, since the server handles the hashing itself.
-      case "PasswordHash":
+      case "Password":
         // Salt and hash password
         const passwordHash = await bcrypt.hash(newValue, saltingRounds);
         newValue = passwordHash;
+        propertyName = "PasswordHash";
+        break;
       case "VendorID":
-        return res.status(401).json({ error: "Users do not have permission to change the their profile vendor ID. Please contact the website administrators." }); // 401 = Unauthorized
+        return res.status(401).json({ error: "Users do not have permission to change their profile vendor ID. Please contact the website administrators." }); // 401 = Unauthorized
     }
     // Update property with the new value
     await pool.query(`UPDATE p2.Profile SET ${propertyName}='${newValue}' WHERE (ID='${profileID}');`);
@@ -359,14 +347,13 @@ async function decodeRefreshToken(httpResponse, refreshToken) {
     const [unexpiredRefreshTokenRows] = await pool.query(`SELECT * FROM p2.ProfileRefreshToken 
       WHERE Token='${refreshToken}' AND ExpirationDateTime >= NOW();`);
     if (Object.keys(unexpiredRefreshTokenRows).length === 0) {
-      const error = "Refresh token is expired";
-      httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
-      return Promise.reject(error);
+      throw Error("Refresh token is expired");
     }
     return decodedRefreshToken;
   }
   catch {
-    const error = "Refresh token is invalid.";
+    console.log("hey"); //R 
+    const error = "Refresh token is invalid";
     httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
     return Promise.reject(error);
   }
@@ -382,7 +369,7 @@ function decodeAccessToken(httpResponse, accessToken) {
     return decodedAccessToken;
   }
   catch {
-    const error = "Access token is expired.";
+    const error = "Access token is invalid";
     httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
     throw Error(error);
   }

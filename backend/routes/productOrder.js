@@ -3,7 +3,10 @@ import { validationResult } from "express-validator";
 
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
-import { validateProfileAccessToken } from "../utils/inputValidation.js"
+import {
+  handleValidationErrors,
+  validateProfileAccessToken
+} from "../utils/inputValidation.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -17,10 +20,7 @@ router.get("/getProfileProductOrders", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const accessToken = req.cookies.profileAccessToken;
     // Check that profile exists and password is right

@@ -1,15 +1,17 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { validationResult } from "express-validator";
+import { body, validationResult } from "express-validator"; //R remove body
 
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
 import {
+  handleValidationErrors,
   validatePassword,
   validateProfileAccessToken,
   validateVendorID,
   validateVendorPropertyName,
-  validateVendorNewValue
+  validateVendorNewValue_Part1Of2,
+  validateVendorNewValue_Part2Of2
 } from "../utils/inputValidation.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
@@ -24,10 +26,7 @@ router.get("/get", [
 ], async (req, res) => {
   try {
     // Handle validation errors
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
-    }
+    handleValidationErrors(req, res, validationResult);
     // Get data from request
     const {
       vendorID
@@ -43,17 +42,18 @@ router.get("/get", [
   }
 });
 
+
 router.post("/modify", [
   validatePassword,
   validateVendorPropertyName,
-  validateVendorNewValue,
+  validateVendorNewValue_Part1Of2, // This does not take into account the property name.
   validateProfileAccessToken
 ], async (req, res) => {
   try {
     // Handle validation errors
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ error: "Input is invalid." }); // 400 = Bad request
+      return res.status(400).json({ error: "Input is invalid for the input: '" + validationErrors.array()[0].path + "'" }); // 400 = Bad request
     }
     // Get data from request
     const {
@@ -62,6 +62,8 @@ router.post("/modify", [
       newValue
     } = req.body;
     const accessToken = req.cookies.profileAccessToken;
+    // Do additional validation for the newValue depending on the propertyName
+    validateVendorNewValue_Part2Of2(res, propertyName, newValue);
     // Check that profile exists and password is right
     const profile = await getProfile(res, accessToken);
     const vendorID = profile.VendorID;
