@@ -29,11 +29,25 @@ import vendorRoute from "./routes/vendor.js";
 app.use("/vendor", vendorRoute);
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
+import payment from "./routes/payment.js";
+app.use("/checkout", payment);
 
 // Stuff that needs to be made into separate files in the "route" directory
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
+});
+
+app.get("/BestSellers", async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM p2.productstatistics ORDER BY AmountSold DESC;"
+    );
+    res.json(rows.slice(0, 4));
+  } catch (error) {
+    console.error("Error fetching productstatistics:", error);
+    res.status(500).json({ error: "Failed to fetch productstatistics" });
+  }
 });
 
 app.get("/example/get-text", async (req, res) => {
@@ -78,18 +92,19 @@ app.get("/product/:id", async (req, res) => {
 
     const [result] = await pool.query(
       `SELECT 
-        p2.Product.*, 
-        p2.Vendor.Name AS StoreName, 
-        p2.productimage.Path
-        FROM p2.Product
-        JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
-        LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
-        WHERE p2.Product.ID = ?;`,
+         p2.Product.*, 
+         p2.Vendor.Name AS StoreName, 
+         p2.productimage.Path,
+         p2.Vendor.Address AS StoreAddress
+         FROM p2.Product
+         JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+         LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
+         WHERE p2.Product.ID = ?;`,
       [id]
     );
+
     res.status(200).json(result);
-  }
-  catch (err) {
+  } catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
@@ -103,13 +118,12 @@ app.get("/faq", async (req, res) => {
 app.get("/products", async (req, res) => {
   try {
     const [result] = await pool.query(`
-      SELECT p2.product.*, p2.store.Name AS StoreName
+      SELECT p2.product.*, p2.vendor.Name AS StoreName
       FROM p2.product
-      JOIN p2.store ON p2.product.StoreID = p2.store.ID;
+      JOIN p2.vendor ON p2.product.StoreID = p2.vendor.ID;
     `);
     res.status(200).json(result);
-  }
-  catch (err) {
+  } catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ error: "Failed to fetch products" });
   }

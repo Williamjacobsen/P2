@@ -7,7 +7,8 @@ import Header from "./pages/Header/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
-import FAQ from "./pages/FAQ";
+import FAQ from "./pages/FAQ/FAQ";
+import VenderHeader from "./pages/Vendor/VenderHeader";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
@@ -17,13 +18,12 @@ import SignIn from "./pages/Profile/SignIn";
 import Cart from "./pages/Cart/Cart";
 import ProfileProductOrders from "./pages/Profile/ProfileProductOrders"
 import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
-import ReSignInPopUp from "./pages/Profile/ReSignInPopUp";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<><Header /> <ReSignInPopUp /> </>}>
+        <Route path="/" element={<Header />}>
           <Route
             path="/DisplayProductImages"
             element={<DisplayProductImages />}
@@ -37,11 +37,13 @@ export default function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/Cart" element={<Cart />} />
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
-          <Route path="*" element={<NoPage />} />
         </Route>
         {/* todo: add header to vendor route */}
-        <Route path="/vendor" element={<Vendor />} />
-        <Route path="/vendor/add-product" element={<AddProduct />} />
+        <Route path="/vendor" element={<VenderHeader />}>
+          <Route index element={<Vendor />} />
+          <Route path="add-product" element={<AddProduct />} />
+        </Route>
+        <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>
   );
