@@ -1,10 +1,18 @@
 import express from "express";
+import bcrypt from "bcrypt";
+import { validationResult } from "express-validator"; //R remove body
+
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
 import {
-  getErrorCode,
-  errorWrongVendorID
-} from "../errorMessage.js"
+  handleValidationErrors,
+  validatePassword,
+  validateProfileAccessToken,
+  validateVendorID,
+  validateVendorPropertyName,
+  validateVendorNewValue_Part1Of2,
+  validateVendorNewValue_Part2Of2
+} from "../utils/inputValidation.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Router
@@ -13,28 +21,66 @@ import {
 const router = express.Router();
 export default router;
 
-router.post("/get", async (req, res) => {
+router.get("/get", [
+  validateVendorID
+], async (req, res) => {
   try {
-    const { vendorID } = req.body; // Get data from body
-    const vendor = await getVendor(vendorID);
-    res.status(200).json({ vendor: vendor }); // Send back response
-    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+    // Handle validation errors
+    handleValidationErrors(req, res, validationResult);
+    // Get data from request
+    const {
+      vendorID
+    } = req.query;
+    // Get vendor
+    const vendor = await getVendor(res, vendorID);
+    // Send back response
+    return res.status(200).json({ vendor: vendor }); // 200 = OK
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      return res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 
-router.post("/modify", async (req, res) => {
+
+router.post("/modify", [
+  validatePassword,
+  validateVendorPropertyName,
+  validateVendorNewValue_Part1Of2, // This does not take into account the property name.
+  validateProfileAccessToken
+], async (req, res) => {
   try {
-    const { email, password, propertyName, newValue } = req.body; // Get data from body
-    console.log("nwah"); //r 
-    const vendor = await modifyVendor(email, password, propertyName, newValue);
-    console.log(vendor.Email); //r 
-    res.status(201).json({ vendor: vendor }); // Send back response
-    //y TODO: implement password encryption (right now it is just being sent directly)
-    //y TODO: add variable validation (like "email" needs to be "not null" in database)
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({ error: "Input is invalid for the input: '" + validationErrors.array()[0].path + "'" }); // 400 = Bad request
+    }
+    // Get data from request
+    const {
+      password,
+      propertyName,
+      newValue
+    } = req.body;
+    const accessToken = req.cookies.profileAccessToken;
+    // Do additional validation for the newValue depending on the propertyName
+    validateVendorNewValue_Part2Of2(res, propertyName, newValue);
+    // Check that profile exists and password is right
+    const profile = await getProfile(res, accessToken);
+    const vendorID = profile.VendorID;
+    // Verify password
+    if (await bcrypt.compare(password, profile.PasswordHash) === false) {
+      return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
+    }
+    // Check that vendor ID exists
+    await getVendor(res, vendorID);
+    // Update property with the new value
+    await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
+    // Send back response
+    return res.status(201).json({}); // 201 = Created
   } catch (error) {
-    res.status(getErrorCode(error)).json({ errorMessage: error });
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      return res.status(500).json({ error: "Internal server error: " + error });
+    }
   }
 });
 
@@ -42,34 +88,20 @@ router.post("/modify", async (req, res) => {
 // Helpers
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
-async function getVendor(vendorID) {
+/**
+ * Tries to get a vendor from the database using a vendor ID.
+ * @returns either a JSON object with the vendor (from the MySQL database), 
+ * or a Promise.reject with an error message.
+ */
+async function getVendor(httpResponse, vendorID) {
   // Get an array of vendors with the corresponding ID from the database
-  const [vendor] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
+  const [vendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
   // Check that vendor exists
-  if (Object.keys(vendor).length === 0) {
-    return Promise.reject(errorWrongVendorID);
+  if (Object.keys(vendorRows).length === 0) {
+    const error = "Vendor ID does not exist in the database."
+    httpResponse.status(404).json({ error: error }); // 404 = Not found
+    return Promise.reject(error);
   }
   // Return vendor
-  return vendor[0];
-}
-
-/** 
- * Tries to assign a new value to a property of a vendor in the database based on vendor profile credentials.
- * @param {*} email string.
- * @param {*} password string.
- * @param {*} propertyName string name of the property in the MySQL database.
- * @param {*} newValue the new value of the property.
- * @returns either a JSON object with the profile, or a Promise.reject() with an error message.
- */
-async function modifyVendor(email, password, propertyName, newValue) {
-  // Check that profile exists and password is right
-  const profile = await getProfile(email, password);
-  const vendorID = profile.VendorID;
-  // Check that vendor ID exists
-  await getVendor(vendorID);
-  // Update property with the new value
-  await pool.query(`UPDATE p2.Vendor SET ${propertyName}='${newValue}' WHERE (ID='${vendorID}');`);
-  // Return profile
-  const [updatedVendor] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${vendorID}';`);
-  return updatedVendor[0];
+  return vendorRows[0];
 }

@@ -1,36 +1,38 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
 import pool from "./db.js";
 
 const app = express();
 const port = 3001;
 
+// Middleware
 app.use(
   cors({
     origin: "http://localhost:3000",
+    credentials: true, // allows cookies and credentials to be sent to the backend
   })
 );
-app.use(express.json());
-
+app.use(express.json()); // This allows the app to use json.
 app.use("/uploads", express.static("uploads"));
+app.use(cookieParser()); // This allows reading cookies from incoming requests.
 
+// Routes
 import productImagesRoute from "./routes/product-images-example-for-martin.js";
 app.use("/product-images", productImagesRoute);
-
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
-
 import profileRoute from "./routes/profile.js";
 app.use("/profile", profileRoute);
-
 import vendorRoute from "./routes/vendor.js";
 app.use("/vendor", vendorRoute);
-
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
-
 import payment from "./routes/payment.js";
 app.use("/checkout", payment);
+
+// Stuff that needs to be made into separate files in the "route" directory
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
@@ -127,6 +129,7 @@ app.get("/products", async (req, res) => {
   }
 });
 
+// Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

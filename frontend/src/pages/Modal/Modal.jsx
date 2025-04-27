@@ -1,6 +1,7 @@
 // A tutorial I've taken heavy inspiration from: https://www.youtube.com/watch?v=9DwGahSqcEc
 
 import { useState } from "react";
+
 import "./modal.css";
 
 /** 

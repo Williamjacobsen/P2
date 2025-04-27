@@ -1,0 +1,1 @@
+start cmd /k "cd backend && node --watch server.js"

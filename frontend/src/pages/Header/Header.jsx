@@ -41,7 +41,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/help" className="hover:underline">
+          <Link to="/FAQ" className="hover:underline">
             Help
           </Link>
         </li>

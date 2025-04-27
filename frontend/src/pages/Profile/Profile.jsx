@@ -1,29 +1,24 @@
 import React from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+
 import Modal from "../Modal/Modal"
-import { useNavigate } from "react-router-dom";
-import { createProfileCookies, deleteProfileCookies } from "./SignIn"
-import { getCookie } from "../../utils/cookies"
-import useCheckLoginValidity from "./useCheckLoginValidity";
+import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
+import { requestAccessToken, promptReSignIn } from "./ReSignInPopUp";
 
 export default function Profile() {
 
-  // Vendor info from cookies
-  const cookieVendorID = getCookie("profileVendorID");
-  const isVendor = (cookieVendorID !== "null" && cookieVendorID !== null); // "getCookie()" returns either null or a string (which would be "null" if the cookie exists, but the profile has the vendor ID null (so, if the profile is not a vendor)). 
-  const bypassUseGetVendor = !isVendor;
-
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
-  const [isLoadingVendor, vendor] = useGetVendor(cookieVendorID, bypassUseGetVendor);
+  const [isLoadingProfile, profile] = useGetProfile();
+  const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
 
   // Is the user signed in?
-  if (isLoadingLogin) {
+  if (isLoadingProfile) {
     return (<>Loading login...</>);
   }
-  else if (!isLoginValid) {
-    navigate("/sign-in");
+  else if (profile === undefined) {
+    return (<Navigate to="/sign-in" replace />);
   }
 
   // Is the user a vendor?
@@ -33,18 +28,22 @@ export default function Profile() {
 
   return (
     <>
-      <h3>
-        --- Profile Information ---
-      </h3>
       <button onClick={signOut}>
         Sign out
       </button>
+      <br />
+      <button onClick={signOutAllDevices}>
+        Sign out on all devices
+      </button>
+      <br />
       <button onClick={() => navigate("/profile-product-orders")}>
         Go to order history
       </button>
-      <br />
+      <h3>
+        --- Profile Information ---
+      </h3>
       <b>Email address: </b>
-      {getCookie("profileEmail")}
+      {profile.Email}
       <Modal
         openButtonText="Change email address?"
         modalContent={<ModifyModal
@@ -57,7 +56,7 @@ export default function Profile() {
       />
       <br />
       <b>Phone number: </b>
-      {getCookie("profilePhoneNumber")}
+      {profile.PhoneNumber}
       <Modal
         openButtonText="Change phone number?"
         modalContent={<ModifyModal
@@ -74,7 +73,7 @@ export default function Profile() {
         openButtonText="Change password?"
         modalContent={<ModifyModal
           modificationFunction={modifyProfile}
-          databasePropertyName="Password"
+          databasePropertyName="Password" // Note that this is not an actual property in the database (but PasswordHash is).
           labelText="New password "
           inputType="password"
           theMaxLength={500}
@@ -85,7 +84,7 @@ export default function Profile() {
         openButtonText="Delete profile?"
         modalContent={(<DeleteProfileModal />)} />
       {
-        isVendor && (
+        vendor !== null && (
           <>
             <h3>
               --- Vendor Profile Information ---
@@ -190,7 +189,7 @@ export default function Profile() {
 }
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Modals content
+// Modal content
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 function DeleteProfileModal() {
@@ -232,31 +231,23 @@ function ModifyModal({ modificationFunction, databasePropertyName, labelText, in
 
 async function deleteProfile(event) {
   try {
-    //y TODO: add variable validation
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
     // Get data
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password");
-    const email = getCookie("profileEmail");
     // Delete profile from server
-    await requestProfileDeletion(email, password);
-    // Delete sign in cookie
-    deleteProfileCookies();
+    await requestProfileDeletion(password);
     // Reload the page (this navigates to the sign in page because the user is now signed out)
     window.location.reload();
   }
   catch (error) {
-    // Alert the user of the error (for example wrong password)
     alert(error);
   }
 }
 
 async function modifyProfile(event) {
   try {
-    //y TODO: add variable validation
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
     // Get data
@@ -264,23 +255,18 @@ async function modifyProfile(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const email = getCookie("profileEmail");
     // Modify profile in server
-    const profile = await requestProfileModification(email, password, propertyName, newValue);
-    // Create sign in cookie
-    createProfileCookies(profile);
+    await requestProfileModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)
     window.location.reload();
   }
   catch (error) {
-    // Alert the user of the error (for example wrong password)
     alert(error);
   }
 }
 
 async function modifyVendor(event) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Prevent page from refreshing on submit
     event.preventDefault();
     // Get data
@@ -288,14 +274,34 @@ async function modifyVendor(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    const email = getCookie("profileEmail");
     // Modify profile in server
-    await requestVendorModification(email, password, propertyName, newValue);
+    await requestVendorModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)
     window.location.reload();
   }
   catch (error) {
-    // Alert the user of the error (for example wrong password)
+    alert(error);
+  }
+}
+
+export async function signOut() {
+  try {
+    await requestSignOut();
+    // Reload the page (to refresh changes)
+    window.location.reload();
+  }
+  catch (error) {
+    alert(error);
+  }
+}
+
+async function signOutAllDevices() {
+  try {
+    await requestSignOutAllDevices();
+    // Reload the page (to refresh changes)
+    window.location.reload();
+  }
+  catch (error) {
     alert(error);
   }
 }
@@ -305,27 +311,32 @@ async function modifyVendor(event) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * @param {*} email string
- * @param {*} password string
  * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestProfileDeletion(email, password) {
+async function requestProfileDeletion(password) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/delete", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
         password,
       }),
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
+    if (!response.ok) {
+      if (data.error === "Access token is invalid") {
+        await requestAccessToken();
+        return await requestProfileDeletion(password);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
   }
   catch (error) {
     return Promise.reject(error);
@@ -333,19 +344,20 @@ async function requestProfileDeletion(email, password) {
 }
 
 /**
- * @returns either a profile object (from the MySQL database), or a Promise.reject() with an error message.
+ * NOTE: When the propetyName is "Password", there is not an actual property in the database called "Password",
+ * but instead a "PasswordHash", but the server handles the hashing itself.
+ * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestProfileModification(email, password, propertyName, newValue) {
+async function requestProfileModification(password, propertyName, newValue) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/modify", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
         password,
         propertyName,
         newValue,
@@ -353,8 +365,15 @@ async function requestProfileModification(email, password, propertyName, newValu
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
-    return data.profile;
+    if (!response.ok) {
+      if (data.error === "Access token is invalid") {
+        await requestAccessToken();
+        return await requestProfileModification(password, propertyName, newValue);
+      }
+      else {
+        return Promise.reject(data.error);
+      }
+    }
   }
   catch (error) {
     return Promise.reject(error);
@@ -362,19 +381,18 @@ async function requestProfileModification(email, password, propertyName, newValu
 }
 
 /**
- * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either nothing, or a Promise.reject() with an error message.
  */
-async function requestVendorModification(email, password, propertyName, newValue) {
+async function requestVendorModification(password, propertyName, newValue) {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/vendor/modify", {
       method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
         password,
         propertyName,
         newValue,
@@ -382,22 +400,67 @@ async function requestVendorModification(email, password, propertyName, newValue
     });
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
-    return data.vendor;
+    if (!response.ok) {
+      if (data.error === "Access token is invalid") {
+        await requestAccessToken();
+        return await requestVendorModification(password, propertyName, newValue);
+      }
+      return Promise.reject(data.error);
+    }
   }
   catch (error) {
     return Promise.reject(error);
   }
 }
 
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Helpers
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+/**
+ * @returns either nothing, or a Promise.reject() with an error message.
+ */
+async function requestSignOut() {
+  try {
+    // Post data from the form to server
+    const response = await fetch("http://localhost:3001/profile/sign-out-device", {
+      method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
+    });
+    // Handle server response
+    const data = await response.json();
+    if (!response.ok) {
+      if (data.error === "Access token is invalid") {
+        await requestAccessToken();
+        return await requestSignOut();
+      }
+      return Promise.reject(data.error);
+    }
+  }
+  catch (error) {
+    return Promise.reject(error);
+  }
+}
 
-function signOut() {
-  deleteProfileCookies();
-  // Reload the page (this navigates to the sign in page because the user is now signed out)
-  window.location.reload();
+/**
+ * @returns either nothing, or a Promise.reject() with an error message.
+ */
+async function requestSignOutAllDevices() {
+  try {
+    // Post data from the form to server
+    const response = await fetch("http://localhost:3001/profile/sign-out-all-devices", {
+      method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request
+    });
+    // Handle server response
+    const data = await response.json();
+    if (!response.ok) {
+      if (data.error === "Access token is invalid") {
+        await requestAccessToken();
+        return await requestSignOutAllDevices();
+      }
+      return Promise.reject(data.error);
+    }
+  }
+  catch (error) {
+    return Promise.reject(error);
+  }
 }
 
 
