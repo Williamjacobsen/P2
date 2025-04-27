@@ -72,7 +72,7 @@ export default function AddProduct() {
           body: formData,
         }
       );
-      if (!response.ok) throw new Error(response);
+      if (!response.ok) throw new Error(response.json());
 
       setName("");
       setPrice(0.0);
