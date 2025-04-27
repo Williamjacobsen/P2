@@ -7,7 +7,7 @@ const port = 3001;
 
 app.use(
   cors({
-    origin: "https://p2-client.vercel.app/",
+    origin: "https://p2-client.vercel.app",
   })
 );
 app.use(express.json());
