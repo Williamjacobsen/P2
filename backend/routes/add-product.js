@@ -72,9 +72,12 @@ router.post("/", upload.array("images", 10), async (req, res) => {
 
     const productId = result.insertId;
 
+    console.log("image path:");
+    console.log(process.env.BACKEND_URL);
+
     if (req.files.length != 0) {
       for (const file of req.files) {
-        const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
+        const imageUrl = `${process.env.BACKEND_URL}/uploads/${file.filename}`;
         await pool.query(
           `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`,
           [productId, imageUrl]
