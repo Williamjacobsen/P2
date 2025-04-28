@@ -175,7 +175,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
       );
 
       console.log("Saving path into database");
-      const imageUrl = `${process.env.AWS_BUCKET_URL}/${safeFilename}`;
+      const imageUrl = `${process.env.CLOUD_FRONT_URL}/${safeFilename}`;
       await pool.query(
         `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`,
         [productId, imageUrl]
