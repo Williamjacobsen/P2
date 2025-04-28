@@ -42,8 +42,23 @@ const ensureArray = (val) => {
 const upload = multer({ storage, fileFilter });
 
 router.post("/", upload.array("images", 10), async (req, res) => {
-  try {
-    const {
+  //try {
+  const {
+    storeID,
+    name,
+    price,
+    discountProcent,
+    description,
+    clothingType,
+    brand,
+    gender,
+  } = req.body;
+
+  const [result] = await pool.query(
+    `INSERT INTO p2.Product
+         (StoreID, Name, Price, DiscountProcent, Description, ClothingType, Brand, Gender)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
       storeID,
       name,
       price,
@@ -52,64 +67,49 @@ router.post("/", upload.array("images", 10), async (req, res) => {
       clothingType,
       brand,
       gender,
-    } = req.body;
+    ]
+  );
 
-    const [result] = await pool.query(
-      `INSERT INTO p2.Product
-         (StoreID, Name, Price, DiscountProcent, Description, ClothingType, Brand, Gender)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        storeID,
-        name,
-        price,
-        discountProcent,
-        description,
-        clothingType,
-        brand,
-        gender,
-      ]
-    );
+  const productId = result.insertId;
 
-    const productId = result.insertId;
+  console.log("image path:");
+  console.log(process.env.BACKEND_URL);
 
-    console.log("image path:");
-    console.log(process.env.BACKEND_URL);
-
-    if (req.files?.length) {
-      for (const file of req.files) {
-        const imageUrl = `${process.env.BACKEND_URL}/uploads/${file.filename}`;
-        await pool.query(
-          `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`,
-          [productId, imageUrl]
-        );
-      }
-    }
-
-    const sizes = ensureArray(req.body.size);
-    const stocks = ensureArray(req.body.stock);
-
-    for (let i = 0; i < sizes.length; i++) {
-      const size = sizes[i];
-      const stock = parseInt(stocks[i]);
+  if (req.files?.length) {
+    for (const file of req.files) {
+      const imageUrl = `${process.env.BACKEND_URL}/uploads/${file.filename}`;
       await pool.query(
-        `INSERT INTO p2.ProductSize (ProductID, Size, Stock) VALUES (?, ?, ?)`,
-        [productId, size, stock]
+        `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`,
+        [productId, imageUrl]
       );
     }
-
-    res.status(201).json({
-      message: "Product added successfully",
-      productId,
-      img: `${process.env.BACKEND_URL}/uploads/${file.filename}`,
-    });
-  } catch (error) {
-    console.error("Error adding product:", error);
-    res.status(500).json({
-      message: "Error adding product to database",
-      error: error,
-      req_body: req.body,
-    });
   }
+
+  const sizes = ensureArray(req.body.size);
+  const stocks = ensureArray(req.body.stock);
+
+  for (let i = 0; i < sizes.length; i++) {
+    const size = sizes[i];
+    const stock = parseInt(stocks[i]);
+    await pool.query(
+      `INSERT INTO p2.ProductSize (ProductID, Size, Stock) VALUES (?, ?, ?)`,
+      [productId, size, stock]
+    );
+  }
+
+  res.status(201).json({
+    message: "Product added successfully",
+    productId,
+    img: `${process.env.BACKEND_URL}/uploads/${file.filename}`,
+  });
+  //} catch (error) {
+  //  console.error("Error adding product:", error);
+  //  res.status(500).json({
+  //    message: "Error adding product to database",
+  //    error: error,
+  //    req_body: req.body,
+  //  });
+  //}
 });
 
 export default router;
