@@ -25,7 +25,10 @@ export default function BoxShop() {
   return (
     <div className="box-shops">
       {shops.map((shop) => (
-        <Link to={shop.link} key={shop.id} className="shop-circle">
+        <Link
+            to={`/Product-Catalogue?store=${encodeURIComponent(shop.Name)}`}
+            key={shop.id}
+            className="shop-circle">
           {/*
           <img src={shop.image} />
           */}
