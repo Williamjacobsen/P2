@@ -4,7 +4,7 @@ import express from "express";
 import pool from "../db.js";
 import path from "path";
 import { fileURLToPath } from "url";
-//import multer from "multer";
+import multer from "multer";
 //import AWS from "aws-sdk";
 //import multerS3 from "multer-s3";
 
@@ -31,6 +31,9 @@ const __dirname = path.dirname(__filename);
 
 console.log("__filename:", __filename);
 console.log("__dirname:", __dirname);
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 //const s3 = new AWS.S3({
 //  region: process.env.AWS_REGION,
