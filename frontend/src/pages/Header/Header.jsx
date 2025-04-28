@@ -54,11 +54,15 @@ const HeaderContent = () => {
 
       {/*Right Section - Cart */}
       <SearchBar/>
-      <div className="flex items-center space-x-2">
-        <Link to="/Cart" className="hover:underline">
-          <span className="text-sm font-bold">Cart</span>
-        </Link>
-      </div>
+        <ul>
+            <li>
+                <div className="flex items-center space-x-2">
+                    <Link to="/Cart" className="hover:underline">
+                        <span className="text-sm font-bold">Cart</span>
+                    </Link>
+                </div>
+            </li>
+        </ul>
     </nav>
   );
 };
