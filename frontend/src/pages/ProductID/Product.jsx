@@ -1,8 +1,10 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
 import "./ProductCSS.css";
 import { setCookie } from "../../utils/cookies.js";
+import useGetVendor from "../Profile/useGetVendor.jsx";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -25,6 +27,18 @@ export default function ProductPage() {
     }
     allProductData();
   }, [id]);
+
+  // Hooks
+  const [isLoadingVendor, productVendor] = useGetVendor(productData[0]?.StoreID);
+
+  // Is the user a vendor?
+  if (isLoadingVendor) {
+    return (<>Loading vendor information...</>);
+  }
+  else if (productVendor === null) {
+    return (<>Error: Product vendor is null.</>);
+  }
+
 
   /** Made to switch main image */
   const onImgClick = (image) => {
@@ -71,6 +85,7 @@ export default function ProductPage() {
       </div>
       <div className="right-content">
         <p className="product-brand">{productData[0]?.Brand}</p>
+        <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
         <p className="product-price">{productData[0]?.Price},00 kr</p>
         <div>
