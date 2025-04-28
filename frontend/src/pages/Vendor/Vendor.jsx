@@ -29,7 +29,7 @@ export default function Vendor() {
 
   return (
     <div>
-      <Products />
+      <Products VendorID={profile.VendorID}/>
     </div>
   );
 }
