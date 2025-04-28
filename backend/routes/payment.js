@@ -1,6 +1,13 @@
 import express from "express";
 import pool from "../db.js";
 import Stripe from "stripe";
+import { validationResult } from "express-validator";
+
+import {
+  handleValidationErrors,
+  validateProfileAccessToken,
+} from "../utils/inputValidation.js"
+import { getProfile } from "./profile.js";
 
 const router = express.Router();
 
@@ -8,9 +15,17 @@ const stripe = new Stripe(
   "sk_test_51RAr8OPGyAJCpFedxTTr7jZH696z7Bs2GZnqOjEX9xdU0LCOJbWJknMoauzhrgvR0Fku9XgMeNXKaOed0OZiGwf700IkAC8dQF"
 );
 
-router.post("/", async (req, res) => {
+router.post("/", [
+  validateProfileAccessToken //r
+], async (req, res) => { //R JWT token validation
   try {
+    // Handle validation errors
+    handleValidationErrors(req, res, validationResult); //r
+
     const { products: cartProducts } = req.body;
+
+    const accessToken = req.cookies.profileAccessToken; //R
+    const profile = await getProfile(res, accessToken); //R 
 
     if (!cartProducts) {
       return res.status(400).json({ error: "No products in the cart." });

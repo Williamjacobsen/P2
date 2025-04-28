@@ -1,7 +1,7 @@
 // Tutorial on how to use forms in React: https://www.youtube.com/watch?v=SaEc7jLWvGY
 
 import React from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";

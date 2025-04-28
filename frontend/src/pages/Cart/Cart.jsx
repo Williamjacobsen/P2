@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import ProductInCart from "./Product-In-Cart";
 import "./Cart.css";
 import CheckoutCard from "./Checkout-Card";
 import { deleteCookie, getAllCookieProducts } from "../../utils/cookies";
 import handleCheckout from "./PaymentFunction";
+import useGetProfile from "../Profile/useGetProfile";
 
 export default function Cart() {
   const [cartProducts, setCartProducts] = useState([]);
@@ -43,6 +46,16 @@ export default function Cart() {
     fetchAllProductData();
   }, [cookieProducts]);
 
+  // Hooks
+  const navigate = useNavigate();
+  const [isLoadingProfile, profile] = useGetProfile();
+
+  // Is the user signed in?
+  if (isLoadingProfile) {
+    return (<>Loading login...</>);
+  }
+
+
   //simply calculates the sum price of all the products in the cart
   function calculateTotalPrice(products) {
     if (products.length === 0) {
@@ -80,14 +93,18 @@ export default function Cart() {
       </div>
       <CheckoutCard
         price={calculateTotalPrice(cartProducts)}
-        PaymentFunction={() =>
-          handleCheckout(
-            cartProducts.map((product) => ({
-              id: product.ID,
-              quantity: product.quantity,
-            }))
-          )
-        }
+        PaymentFunction={() => {
+          if (profile === undefined) {
+            navigate("/sign-in");
+          } else {
+            handleCheckout(
+              cartProducts.map((product) => ({
+                id: product.ID,
+                quantity: product.quantity,
+              }))
+            )
+          }
+        }}
       />
     </div>
   );
