@@ -1,3 +1,4 @@
 /uploads/*
 .env
 .vercel
+/node_modules
