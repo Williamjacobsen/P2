@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import ProductCard from "./Product-Card";
 import "./Product-Card.css"
 import {CatalogueFilter, CatalogueSearch} from "./Catalogue-Filter";
+import { useLocation } from "react-router-dom";
 
 
 export default function ProductCatalogue (){
@@ -19,6 +20,8 @@ export default function ProductCatalogue (){
     //So instead we have shownProducts which is just a reference array that we can freely change and loadedProducts is untouched
     const [loadedProducts, setLoadedProducts] = useState([]);
     const [shownProducts, setShownProducts] = useState([]);
+
+    const location = useLocation();
 
     const genderOptionArray = [
         'Male','Female'
@@ -123,9 +126,28 @@ export default function ProductCatalogue (){
     useEffect(() => {
         if (loadedProducts.length === 0) return;
         setShownProducts(filterAndSortProducts(loadedProducts));
-    }, [genderFilter,priceSort,clothingTypeFilter,search,storeFilter]);
+    }, [loadedProducts, genderFilter,priceSort,clothingTypeFilter,search,storeFilter]);
 
+    //this effect reads the url parameter for store and sets it to the store filter,
+    //used when the user clicks a store in the front page and is redirected we need to filter for it here
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const storeFromUrl = params.get('store')
+        const searchFromUrl = params.get('search')
 
+        if(storeFromUrl){
+            setStoreFilter(storeFromUrl);
+        }
+        else{
+            setStoreFilter('');
+        }
+        if(searchFromUrl){
+            setSearch(searchFromUrl);
+        }
+        else{
+            setSearch('')
+        }
+    }, [location.search]);
 
 // filters take a lot of parameters (props technically) so we can update them when they change
     return (

@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
-import { requestAccessToken, promptReSignIn } from "./ReSignInPopUp";
+import { requestAccessToken } from "./ReSignInPopUp";
 
 export default function Profile() {
 

@@ -130,7 +130,6 @@ export async function requestAccessToken() {
     const data = await response.json();
     if (!response.ok) {
       if (data.error === "Refresh token is invalid") {
-        console.log("jwat"); //R
         await promptReSignIn(); // When the user signs in, a new refresh token will be available in the cookies.
         return await requestAccessToken();
       }

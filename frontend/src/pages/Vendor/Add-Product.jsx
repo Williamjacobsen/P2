@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+
+import useGetProfile from "../Profile/useGetProfile";
+import useGetVendor from "../Profile/useGetVendor";
 
 const genderOptions = ["Male", "Female", "Unisex"];
 const clothingOptions = [
@@ -20,6 +24,7 @@ const clothingOptions = [
 ];
 
 export default function AddProduct() {
+
   const [storeID, setStoreID] = useState(-1);
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0.0);
@@ -32,6 +37,31 @@ export default function AddProduct() {
   const [sizeInput, setSizeInput] = useState("");
   const [stockInput, setStockInput] = useState(0);
   const [sizes, setSizes] = useState([]);
+
+  // Hooks
+  const [isLoadingProfile, profile] = useGetProfile();
+  const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
+  useEffect(() => {
+    (async () => {
+      setStoreID(profile?.VendorID);
+    })();
+  }, [profile]);
+
+  // Is the user signed in?
+  if (isLoadingProfile) {
+    return (<>Loading login...</>);
+  }
+  else if (profile === undefined) {
+    return (<Navigate to="/sign-in" replace />);
+  }
+
+  // Is the user a vendor?
+  if (isLoadingVendor) {
+    return (<>Loading vendor information...</>);
+  }
+  else if (vendor === null) {
+    return (<>You are not a vendor, so you do not have access to this page.</>);
+  }
 
   const handleImageChange = (e) => {
     if (e.target.files) setImages(Array.from(e.target.files));

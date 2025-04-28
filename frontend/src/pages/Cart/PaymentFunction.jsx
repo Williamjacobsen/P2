@@ -6,23 +6,35 @@ const stripePromise = loadStripe(
 );
 
 export default async function handleCheckout(products) {
-  const stripe = await stripePromise;
+  try { //R 
+    const stripe = await stripePromise;
 
-  const response = await fetch("http://localhost:3001/checkout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ products }),
-  });
+    const response = await fetch("http://localhost:3001/checkout", {
+      method: "POST",
+      credentials: "include", // Ensures cookies are sent with the request //r
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ products }),
+    });
 
-  const session = await response.json();
+    const session = await response.json();
 
-  const result = await stripe.redirectToCheckout({
-    sessionId: session.id,
-  });
+    if (!response.ok) { //R 
+      return Promise.reject(session.error);
+    }
 
-  if (result.error) {
-    console.error(result.error.message);
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+
+    if (result.error) {
+      //r redirct to failure?
+      return Promise.reject(result.error.message); //R
+    }
+  }
+  //R 
+  catch (error) {
+    alert(error);
   }
 }

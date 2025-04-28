@@ -36,7 +36,6 @@ app.use("/faq", faqRoute);
 
 
 // Stuff that needs to be made into separate files in the "route" directory
-
 app.get("/test", (req, res) => {
   res.send("API is working!");
 });
@@ -88,31 +87,6 @@ app.post("/example/save-text", async (req, res) => {
   }
 });
 
-/** Gets all product data with related image paths and store name */
-app.get("/product/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [result] = await pool.query(
-      `SELECT 
-         p2.Product.*, 
-         p2.Vendor.Name AS StoreName, 
-         p2.productimage.Path,
-         p2.Vendor.Address AS StoreAddress
-         FROM p2.Product
-         JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
-         LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
-         WHERE p2.Product.ID = ?;`,
-      [id]
-    );
-
-    res.status(200).json(result);
-  } catch (err) {
-    console.error("Error fetching product:", err);
-    res.status(500).json({ error: "Failed to fetch products" });
-  }
-});
-
 app.get("/faq", async (req, res) => {
   const [result] = await pool.query("SELECT * FROM p2.faq;");
   res.status(200).json(result);
@@ -131,6 +105,41 @@ app.get("/products", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
+
+app.get("/shopCircles", async (req, res) => {
+  try{
+    const [result] = await pool.query(`
+        SELECT * FROM Vendor
+        LIMIT 25
+    `);
+    res.status(200).json(result)
+  }catch (err){
+    console.log("Error in database query for shopcircles", err);
+    res.status(500).json({error: "Failed to fetch ShopCircles"})
+  }
+})
+
+app.get("/VendorProducts/:vendorid", async (req, res) => {
+  const { vendorid } = req.params;  // VendorID is grabbed from the url parameter
+
+  if (!vendorid) {
+    return res.status(400).json({ message: "Vendor ID is required" });
+  }
+
+  try {
+    const [result] = await pool.query(`
+      SELECT p2.Product.*, p2.Vendor.Name AS StoreName
+      FROM p2.Product
+             JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+      WHERE p2.Product.StoreID = ?
+    `, [vendorid]);  // Use parameterized query to safely inject vendorid
+    res.status(200).json(result);
+  } catch (err) {
+    console.log("error in database query for vendorproducts", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 // Start server
 app.listen(port, () => {

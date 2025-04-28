@@ -26,7 +26,7 @@ import {
 // JWT tokens
 const accessTokenSecretKey = "placeholderSecret1"; // This is essentially a password, so it should be more complex than this placeholder.
 const refreshTokenSecretKey = "placeholderSecret2"; // This is essentially a password, so it should be more complex than this placeholder.
-const accessTokenExpirationAge = "5s"; //R
+const accessTokenExpirationAge = "5m";
 const refreshTokenExpirationAgeInDays = 7;
 
 // Hashing
@@ -352,7 +352,6 @@ async function decodeRefreshToken(httpResponse, refreshToken) {
     return decodedRefreshToken;
   }
   catch {
-    console.log("hey"); //R 
     const error = "Refresh token is invalid";
     httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
     return Promise.reject(error);
