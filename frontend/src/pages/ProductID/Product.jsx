@@ -14,8 +14,11 @@ export default function ProductPage() {
   useEffect(() => {
     async function allProductData() {
       const res = await fetch(`http://localhost:3001/product/${id}`);
+      if (!res.ok) {
+        console.error(`Server returned ${res.status}`);
+        throw new Error(`Failed to fetch product: ${res.status}`);
+      }
       await res.json().then((productData) => {
-        console.log(productData);
         setProductData(productData);
         setMainImage(productData[0]); // Initializing first Image
       });
