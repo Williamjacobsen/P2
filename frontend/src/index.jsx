@@ -19,6 +19,9 @@ import Cart from "./pages/Cart/Cart";
 import ProfileProductOrders from "./pages/Profile/ProfileProductOrders"
 import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
 import ReSignInPopUp from "./pages/Profile/ReSignInPopUp";
+import Success from "./pages/SuccessFailure/Success";
+import Failure from "./pages/SuccessFailure/Failure";
+
 
 export default function App() {
   return (
@@ -38,6 +41,8 @@ export default function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/Cart" element={<Cart />} />
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Failure />} />
         </Route>
         {/* todo: add header to vendor route */}
         <Route path="/vendor" element={<VenderHeader />}>
