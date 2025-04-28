@@ -100,6 +100,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
     res.status(201).json({
       message: "Product added successfully",
       productId,
+      img: `${process.env.BACKEND_URL}/uploads/${file.filename}`,
     });
   } catch (error) {
     console.error("Error adding product:", error);
