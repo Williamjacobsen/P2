@@ -173,9 +173,10 @@ router.post("/", upload.array("images", 10), async (req, res) => {
           ContentType: file.mimetype,
         })
       );
+      const imageUrl = `${process.env.AWS_BUCKET_URL}/${safeFilename}`;
       await pool.query(
         `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`[
-          (productId, `${process.env.AWS_BUCKET_URL}/${safeFilename}`)
+          (productId, imageUrl)
         ]
       );
       console.log("Uploaded file to S3:", safeFilename);
