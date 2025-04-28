@@ -12,9 +12,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.797.0",
     "aws-sdk": "^2.1692.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "multer": "^1.4.5-lts.2",
     "multer-s3": "^3.0.1",
