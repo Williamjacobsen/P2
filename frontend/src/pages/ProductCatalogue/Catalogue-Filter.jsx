@@ -17,14 +17,13 @@ export function CatalogueFilter({FilterName, FilterOptions, value, onChange}) {
         <div>
             <label htmlFor={FilterName}></label>
             <select
-                id="category"
-                defaultValue=""
+                id={FilterName}
                 className="SortBox"
                 value = {value}
                 onChange={onChange}>
                 <FilterOption optionName={FilterName} IsTitle={true} />
-                {FilterOptions.map((option) => (
-                    <option value={option}>{option}</option>
+                {FilterOptions.map((option, index) => (
+                    <option key={index} value={option}>{option}</option>
                 ))}
             </select>
         </div>
