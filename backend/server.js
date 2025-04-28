@@ -31,9 +31,10 @@ import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 import payment from "./routes/payment.js";
 app.use("/checkout", payment);
+import productID from "./routes/productID.js";
+app.use("/product", productID);
 
 // Stuff that needs to be made into separate files in the "route" directory
-
 app.get("/test", (req, res) => {
   res.send("API is working!");
 });
@@ -82,31 +83,6 @@ app.post("/example/save-text", async (req, res) => {
   } catch (error) {
     console.error("Error saving text:", error);
     res.status(500).json({ error: "Failed to save text" });
-  }
-});
-
-/** Gets all product data with related image paths and store name */
-app.get("/product/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [result] = await pool.query(
-      `SELECT 
-         p2.Product.*, 
-         p2.Vendor.Name AS StoreName, 
-         p2.productimage.Path,
-         p2.Vendor.Address AS StoreAddress
-         FROM p2.Product
-         JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
-         LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
-         WHERE p2.Product.ID = ?;`,
-      [id]
-    );
-
-    res.status(200).json(result);
-  } catch (err) {
-    console.error("Error fetching product:", err);
-    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
