@@ -166,7 +166,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
   res.status(201).json({
     message: "Product added successfully",
     productId,
-    img: file.location,
+    //img: file.location,
   });
 
   // } catch (error) {
