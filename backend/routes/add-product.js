@@ -5,6 +5,9 @@ import pool from "../db.js";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
+import AWS from "aws-sdk";
+import multerS3 from "multer-s3";
 
 console.log("add-product: 2");
 
@@ -18,18 +21,31 @@ const __dirname = path.dirname(__filename);
 console.log("__filename:", __filename);
 console.log("__dirname:", __dirname);
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    console.log("multer destination - saving file to uploads folder");
-    cb(null, path.join(__dirname, "../uploads"));
-  },
-  filename: (req, file, cb) => {
-    console.log("multer filename - original filename:", file.originalname);
-    const safeFilename = file.originalname
-      .replace(/\s+/g, "_")
-      .replace(/#/g, "");
-    console.log("safeFilename:", safeFilename);
-    cb(null, `${Date.now()}-${safeFilename}`);
+const s3 = new AWS.S3({
+  region: process.env.AWS_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const storageUpload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.AWS_BUCKET_NAME,
+    acl: "public-read", // makes uploaded files public (optional but needed if you want direct URL access)
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function (req, file, cb) {
+      const safeFilename = file.originalname
+        .replace(/\s+/g, "_")
+        .replace(/#/g, "");
+      cb(null, `uploads/${Date.now()}-${safeFilename}`);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
   },
 });
 
@@ -59,7 +75,7 @@ const ensureArray = (val) => {
 
 console.log("add-product: 6 - ensureArray function created");
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({ storageUpload, fileFilter });
 
 console.log("add-product: 7 - multer upload middleware created");
 
@@ -151,7 +167,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
   res.status(201).json({
     message: "Product added successfully",
     productId,
-    img: `${process.env.BACKEND_URL}/uploads/${req.files?.[0]?.filename || ""}`,
+    img: file.location,
   });
 
   // } catch (error) {
