@@ -143,7 +143,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
 
   const productId = result.insertId;
 
-  console.log("image path environment variable:", process.env.BACKEND_URL);
+  console.log("image path environment variable:", process.env.AWS_BUCKET_URL);
 
   if (req.files) {
     console.log("Files received, processing uploads...");
@@ -160,16 +160,25 @@ router.post("/", upload.array("images", 10), async (req, res) => {
     //}
 
     for (const file of req.files) {
-      console.log("Uploading file to S3:", file.originalname);
+      const safeFilename = `${Date.now()}-${file.originalname
+        .replace(/\s+/g, "_")
+        .replace(/#/g, "")}`;
+
+      console.log("Uploading file to S3:", safeFilename);
       await s3.send(
         new PutObjectCommand({
           Bucket: process.env.AWS_BUCKET_NAME,
-          Key: file.originalname,
+          Key: safeFilename,
           Body: file.buffer,
           ContentType: file.mimetype,
         })
       );
-      console.log("Uploaded file to S3:", file.originalname);
+      await pool.query(
+        `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`[
+          (productId, `${process.env.AWS_BUCKET_URL}/${safeFilename}`)
+        ]
+      );
+      console.log("Uploaded file to S3:", safeFilename);
     }
   } else {
     console.log("No files uploaded");
