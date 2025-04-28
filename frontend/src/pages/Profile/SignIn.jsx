@@ -1,7 +1,7 @@
 // Tutorial on how to use forms in React: https://www.youtube.com/watch?v=SaEc7jLWvGY
 
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
@@ -82,7 +82,7 @@ async function signIn(event) {
     // Get authetification tokens from server
     await requestSignIn(email, password);
     // Reload the page (this navigates to the profile page because the user is now signed in)
-    window.location.reload();
+    window.location.reload(); //R for some reason, the page reload is too fast for the server to have updated yet??
   }
   catch (error) {
     // Alert the user of the error (for example wrong password)
