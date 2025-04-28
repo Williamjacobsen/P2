@@ -105,6 +105,19 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.get("/shopCircles", async (req, res) => {
+  try{
+    const [result] = await pool.query(`
+        SELECT * FROM Vendor
+        LIMIT 25
+    `);
+    res.status(200).json(result)
+  }catch (err){
+    console.log("Error in database query for shopcircles", err);
+    res.status(500).json({error: "Failed to fetch ShopCircles"})
+  }
+})
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
