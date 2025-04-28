@@ -76,18 +76,18 @@ const upload = multer({ storage: storage });
 
 //console.log("add-product: 5 - fileFilter configured");
 
-//const ensureArray = (val) => {
-//  console.log("ensureArray - input value:", val);
-//  if (Array.isArray(val)) {
-//    return val;
-//  }
-//  if (val != null) {
-//    return [val];
-//  }
-//  return [];
-//};
+const ensureArray = (val) => {
+  console.log("ensureArray - input value:", val);
+  if (Array.isArray(val)) {
+    return val;
+  }
+  if (val != null) {
+    return [val];
+  }
+  return [];
+};
 
-//console.log("add-product: 6 - ensureArray function created");
+console.log("add-product: 6 - ensureArray function created");
 
 //const upload = multer({ storageUpload, fileFilter });
 
