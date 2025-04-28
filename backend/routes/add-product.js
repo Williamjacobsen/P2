@@ -2,7 +2,6 @@ console.log("add-product: 1");
 
 import express from "express";
 import pool from "../db.js";
-import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
