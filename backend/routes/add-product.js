@@ -143,7 +143,7 @@ router.post("/", upload.array("images", 10), async (req, res) => {
 
   const productId = result.insertId;
 
-  console.log("image path environment variable:", process.env.AWS_BUCKET_URL);
+  console.log("image path environment variable:", process.env.CLOUD_FRONT_URL);
 
   if (req.files) {
     console.log("Files received, processing uploads...");
