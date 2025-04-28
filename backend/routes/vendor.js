@@ -42,6 +42,18 @@ router.get("/get", [
   }
 });
 
+router.get("/get-all", async (req, res) => {
+  try {
+    // Get all vendors
+    const [vendorRows] = await pool.query(`SELECT * FROM p2.Vendor;`);
+    // Send back response
+    return res.status(200).json({ vendors: vendorRows }); // 200 = OK
+  } catch (error) {
+    if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+      return res.status(500).json({ error: "Internal server error: " + error });
+    }
+  }
+});
 
 router.post("/modify", [
   validatePassword,
