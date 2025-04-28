@@ -10,7 +10,7 @@ export default function Success() {
   const [isLoading, profile] = useGetProfile();
   const emailSentRef = useRef(false);
 
-  /* Everything from here till emailjs part is just copy paste Cart.jsx */
+  /* Everything from here till emailjs part is just copy paste from Cart.jsx */
   const [cartProducts, setCartProducts] = useState([]);
   const [cookieProducts, setCookieProducts] = useState([]);
 
@@ -41,7 +41,7 @@ export default function Success() {
           )
         );
         setCartProducts(products);
-        setIsReadyToSendEmail(true);
+        setIsReadyToSendEmail(true); // The only part i added
       } catch (err) {
         console.log("failed to fetch products for cart", err);
       }
@@ -63,6 +63,7 @@ export default function Success() {
 
   /* Emailjs tomfoolery */
   const EMAILJS_CONFIG = { // Emailjs gives 200 free request, and i ain't payin, so these need changing each time we create new gmail for it
+    // Contact Rasmus for this because he already made a template for the email
     PUBLIC_KEY: '8C1puUe6dLKfLgpjS', 
     SERVICE_ID: 'service_fgfnany',
     TEMPLATE_ID: 'template_um70l56'
@@ -71,11 +72,13 @@ export default function Success() {
 
   useEffect(() => {
     if (isReadyToSendEmail && !isLoading && profile && cartProducts.length > 0 && !emailSentRef.current) {
+        
+        // All data for the mail
         const Data = {
-          order_id: `${Date.now()}`,
-          email: profile.Email,  // Use profile email
+          order_id: `${Date.now()}`, // Setting the order id to date for kinda not really random order id
+          email: profile.Email,  
           total: calculateTotalPrice(cartProducts),
-          orders: cartProducts.map((product) => ({
+          orders: cartProducts.map((product) => ({ // Mapping out all products 
             name: product.Name,
             price: product.Price,
             units: product.quantity,
@@ -83,11 +86,11 @@ export default function Success() {
           }))
         };
   
-        emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+        emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY); // Initialization via. authentication
   
         const sendEmail = async () => {
-          try {
-            const response = await emailjs.send(
+          try { 
+            const response = await emailjs.send(// Try to send email with params;
               EMAILJS_CONFIG.SERVICE_ID,
               EMAILJS_CONFIG.TEMPLATE_ID,
               {
@@ -104,14 +107,11 @@ export default function Success() {
             console.error('Email failed:', error);
           }
         };
-  
         sendEmail();
       }
     }, [isReadyToSendEmail, isLoading, profile, cartProducts]);
 
-
   return (
-    
     <div>
         <h1>Thank you for your order</h1>  
         <p>Total price of purchase {calculateTotalPrice(cartProducts)} DKK</p>
@@ -122,13 +122,8 @@ export default function Success() {
                 <p>Price of item: {product.Price} DKK</p>
                 <p>Ordered item: {product.Name} from {product.Brand}, in amount of {product.quantity} and size {product.size}</p>
                 <p>Pickup from store at {product.StoreAddress}</p>
-            
-            
-            
             </div>
-            
         ))}
-      
     </div>
   );
 }
