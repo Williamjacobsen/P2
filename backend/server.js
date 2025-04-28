@@ -31,6 +31,9 @@ import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 import payment from "./routes/payment.js";
 app.use("/checkout", payment);
+import faqRoute from "./routes/faq.js";
+app.use("/faq", faqRoute);
+
 
 // Stuff that needs to be made into separate files in the "route" directory
 

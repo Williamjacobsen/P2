@@ -1,32 +1,44 @@
 import React, { useState, useEffect } from "react";
-import "./FAQ.css";
+import "./faq.css";
 
 export default function FAQ() {
-    const faq = [
-      { question: "How long is the return policy?", answer: "14 days." },
+  const [faqList, setFaqList] = useState([]);
 
-      { question: "What happens if I don't return the item within the 14 days?", answer: "You will have to pay for item." },
+  useEffect(() => {
+    fetchFAQs();
+  }, []);
 
-      { question: "Can I exchange the item for free if I got the wrong size?", answer: "Yes you are able to change the sizing." },
-
-      { question: "How do I pay for my order?", answer: "You can either pay online or in person." },
-
-      { question: "Are you able to get your item shipped?", answer: "No, you are not able to get the item shipped to you." },
-
-    ];
+  const fetchFAQs = async () => {
+    try {
+      const res = await fetch(`http://localhost:3001/faq`);
+      const data = await res.json();
   
+      if (Array.isArray(data)) {
+        setFaqList(data);
+      } else {
+        setFaqList([]);
+        console.error("Fetched FAQs are not an array:", data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch FAQs:", error);
+      setFaqList([]);
+    }
+  };
 
   return (
-    <div className= "faq-container">
+    <div className="faq-container">
       <h1>Frequently Asked Questions</h1>
-      {faq.map((data, i) => {
-        return (
-          <div key={i} classnAME="faq-item">
-            <h2 className="faq-question">{data.questions}</h2>
-            <p className="faq-answer">{data.answers}</p>
+
+      {faqList.length > 0 ? (
+        faqList.map((data) => (
+          <div key={data.ID} className="faq-item">
+            <h2 className="faq-question">{data.Question}</h2>
+            <p className="faq-answer">{data.Answer}</p>
           </div>
-        );
-      })}
+        ))
+      ) : (
+        <p>No FAQs available yet.</p>
+      )}
     </div>
   );
 }

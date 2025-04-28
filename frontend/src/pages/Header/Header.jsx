@@ -42,7 +42,7 @@ const HeaderContent = () => {
         </li>
         <li>
           <Link to="/FAQ" className="hover:underline">
-            Help
+            FAQ
           </Link>
         </li>
         <li>

@@ -7,7 +7,8 @@ import Header from "./pages/Header/Header";
 import NoPage from "./pages/NoPage";
 import FrontPage from "./pages/FrontPage";
 import Example from "./pages/Example";
-import FAQ from "./pages/FAQ/FAQ";
+import FAQ from "./pages/FAQ/faq";
+import AddFAQPage from "./pages/Vendor/AddFAQPage"; 
 import VenderHeader from "./pages/Vendor/VenderHeader";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
@@ -32,6 +33,7 @@ export default function App() {
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
+          <Route path="/add-faq" element={<AddFAQPage />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
           <Route path="/Product/:id" element={<Product />} />
           <Route path="/profile" element={<Profile />} />
