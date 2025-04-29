@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function SuccessPage() {
-  const { session_id } = useParams();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState("Checking payment...");
 
-  console.log("sessionid:", session_id);
+  console.log("sessionId:", session_id);
 
   useEffect(() => {
     async function checkPayment() {
-      console.log("Checking payment for sessionId:", session_id);
+      console.log("Checking payment for sessionId:", sessionId);
       try {
         const res = await fetch(
-          `/checkout/verify-payment?session_id=${session_id}`
+          `/checkout/verify-payment?session_id=${sessionId}`
         );
         const data = await res.json();
         console.log("Payment verification response:", data);
@@ -30,13 +31,13 @@ export default function SuccessPage() {
       }
     }
 
-    if (session_id) {
+    if (sessionId) {
       console.log("Session ID exists, initiating payment check...");
       checkPayment();
     } else {
       console.log("No session ID found in URL params.");
     }
-  }, [session_id]);
+  }, [sessionId]);
 
   return (
     <div>
