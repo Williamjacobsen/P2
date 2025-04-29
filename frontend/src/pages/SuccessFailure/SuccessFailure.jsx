@@ -5,6 +5,8 @@ export default function SuccessPage() {
   const { session_id } = useParams();
   const [status, setStatus] = useState("Checking payment...");
 
+  console.log("sessionid:", session_id);
+
   useEffect(() => {
     async function checkPayment() {
       console.log("Checking payment for sessionId:", session_id);
