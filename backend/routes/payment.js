@@ -64,8 +64,8 @@ router.post("/", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: `http://localhost:3000/success?session_id={${session.id}}`,
-      cancel_url: "http://localhost:3000/cancel",
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={${session.id}}`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
     res.json({ id: session.id });
