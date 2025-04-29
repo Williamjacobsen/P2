@@ -37,7 +37,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/Cart" element={<Cart />} />
-          <Route path="/success:session_id*" element={<SuccessPage />} />
+          <Route path="/success:session_id" element={<SuccessPage />} />
           <Route
             path="/profile-product-orders"
             element={<ProfileProductOrders />}
