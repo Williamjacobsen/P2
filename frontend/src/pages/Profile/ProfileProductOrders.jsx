@@ -27,12 +27,14 @@ export default function ProfileProductOrders() {
     return (<>You have no orders.</>)
   }
 
-  // Sort the orders by IsResolved and secondarily sort by Datetime
+  // Sort the orders by IsCollected, then IsReady, and secondarily sort by Datetime
   let sortedOrders = orders;
   sortedOrders.sort((a, b) => {
-    if (a.IsResolved === 1 && b.IsResolved === 0) return true;
-    else if (a.IsResolved === 0 && b.IsResolved === 1) return false;
-    else return b.DateTime.localeCompare(a.DateTime);
+    if (a.IsCollected === 1 && b.IsCollected === 0) return true;
+    else if (a.IsCollected === 0 && b.IsCollected === 1) return false;
+    else if (a.IsReady === 1 && b.IsReady === 0) return false;
+    else if (a.IsReady === 0 && b.IsReady === 1) return true;
+    else return b.DateTimeOfPurchase.localeCompare(a.DateTimeOfPurchase);
   })
 
   //y TODO: Maybe show unresolved and resolved separately?
@@ -40,16 +42,19 @@ export default function ProfileProductOrders() {
   return (
     <>
       <h3>
-        --- Orders (sorted primarily by resolved and secondarily by time) ---
+        --- Orders ---
       </h3>
       {sortedOrders.map((order) => (
         <>
-          <b>Has been resolved: </b>
-          {order.IsResolved}
+          <b>Has been collected: </b>
+          {order.IsCollected}
+          <br />
+          <b>Is ready to be collected: </b>
+          {order.IsReady}
           <br />
           <b>Time of purchase: </b>
-          {order.DateTime}
-          {/* NOTE: A MySQL Datetime also factors in daylight savings time (DST). */}
+          {order.DateTimeOfPurchase}
+          {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
           <br />
           <b>Product ID: </b>
           {order.ProductID}
