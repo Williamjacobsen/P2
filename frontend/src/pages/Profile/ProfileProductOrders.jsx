@@ -32,7 +32,7 @@ export default function ProfileProductOrders() {
   sortedOrders.sort((a, b) => {
     if (a.IsResolved === 1 && b.IsResolved === 0) return true;
     else if (a.IsResolved === 0 && b.IsResolved === 1) return false;
-    else return b.Datetime.localeCompare(a.Datetime);
+    else return b.DateTime.localeCompare(a.DateTime);
   })
 
   //y TODO: Maybe show unresolved and resolved separately?

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./faq.css";
+import "./FAQ.css";
 
 export default function FAQ() {
   const [faqList, setFaqList] = useState([]);
@@ -12,7 +12,7 @@ export default function FAQ() {
     try {
       const res = await fetch(`http://localhost:3001/faq`);
       const data = await res.json();
-  
+
       if (Array.isArray(data)) {
         setFaqList(data);
       } else {
