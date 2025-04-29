@@ -95,6 +95,7 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/verify-payment", async (req, res) => {
+  //
   const { session_id } = req.query;
   console.log("GET /verify-payment triggered with session_id:", session_id);
 
