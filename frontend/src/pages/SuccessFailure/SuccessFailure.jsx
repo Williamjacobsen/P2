@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export default function SuccessPage() {
-  //
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState("Checking payment...");
 
-  console.log("sessionId:", session_id);
+  console.log("sessionId:", sessionId);
 
   useEffect(() => {
     async function checkPayment() {

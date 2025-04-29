@@ -81,7 +81,7 @@ router.post("/", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/success/{CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
@@ -95,7 +95,6 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/verify-payment", async (req, res) => {
-  //
   const { session_id } = req.query;
   console.log("GET /verify-payment triggered with session_id:", session_id);
 
