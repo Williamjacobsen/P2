@@ -75,4 +75,33 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/verify-payment", async (req, res) => {
+  const { session_id } = req.query;
+
+  if (!session_id) {
+    return res.status(400).json({ error: "Session ID is missing." });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id, {
+      expand: ["payment_intent"],
+    });
+
+    if (
+      session.payment_status === "paid" &&
+      session.payment_intent.status === "succeeded"
+    ) {
+      // payment succeeded
+      res.json({ success: true, message: "Payment confirmed" });
+    } else {
+      res
+        .status(400)
+        .json({ success: false, message: "Payment not successful" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
