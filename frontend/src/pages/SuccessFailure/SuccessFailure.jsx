@@ -7,20 +7,32 @@ export default function SuccessPage() {
 
   useEffect(() => {
     async function checkPayment() {
-      const res = await fetch(
-        `/checkout/verify-payment?session_id=${sessionId}`
-      );
-      const data = await res.json();
+      console.log("Checking payment for sessionId:", sessionId);
+      try {
+        const res = await fetch(
+          `/checkout/verify-payment?session_id=${sessionId}`
+        );
+        const data = await res.json();
+        console.log("Payment verification response:", data);
 
-      if (data.success) {
-        setStatus("Payment successful");
-      } else {
-        setStatus("Payment not successful");
+        if (data.success) {
+          console.log("Payment successful");
+          setStatus("Payment successful");
+        } else {
+          console.log("Payment not successful");
+          setStatus("Payment not successful");
+        }
+      } catch (error) {
+        console.error("Error during payment verification:", error);
+        setStatus("Error verifying payment");
       }
     }
 
     if (sessionId) {
+      console.log("Session ID exists, initiating payment check...");
       checkPayment();
+    } else {
+      console.log("No session ID found in URL params.");
     }
   }, [sessionId]);
 
