@@ -18,6 +18,7 @@ import SignIn from "./pages/Profile/SignIn";
 import Cart from "./pages/Cart/Cart";
 import ProfileProductOrders from "./pages/Profile/ProfileProductOrders";
 import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
+import SuccessPage from "./pages/SuccessFailure/SuccessFailure";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/Cart" element={<Cart />} />
+          <Route path="/success*" element={<SuccessPage />} />
           <Route
             path="/profile-product-orders"
             element={<ProfileProductOrders />}
