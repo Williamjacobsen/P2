@@ -15,6 +15,10 @@ export default function SuccessPage() {
         const res = await fetch(
           `/checkout/verify-payment?session_id=${sessionId}`
         );
+
+        console.log("res:");
+        console.log(res);
+
         const data = await res.json();
         console.log("Payment verification response:", data);
 
