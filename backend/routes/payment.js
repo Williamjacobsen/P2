@@ -10,17 +10,24 @@ const stripe = new Stripe(
 
 router.post("/", async (req, res) => {
   try {
+    console.log("POST /checkout-session triggered");
     const { products: cartProducts } = req.body;
+    console.log("Received cart products:", cartProducts);
 
     if (!cartProducts) {
+      console.log("No products found in request body");
       return res.status(400).json({ error: "No products in the cart." });
     }
 
     const productIds = cartProducts.map((p) => p.id);
+    console.log("Fetching products from DB with IDs:", productIds);
+
     const [products] = await pool.query(
       "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
       [productIds]
     );
+
+    console.log("Products fetched from DB:", products);
 
     const productMap = {};
     products.forEach((product) => {
@@ -29,6 +36,7 @@ router.post("/", async (req, res) => {
 
     for (const item of cartProducts) {
       if (!productMap[item.id]) {
+        console.log(`Product with ID ${item.id} not found in DB`);
         return res
           .status(400)
           .json({ error: `Product with ID ${item.id} not found` });
@@ -42,7 +50,14 @@ router.post("/", async (req, res) => {
         product.Price * (1 - product.DiscountProcent / 100);
       const unit_amount = Math.round(discountedPrice * 100); // Convert to cents
 
+      console.log(
+        `Product ${product.Name} (ID: ${product.ID}) - original price: ${product.Price}, discount: ${product.DiscountProcent}%, final unit amount: ${unit_amount}`
+      );
+
       if (unit_amount < 250) {
+        console.log(
+          `Product "${product.Name}" price after discount is below minimum`
+        );
         return res.status(400).json({
           error: `Product "${product.Name}" (ID: ${product.ID}) price after discount is too low (minimum 2.5 DKK).`,
         });
@@ -60,6 +75,8 @@ router.post("/", async (req, res) => {
       });
     }
 
+    console.log("Creating Stripe session with line items:", line_items);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
@@ -68,17 +85,21 @@ router.post("/", async (req, res) => {
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
+    console.log("Stripe session created:", session.id);
+
     res.json({ id: session.id });
   } catch (error) {
-    console.log(error);
+    console.log("Error during checkout session creation:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
 router.get("/verify-payment", async (req, res) => {
   const { session_id } = req.query;
+  console.log("GET /verify-payment triggered with session_id:", session_id);
 
   if (!session_id) {
+    console.log("No session ID provided in query");
     return res.status(400).json({ error: "Session ID is missing." });
   }
 
@@ -87,19 +108,24 @@ router.get("/verify-payment", async (req, res) => {
       expand: ["payment_intent"],
     });
 
+    console.log("Retrieved Stripe session:", session.id);
+    console.log("Payment status:", session.payment_status);
+    console.log("Payment intent status:", session.payment_intent.status);
+
     if (
       session.payment_status === "paid" &&
       session.payment_intent.status === "succeeded"
     ) {
-      // payment succeeded
+      console.log("Payment was successful");
       res.json({ success: true, message: "Payment confirmed" });
     } else {
+      console.log("Payment was not successful");
       res
         .status(400)
         .json({ success: false, message: "Payment not successful" });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error verifying payment:", error);
     res.status(500).json({ error: error.message });
   }
 });
