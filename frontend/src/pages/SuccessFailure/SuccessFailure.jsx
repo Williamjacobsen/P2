@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function SuccessPage() {
-  const { session_id } = useParams();
+  const [searchParams] = useSearchParams();
+  const session_id = searchParams.get("session_id");
   const [status, setStatus] = useState("Checking payment...");
 
   console.log("sessionid:", session_id);
