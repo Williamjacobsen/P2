@@ -31,6 +31,8 @@ import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 import payment from "./routes/payment.js";
 app.use("/checkout", payment);
+import productID from "./routes/productID.js";
+app.use("/product", productID);
 import faqRoute from "./routes/faq.js";
 app.use("/faq", faqRoute);
 
@@ -107,15 +109,15 @@ app.get("/products", async (req, res) => {
 });
 
 app.get("/shopCircles", async (req, res) => {
-  try{
+  try {
     const [result] = await pool.query(`
         SELECT * FROM Vendor
         LIMIT 25
     `);
     res.status(200).json(result)
-  }catch (err){
+  } catch (err) {
     console.log("Error in database query for shopcircles", err);
-    res.status(500).json({error: "Failed to fetch ShopCircles"})
+    res.status(500).json({ error: "Failed to fetch ShopCircles" })
   }
 })
 
