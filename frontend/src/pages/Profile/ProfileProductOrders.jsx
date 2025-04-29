@@ -59,6 +59,9 @@ export default function ProfileProductOrders() {
           <b>Product ID: </b>
           {order.ProductID}
           <br />
+          <b>Product size ID: </b>
+          {order.ProductSizeID}
+          <br />
           <br />
         </>
       ))}
@@ -127,3 +130,4 @@ async function requestProfileProductOrders() {
     return Promise.reject(error);
   }
 }
+
