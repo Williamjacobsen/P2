@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function SuccessPage() {
-  const { sessionId } = useParams();
+  const { session_id } = useParams();
   const [status, setStatus] = useState("Checking payment...");
 
   useEffect(() => {
     async function checkPayment() {
-      console.log("Checking payment for sessionId:", sessionId);
+      console.log("Checking payment for sessionId:", session_id);
       try {
         const res = await fetch(
-          `/checkout/verify-payment?session_id=${sessionId}`
+          `/checkout/verify-payment?session_id=${session_id}`
         );
         const data = await res.json();
         console.log("Payment verification response:", data);
@@ -28,13 +28,13 @@ export default function SuccessPage() {
       }
     }
 
-    if (sessionId) {
+    if (session_id) {
       console.log("Session ID exists, initiating payment check...");
       checkPayment();
     } else {
       console.log("No session ID found in URL params.");
     }
-  }, [sessionId]);
+  }, [session_id]);
 
   return (
     <div>
