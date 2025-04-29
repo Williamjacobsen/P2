@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import useGetProfile from "./useGetProfile";
 import { requestAccessToken } from "./ReSignInPopUp";
+import "./Profile.css";
 
 const ordersPerPage = 5;
 
@@ -40,54 +40,58 @@ export default function ProfileProductOrders() {
     else return b.DateTimeOfPurchase.localeCompare(a.DateTimeOfPurchase);
   })
 
+  //y TODO: Maybe show unresolved and resolved separately?
+
   return (
     <>
-      Page {ordersPageNumber} of {Math.ceil(sortedOrders.length / ordersPerPage)}
-      <br />
-      <button onClick={function (event) {
-        if (ordersPageNumber !== 1) {
-          setOrdersPageNumber(ordersPageNumber - 1)
-        }
-      }}>
-        Previous page
-      </button>
-      <button onClick={function (event) {
-        if ((ordersPageNumber - 1) * ordersPerPage < sortedOrders.length - ordersPerPage) {
-          setOrdersPageNumber(ordersPageNumber + 1)
-        }
-      }}>
-        Next page
-      </button>
-      <h3>
-        --- Orders ---
-      </h3>
-      {sortedOrders.slice((ordersPageNumber - 1) * ordersPerPage, ordersPageNumber * ordersPerPage).map((order) => (
-        <>
-          <b>Has been collected: </b>
-          {order.IsCollected}
-          <br />
-          <b>Is ready to be collected: </b>
-          {order.IsReady}
-          <br />
-          <b>Time of purchase: </b>
-          {order.DateTimeOfPurchase}
-          {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
-          <br />
-          <b>Order ID: </b>
-          {order.ID}
-          <br />
-          <b>Product ID: </b>
-          {order.ProductID}
-          <br />
-          <b>Product size ID: </b>
-          {order.ProductSizeID}
-          <br />
-          <br />
-        </>
-      ))}
+      <div className="orders-section">
+        <p>Page {ordersPageNumber} of {Math.ceil(sortedOrders.length / ordersPerPage)}</p>  
+        <br />
+        <button onClick={function (event) {
+          if (ordersPageNumber !== 1) {
+            setOrdersPageNumber(ordersPageNumber - 1)
+          }
+        }}>
+          Previous page
+        </button>
+        <button onClick={function (event) {
+          if ((ordersPageNumber - 1) * ordersPerPage < sortedOrders.length - ordersPerPage) {
+            setOrdersPageNumber(ordersPageNumber + 1)
+          }
+        }}>
+          Next page
+        </button>
+        <h3>
+          Orders 
+        </h3>
+        {sortedOrders.slice((ordersPageNumber - 1) * ordersPerPage, ordersPageNumber * ordersPerPage).map((order) => (
+          <>
+            <b>Has been resolved: </b>
+            {order.IsResolved}
+            <br />
+            <b>Time of purchase: </b>
+            {order.DateTimeOfPurchase}
+            {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
+            <br />
+            <b>Order ID: </b>
+            {order.ID}
+            <br />
+            <b>Product ID: </b>
+            {order.ProductID}
+            <br />
+            <b>Product size ID: </b>
+            {order.ProductSizeID}
+            <br />
+            <br />
+            <hr />
+          </>
+        ))}
+      </div>
     </>
   );
+  
 }
+
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Custom hooks

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
-import './FrontPage.css';
+import './SearchBar.css';
 
 export default function BoxShop() {
   const [shops, setShops] = useState([])
