@@ -240,7 +240,7 @@ router.post("/delete", [
   }
 });
 
-router.post("/modify", [
+router.put("/modify", [
   validatePassword,
   validateProfilePropertyName,
   validateProfileNewValue_Part1Of2, // This does not take into account the property name.

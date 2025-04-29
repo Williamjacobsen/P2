@@ -4,12 +4,15 @@ import { useNavigate } from "react-router-dom";
 import useGetProfile from "./useGetProfile";
 import { requestAccessToken } from "./ReSignInPopUp";
 
+const ordersPerPage = 5;
+
 export default function ProfileProductOrders() {
 
   // Hooks
   const navigate = useNavigate();
   const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoadingProfile);
+  const [ordersPageNumber, setOrdersPageNumber] = useState(1);
 
   // Is the user signed in?
   if (isLoadingProfile) {
@@ -27,7 +30,7 @@ export default function ProfileProductOrders() {
     return (<>You have no orders.</>)
   }
 
-  // Sort the orders by IsCollected, then IsReady, and secondarily sort by Datetime
+  // Sort the orders by !IsCollected, then IsReady, then Datetime
   let sortedOrders = orders;
   sortedOrders.sort((a, b) => {
     if (a.IsCollected === 1 && b.IsCollected === 0) return true;
@@ -37,14 +40,28 @@ export default function ProfileProductOrders() {
     else return b.DateTimeOfPurchase.localeCompare(a.DateTimeOfPurchase);
   })
 
-  //y TODO: Maybe show unresolved and resolved separately?
-
   return (
     <>
+      Page {ordersPageNumber} of {Math.ceil(sortedOrders.length / ordersPerPage)}
+      <br />
+      <button onClick={function (event) {
+        if (ordersPageNumber !== 1) {
+          setOrdersPageNumber(ordersPageNumber - 1)
+        }
+      }}>
+        Previous page
+      </button>
+      <button onClick={function (event) {
+        if ((ordersPageNumber - 1) * ordersPerPage < sortedOrders.length - ordersPerPage) {
+          setOrdersPageNumber(ordersPageNumber + 1)
+        }
+      }}>
+        Next page
+      </button>
       <h3>
         --- Orders ---
       </h3>
-      {sortedOrders.map((order) => (
+      {sortedOrders.slice((ordersPageNumber - 1) * ordersPerPage, ordersPageNumber * ordersPerPage).map((order) => (
         <>
           <b>Has been collected: </b>
           {order.IsCollected}
@@ -55,6 +72,9 @@ export default function ProfileProductOrders() {
           <b>Time of purchase: </b>
           {order.DateTimeOfPurchase}
           {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
+          <br />
+          <b>Order ID: </b>
+          {order.ID}
           <br />
           <b>Product ID: </b>
           {order.ProductID}

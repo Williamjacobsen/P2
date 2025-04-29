@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
-import { requestAccessToken } from "./ReSignInPopUp";
+import { requestAccessToken, promptReSignIn } from "./ReSignInPopUp";
 
 export default function Profile() {
 
@@ -352,7 +352,7 @@ async function requestProfileModification(password, propertyName, newValue) {
   try {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/modify", {
-      method: "POST",
+      method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
@@ -387,7 +387,7 @@ async function requestVendorModification(password, propertyName, newValue) {
   try {
     // Post data from the form to server
     const response = await fetch("http://localhost:3001/vendor/modify", {
-      method: "POST",
+      method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",

@@ -55,7 +55,7 @@ router.get("/get-all", async (req, res) => {
   }
 });
 
-router.post("/modify", [
+router.put("/modify", [
   validatePassword,
   validateVendorPropertyName,
   validateVendorNewValue_Part1Of2, // This does not take into account the property name.
