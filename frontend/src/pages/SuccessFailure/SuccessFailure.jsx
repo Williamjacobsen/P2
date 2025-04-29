@@ -11,9 +11,13 @@ export default function SuccessPage() {
   useEffect(() => {
     async function checkPayment() {
       console.log("Checking payment for sessionId:", sessionId);
+      console.log(
+        `fetching: ${process.env.REACT_APP_BACKEND_URL}/checkout/verify-payment?session_id=${sessionId}`
+      );
+
       try {
         const res = await fetch(
-          `/checkout/verify-payment?session_id=${sessionId}`
+          `${process.env.REACT_APP_BACKEND_URL}/checkout/verify-payment?session_id=${sessionId}`
         );
 
         console.log("res:");
