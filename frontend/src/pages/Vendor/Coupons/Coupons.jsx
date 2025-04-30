@@ -2,10 +2,9 @@ import { useState } from 'react';
 
 export default function CreateCoupon() {
   const [form, setForm] = useState({
-    coupon_code: '',
-    discount_value: '',
-    is_percentage: false,
-    is_active: true
+    CouponCode: '',
+    DiscountValue: '',
+    IsActive: true
   });
 
   const handleChange = (e) => {
@@ -19,11 +18,12 @@ export default function CreateCoupon() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("djaflkjfds");
       // Extract data from form
-      const coupon_code = form.coupon_code;
-      const discount_value = form.discount_value;
-      const is_percentage = form.is_percentage;
-      const is_active = form.is_active;
+      const CouponCode = form.CouponCode;
+      const DiscountValue = form.DiscountValue;
+      const IsActive = form.IsActive;
+      console.log("djaflddkjfds");
       // Post data from the form to server
       const response = await fetch("http://localhost:3001/create-coupon", {
         method: "POST",
@@ -31,33 +31,31 @@ export default function CreateCoupon() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          coupon_code,
-          discount_value,
-          is_percentage,
-          is_active
+          CouponCode,
+          DiscountValue,
+          IsActive
         }),
       });
+      console.log("djaflddkjfds");
       // Handle server response
       const data = await response.json(); // In case you need to get read a response from the server
-      if (!response.ok) return Promise.reject("Oh nooooo! There was an error!");
+      if (!response.ok) {
+        return Promise.reject(data.error);
+      }
       alert('Coupon created successfully!');
     }
     catch (error) {
-      console.error(error);
-      alert('Error creating coupon.');
+      console.log(error);
+      alert('Error creating coupon. Error: ' + error);
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input name="coupon_code" placeholder="Coupon Code" onChange={handleChange} required />
-      <input name="discount_value" type="number" step="0.01" placeholder="Discount Value" onChange={handleChange} required />
+      <input name="CouponCode" placeholder="Coupon Code" onChange={handleChange} required />
+      <input name="DiscountValue" type="number" step="0.01" placeholder="Discount Value" onChange={handleChange} required />
       <label>
-        <input type="checkbox" name="is_percentage" onChange={handleChange} />
-        Percentage?
-      </label>
-      <label>
-        <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleChange} />
+        <input type="checkbox" name="IsActive" checked={form.IsActive} onChange={handleChange} />
         Active
       </label>
       <button type="submit">Create Coupon</button>

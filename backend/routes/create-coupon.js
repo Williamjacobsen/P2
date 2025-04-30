@@ -1,20 +1,35 @@
-const express = require('express');
+import express from 'express';
+import pool from "../db.js";
+
 const router = express.Router();
 
-const db = require('../db.js');
+router.post('/', async (req, res) => {
+  try {
+    console.log("hddddeydddyy");
+    const {
+      CouponCode,
+      DiscountValue,
+      IsActive
+    } = req.body;
 
-router.post('/', (req, res) => {
-  const { coupon_code, discount_value, is_percentage, is_active } = req.body;
+    console.log("heydddyy");
+    await pool.query(`INSERT INTO p2.Coupons 
+      (CouponCode, DiscountValue, IsActive)
+      VALUES (?, ?, ?)`,
+      [
+        CouponCode,
+        DiscountValue,
+        IsActive
+      ]
+    );
 
-  const sql = `INSERT INTO Coupons (coupon_code, discount_value, is_percentage, is_active) VALUES (?, ?, ?, ?)`;
-
-  db.execute(sql, [coupon_code, discount_value, is_percentage, is_active], (err, results) => {
-    if (err) {
-      console.error('Error inserting coupon:', err);
-      return res.status(500).send('Failed to save coupon');
-    }
-    res.send('Coupon saved successfully');
-  });
+    console.log("heyyy");
+    res.status(200).json({}); // 200 = OK
+  }
+  catch (error) {
+    console.error('Error inserting coupon:', error);
+    return res.status(500).json({ error: error }); // 500 = Internal server error
+  }
 });
 
 export default router;

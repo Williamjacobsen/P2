@@ -14,6 +14,8 @@ app.use(express.json());
 
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
+import createCouponRoute from "./routes/create-coupon.js";
+app.use("/create-coupon", createCouponRoute);
 
 app.get("/test", (req, res) => {
   res.send("API is working!");
