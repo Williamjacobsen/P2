@@ -1,5 +1,7 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
+import "./Header.css";
+import SearchBar from "../SearchBar";
 
 export default function Header() {
   return (
@@ -15,7 +17,9 @@ const HeaderContent = () => {
     <nav className="flex justify-between items-center px-6 py-3 border-b shadow-md">
       {/* Left Section - Website */}
       <div className="flex items-center">
-        <span className="text-lf font-bold">Insert Cool Website Name</span>
+        <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+            <span className="text-lf font-bold">Aalborg Clothing Shops</span>
+        </Link>
         <span className="mx-4 border-l h-6"></span> {/* Vertical Separator */}
       </div>
 
@@ -27,7 +31,7 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/products" className="hover:underline">
+          <Link to="/Product-Catalogue" className="hover:underline">
             Products
           </Link>
         </li>
@@ -37,21 +41,28 @@ const HeaderContent = () => {
           </Link>
         </li>
         <li>
-          <Link to="/help" className="hover:underline">
-            Help
+          <Link to="/FAQ" className="hover:underline">
+            FAQ
           </Link>
         </li>
         <li>
-          <Link to="/partners" className="hover:underline">
+          <Link to="/vendor" className="hover:underline">
             For Partners
           </Link>
         </li>
       </ul>
 
       {/*Right Section - Cart */}
-      <div className="flex items-center space-x-2">
-        <span className="text-sm font-bold">Cart</span>
-      </div>
+      <SearchBar/>
+        <ul>
+            <li>
+                <div className="flex items-center space-x-2">
+                    <Link to="/Cart" className="hover:underline">
+                        <span className="text-sm font-bold">Cart</span>
+                    </Link>
+                </div>
+            </li>
+        </ul>
     </nav>
   );
 };

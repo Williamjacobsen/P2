@@ -1,11 +1,13 @@
 // A tutorial I've taken heavy inspiration from: https://www.youtube.com/watch?v=9DwGahSqcEc
 
-import React, { useState } from "react";
+import { useState } from "react";
+
 import "./modal.css";
 
-/** Creates a button that when pressed shows a pop up. */
+/** 
+ * Creates a button that when pressed shows a pop up. 
+ */
 export default function Modal({ modalContent = "X", openButtonText = "X", closeButtonText = "CLOSE" }) {
-
   // Modal visibility
   const [modalVisible, setModalVisibility] = useState(false);
   function toggleModal() {
@@ -18,7 +20,6 @@ export default function Modal({ modalContent = "X", openButtonText = "X", closeB
       <button onClick={toggleModal} className="modal-open-button">
         {openButtonText}
       </button>
-
       {/* The modal */}
       {
         modalVisible && (

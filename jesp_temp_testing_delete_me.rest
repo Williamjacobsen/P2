@@ -1,0 +1,62 @@
+
+### Testing of profile.js
+
+POST http://localhost:3001/profile/create
+Content-Type: application/json
+
+{
+  "email": "1@1.com",
+  "password": "1",
+  "phoneNumber": "234224456"
+}
+
+POST http://localhost:3001/profile/sign-in
+Content-Type: application/json
+
+{
+  "email": "4@4.com",
+  "password": "4"
+}
+
+POST http://localhost:3001/profile/generate-access-token
+Cookie: profileRefreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEsImlhdCI6MTc0NTc0NjEzMn0._VsgdwuFxLiZjrbYEF_XFitGTSvQ5lNETrbUqcRxFDo
+
+GET http://localhost:3001/profile/get
+Cookie:  profileAccessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEsImlhdCI6MTc0NTc0NjE4MiwiZXhwIjoxNzQ1NzQ2NDgyfQ.fzetUqNf0DczzIBVhjUgGdC3NF_S_jiiKbpJouE8N-A
+
+POST http://localhost:3001/profile/modify
+Cookie:  profileAccessToken=yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEsImlhdCI6MTc0NTc0NjEzMiwiZXhwIjoxNzQ1NzQ2NDMyfQ.wbMMSph-6j3UVE82VJeJ4Hk7J6zYzeVBDmu0AOHC58k
+Content-Type: application/json
+
+{
+  "password": "1",
+  "propertyName": "PhoneNumber",
+  "newValue": "11114444"
+}
+
+POST http://localhost:3001/profile/delete
+Cookie:  profileAccessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjQsImlhdCI6MTc0NTY0OTg5NiwiZXhwIjoxNzQ1NjUwMTk2fQ.W9gAxEdw6hBq5tON94-5EFemJTxd9Ms-UkJic04IQ3c
+Content-Type: application/json
+
+{
+  "password": "1"
+}
+
+### Testing of productOrder.js
+
+GET http://localhost:3001/productOrder/getProfileProductOrders
+Cookie:  profileAccessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjQsImlhdCI6MTc0NTY0OTg5NiwiZXhwIjoxNzQ1NjUwMTk2fQ.W9gAxEdw6hBq5tON94-5EFemJTxd9Ms-UkJic04IQ3c
+
+### Testing of vendor.js
+
+GET http://localhost:3001/vendor/get?vendorID=1
+
+POST http://localhost:3001/vendor/modify
+Cookie:  profileAccessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlSUQiOjEsImlhdCI6MTc0NTc0MzYyNCwiZXhwIjoxNzQ1NzQzOTI0fQ.-MfNmwneQ_8jXL40zJoMaVHML3Oy0qGLX_rbwz4fcQk
+Content-Type: application/json
+
+{
+  "password": "4",
+  "propertyName": "PhoneNumber",
+  "newValue": "12345678910"
+}

@@ -5,6 +5,7 @@ nav {
     padding: 10px 20px;
     border-bottom: 1px solid #ddd;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    gap: 20;
   }
   
   nav ul {
@@ -35,4 +36,9 @@ nav {
     font-size: 14px;
     color: gray;
   }
+
+.SearchBar {
+  position: absolute;
+  
+}
   

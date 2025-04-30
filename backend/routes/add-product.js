@@ -1,9 +1,47 @@
 import express from "express";
 import pool from "../db.js";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../uploads"));
+  },
+  filename: (req, file, cb) => {
+    const safeFilename = file.originalname
+      .replace(/\s+/g, "_")
+      .replace(/#/g, "");
+    cb(null, `${Date.now()}-${safeFilename}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed"), false);
+  }
+};
+
+const ensureArray = (val) => {
+  if (Array.isArray(val)) {
+    return val;
+  }
+  if (val != null) {
+    return [val];
+  }
+  return [];
+};
+
+const upload = multer({ storage, fileFilter });
+
+router.post("/", upload.array("images", 10), async (req, res) => {
   try {
     const {
       storeID,
@@ -16,12 +54,10 @@ router.post("/", async (req, res) => {
       gender,
     } = req.body;
 
-    // todo: add some variable validation (like "name" needs to be "not null" in database)
-
     const [result] = await pool.query(
-      `INSERT INTO p2.product 
-      (StoreId, Name, Price, DiscountProcent, Description, ClothingType, Brand, Gender)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO p2.Product
+         (StoreID, Name, Price, DiscountProcent, Description, ClothingType, Brand, Gender)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         storeID,
         name,
@@ -34,12 +70,36 @@ router.post("/", async (req, res) => {
       ]
     );
 
+    const productId = result.insertId;
+
+    if (req.files.length != 0) {
+      for (const file of req.files) {
+        const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
+        await pool.query(
+          `INSERT INTO p2.ProductImage (ProductID, Path) VALUES (?, ?)`,
+          [productId, imageUrl]
+        );
+      }
+    }
+
+    const sizes = ensureArray(req.body.size);
+    const stocks = ensureArray(req.body.stock);
+
+    for (let i = 0; i < sizes.length; i++) {
+      const size = sizes[i];
+      const stock = parseInt(stocks[i]);
+      await pool.query(
+        `INSERT INTO p2.ProductSize (ProductID, Size, Stock) VALUES (?, ?, ?)`,
+        [productId, size, stock]
+      );
+    }
+
     res.status(201).json({
       message: "Product added successfully",
-      productId: result.insertId,
+      productId,
     });
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Error adding product:", error);
     res.status(500).json({ message: "Error adding product to database" });
   }
 });
