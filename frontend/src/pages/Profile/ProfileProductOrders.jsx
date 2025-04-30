@@ -40,12 +40,10 @@ export default function ProfileProductOrders() {
     else return b.DateTimeOfPurchase.localeCompare(a.DateTimeOfPurchase);
   })
 
-  //y TODO: Maybe show unresolved and resolved separately?
-
   return (
     <>
       <div className="orders-section">
-        <p>Page {ordersPageNumber} of {Math.ceil(sortedOrders.length / ordersPerPage)}</p>  
+        <p>Page {ordersPageNumber} of {Math.ceil(sortedOrders.length / ordersPerPage)}</p>
         <br />
         <button onClick={function (event) {
           if (ordersPageNumber !== 1) {
@@ -62,12 +60,15 @@ export default function ProfileProductOrders() {
           Next page
         </button>
         <h3>
-          Orders 
+          Orders
         </h3>
         {sortedOrders.slice((ordersPageNumber - 1) * ordersPerPage, ordersPageNumber * ordersPerPage).map((order) => (
           <>
-            <b>Has been resolved: </b>
-            {order.IsResolved}
+            <b>Has been collected: </b>
+            {order.IsCollected}
+            <br />
+            <b>Ready to be collected: </b>
+            {order.IsReady}
             <br />
             <b>Time of purchase: </b>
             {order.DateTimeOfPurchase}
@@ -76,20 +77,37 @@ export default function ProfileProductOrders() {
             <b>Order ID: </b>
             {order.ID}
             <br />
-            <b>Product ID: </b>
-            {order.ProductID}
+            <b>Name of vendor: </b>
+            {order.VendorName}
             <br />
-            <b>Product size ID: </b>
-            {order.ProductSizeID}
+            <b>CVR of vendor: </b>
+            {order.VendorCVR}
             <br />
+            <b>Name of brand: </b>
+            {order.ProductBrand}
+            <br />
+            <b>Name of product: </b>
+            {order.ProductName}
+            <br />
+            <b>Type of clothing: </b>
+            {order.ProductClothingType}
+            <br />
+            <b>Size: </b>
+            {order.ProductSize}
+            <br />
+            <b>Gender: </b>
+            {order.ProductGender}
+            <br />
+            <b>Price: </b>
+            {order.ProductPrice} DKK
             <br />
             <hr />
           </>
         ))}
       </div>
+>>>>>>> Stashed changes
     </>
   );
-  
 }
 
 
@@ -132,7 +150,6 @@ function useGetProfileProductOrders(isLoadingProfile) {
  */
 async function requestProfileProductOrders() {
   try {
-    // Get data from the form to server
     const response = await fetch("http://localhost:3001/productOrder/getProfileProductOrders", {
       method: "GET",
       credentials: "include", // Ensures cookies are sent with the request

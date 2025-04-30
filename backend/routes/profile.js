@@ -218,6 +218,7 @@ router.post("/delete", [
     const {
       password
     } = req.body;
+    const refreshToken = req.cookies.profileRefreshToken;
     const accessToken = req.cookies.profileAccessToken;
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
@@ -230,6 +231,9 @@ router.post("/delete", [
       return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
     }
     // Delete the profile
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
+    setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
+    setSecureCookie(res, "profileAccessToken", accessToken, 0);
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
     // Send back response
     return res.status(200).json({}); // 200 = OK
