@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
 import ProductCard from "./Product-Card";
 import "./Product-Card.css"
 import { CatalogueFilter, CatalogueSearch } from "./Catalogue-Filter";
-import { useLocation } from "react-router-dom";
+import usePages from "../../utils/usePages";
 
+const productsPerPage = 10;
 
 export default function ProductCatalogue() {
     // Filters and sorts needs usestate to react to selections
@@ -20,6 +23,9 @@ export default function ProductCatalogue() {
     //So instead we have shownProducts which is just a reference array that we can freely change and loadedProducts is untouched
     const [loadedProducts, setLoadedProducts] = useState([]);
     const [shownProducts, setShownProducts] = useState([]);
+
+    // Hook for page functionality
+    const [getVisiblePartOfPageArray, CurrentPageDisplay, PreviousPageButton, NextPageButton] = usePages(shownProducts, productsPerPage);
 
     const location = useLocation();
 
@@ -179,8 +185,13 @@ export default function ProductCatalogue() {
                     </button>)
                 }
             </div>
+            <div>
+                <CurrentPageDisplay />
+                <PreviousPageButton />
+                <NextPageButton />
+            </div>
             <div className="product-grid">
-                {shownProducts.map((productIndex) => {
+                {getVisiblePartOfPageArray().map((productIndex) => {
                     const product = loadedProducts[productIndex]
                     return (
                         <ProductCard id={product.ID} storeName={product.StoreName} productName={product.Name} price={product.Price}></ProductCard>
