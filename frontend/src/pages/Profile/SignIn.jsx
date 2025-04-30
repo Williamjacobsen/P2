@@ -126,7 +126,6 @@ async function signUp(event) {
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/create", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
@@ -156,7 +155,6 @@ async function requestProfileCreation(email, password, phoneNumber) {
  */
 export async function requestSignIn(email, password) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-in", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request

@@ -4,7 +4,7 @@ import "./Profile.css";
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
-import { requestAccessToken, promptReSignIn } from "./ReSignInPopUp";
+import { requestAccessToken } from "./ReSignInPopUp";
 
 export default function Profile() {
 
@@ -32,7 +32,6 @@ export default function Profile() {
         <h3>
           Profile Information
         </h3>
-        
         <b>Email address: </b>
         {profile.Email}
         <Modal
@@ -90,7 +89,7 @@ export default function Profile() {
           vendor !== null && (
             <>
               <h3>
-                --- Vendor Profile Information ---
+                Vendor Profile Information
               </h3>
               <b>Vendor name: </b>
               {vendor.Name}
@@ -319,7 +318,6 @@ async function signOutAllDevices() {
  */
 async function requestProfileDeletion(password) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/delete", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
@@ -354,7 +352,6 @@ async function requestProfileDeletion(password) {
  */
 async function requestProfileModification(password, propertyName, newValue) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/modify", {
       method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
@@ -389,7 +386,6 @@ async function requestProfileModification(password, propertyName, newValue) {
  */
 async function requestVendorModification(password, propertyName, newValue) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/vendor/modify", {
       method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
@@ -422,7 +418,6 @@ async function requestVendorModification(password, propertyName, newValue) {
  */
 async function requestSignOut() {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-out-device", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
@@ -447,7 +442,6 @@ async function requestSignOut() {
  */
 async function requestSignOutAllDevices() {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-out-all-devices", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request

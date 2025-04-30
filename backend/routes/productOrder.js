@@ -27,7 +27,7 @@ router.get("/getProfileProductOrders", [
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;
     // Get product orders for that profile
-    const [profileProductOrderRows] = await pool.query(`SELECT * FROM p2.ProductOrder WHERE CustomerID='${profileID}';`);
+    const [profileProductOrderRows] = await pool.query(`SELECT * FROM p2.ProductOrder WHERE CustomerProfileID='${profileID}';`);
     // Send back response
     res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
     return res.status(200).json({ productOrders: profileProductOrderRows }); // 200 = OK

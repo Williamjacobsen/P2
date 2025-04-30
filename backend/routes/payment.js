@@ -18,18 +18,16 @@ const stripe = new Stripe(
 router.post(
   "/",
   [
-    validateProfileAccessToken, //r
+    validateProfileAccessToken,
   ],
   async (req, res) => {
-    //R JWT token validation
     try {
       // Handle validation errors
-      handleValidationErrors(req, res, validationResult); //r
-
-      const { products: cartProducts } = req.body;
-
-      const accessToken = req.cookies.profileAccessToken; //R
-      const profile = await getProfile(res, accessToken); //R
+      handleValidationErrors(req, res, validationResult);
+      // Get information from request
+      const { products: cartProducts } = req.body; // TODO: NEEDS INPUT VALIDATION!
+      const accessToken = req.cookies.profileAccessToken;
+      const profile = await getProfile(res, accessToken);
 
       if (!cartProducts) {
         return res.status(400).json({ error: "No products in the cart." });
@@ -88,10 +86,51 @@ router.post(
         cancel_url: "http://localhost:3000/cancel",
       });
 
-      res.json({ id: session.id });
+      // Add products to profile product orders and remove from stock
+      for (const productID of productIds) {
+        //r Right now, it adds the products before the purchase has been confirmed.
+        // Get needed information
+        //r Getting this information should happen before making the transaction occurs 
+        //r (the transaction should use the same variables as this - else a product might change before
+        //r the transation finishes and the user then suddenly gets a different product added to their orders.)
+        const [productRows] = await pool.query(`SELECT * FROM p2.Product WHERE ID='${productID}';`);
+        const product = productRows[0];
+        const [vendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${product.StoreID}';`);
+        const vendor = vendorRows[0];
+        const size = -1;
+        const sizeID = -1;
+        const finalPrice = Math.round(product.Price * (1 - product.DiscountProcent / 100));
+        const currentDateTime = new Date();
+        currentDateTime.getUTCDate();
+        // Add product order to profile
+        await pool.query(
+          `INSERT INTO p2.ProductOrder
+          (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR,
+          ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            profile.ID,
+            0,
+            0,
+            currentDateTime,
+            vendor.Name,
+            vendor.CVR,
+            product.Brand,
+            product.Name,
+            product.ClothingType,
+            size,
+            product.Gender,
+            finalPrice
+          ]);
+        // Remove 1 stock of the product
+        await pool.query(`UPDATE p2.ProductSize SET Stock=Stock-1 WHERE ID='${sizeID}';`);
+      }
+      // Send back response
+      res.status(200).json({ id: session.id }); // 200 = OK
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: error.message });
+      if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
+        return res.status(500).json({ error: "Internal server error: " + error });
+      }
     }
   }
 );
