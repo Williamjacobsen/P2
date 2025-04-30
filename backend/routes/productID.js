@@ -12,14 +12,16 @@ router.get("/:id", async (req, res) => {
   
       const [result] = await pool.query(
         `SELECT 
-           p2.Product.*, 
-           p2.Vendor.Name AS StoreName, 
-           p2.productimage.Path,
-           p2.Vendor.Address AS StoreAddress
-           FROM p2.Product
-           JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
-           LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
-           WHERE p2.Product.ID = ?;`,
+          p2.Product.*, 
+          p2.Vendor.Name,
+          p2.ProductImage.Path,
+          p2.Vendor.Address,
+          p2.ProductSize.*
+          FROM p2.Product
+          JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+          LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID
+          LEFT JOIN p2.ProductSize ON p2.Product.ID = p2.ProductSize.ProductID
+          WHERE p2.Product.ID = ?;`,
         [id]
       );
   

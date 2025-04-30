@@ -45,6 +45,41 @@ export default function ProductPage() {
     setMainImage(image);
   };
 
+  /** Find and input sizes */
+  const SizeSelector = () => {
+    const allSizes = ['small', 'medium', 'large', 's', 'm', 'l'];
+    let size = null;
+    if (productData[0]?.Size !== null) {
+      size = productData[0]?.Size.toLowerCase();
+      if (size == 's') size = 'small';
+      else if (size == 'm') size = 'medium';
+      else if (size == 'l') size = 'large';
+    }
+    else return <>no size available</>
+    return (
+    <select
+      id="category"
+      defaultValue=""
+      className="SortBox"
+      onChange={(e) => {
+        setSizeSelection(e.target.value);
+    }}
+      style={{ width: "300px" }}
+    >
+      <option value="SIZE" hidden={true}>
+        SIZE
+      </option>
+        {allSizes.map((sizes) =>
+          size.toLowerCase() === sizes.toLowerCase() ? (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ) : null
+        )}
+      </select>
+    );
+  }
+  
   return (
     <div className="container">
       <div className="left-content">
@@ -89,22 +124,7 @@ export default function ProductPage() {
         <p className="product-name">{productData[0]?.Name}</p>
         <p className="product-price">{productData[0]?.Price},00 kr</p>
         <div>
-          <select
-            id="category"
-            defaultValue=""
-            className="SortBox"
-            onChange={(e) => {
-              setSizeSelection(e.target.value);
-            }}
-            style={{ width: "300px" }}
-          >
-            <option value="SIZE" hidden={true}>
-              SIZE
-            </option>
-            <option value="small">small</option>
-            <option value="medium">medium</option>
-            <option value="large">large</option>
-          </select>
+          <SizeSelector/> {/* The function extracts straight from productData so no need for it here */}
         </div>
         <div>
           <select
@@ -118,7 +138,7 @@ export default function ProductPage() {
             <option value="AMOUNT" hidden={true}>
               AMOUNT
             </option>
-            {[...Array(10)].map((e, i) => (
+            {[...Array(productData[0]?.Stock)].map((e, i) => (
               <option value={i + 1} key={i}>
                 {i + 1}
               </option>
