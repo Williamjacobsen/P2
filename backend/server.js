@@ -36,7 +36,6 @@ app.use("/product", productID);
 import faqRoute from "./routes/faq.js";
 app.use("/faq", faqRoute);
 
-
 // Stuff that needs to be made into separate files in the "route" directory
 app.get("/test", (req, res) => {
   res.send("API is working!");
@@ -114,34 +113,36 @@ app.get("/shopCircles", async (req, res) => {
         SELECT * FROM Vendor
         LIMIT 25
     `);
-    res.status(200).json(result)
+    res.status(200).json(result);
   } catch (err) {
     console.log("Error in database query for shopcircles", err);
-    res.status(500).json({ error: "Failed to fetch ShopCircles" })
+    res.status(500).json({ error: "Failed to fetch ShopCircles" });
   }
-})
+});
 
 app.get("/VendorProducts/:vendorid", async (req, res) => {
-  const { vendorid } = req.params;  // VendorID is grabbed from the url parameter
+  const { vendorid } = req.params; // VendorID is grabbed from the url parameter
 
   if (!vendorid) {
     return res.status(400).json({ message: "Vendor ID is required" });
   }
 
   try {
-    const [result] = await pool.query(`
+    const [result] = await pool.query(
+      `
       SELECT p2.Product.*, p2.Vendor.Name AS StoreName
       FROM p2.Product
              JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
       WHERE p2.Product.StoreID = ?
-    `, [vendorid]);  // Use parameterized query to safely inject vendorid
+    `,
+      [vendorid]
+    ); // Use parameterized query to safely inject vendorid
     res.status(200).json(result);
   } catch (err) {
     console.log("error in database query for vendorproducts", err);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 // Start server
 app.listen(port, () => {
