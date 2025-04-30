@@ -6,7 +6,7 @@ import "./Product-Card.css"
 import { CatalogueFilter, CatalogueSearch } from "./Catalogue-Filter";
 import usePages from "../../utils/usePages";
 
-const productsPerPage = 10;
+const productsPerPage = 12;
 
 export default function ProductCatalogue() {
     // Filters and sorts needs usestate to react to selections
