@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 /**
+ * Used to get the functions and React components needed to set up pages functionality.
  * @returns An object [getVisiblePartOfPageArray, CurrentPageDisplay, PreviousPageButton, NextPageButton],
  * containing the types [function, React component, React component, React component].
  */
