@@ -49,7 +49,7 @@ export default function ProductPage() {
   const SizeSelector = () => {
     const allSizes = ['small', 'medium', 'large', 's', 'm', 'l'];
     let size = null;
-    if (productData[0]?.Size !== null) {
+    if (productData[0]?.Size !== null && productData[0]?.Size !== undefined) {
       size = productData[0]?.Size.toLowerCase();
       if (size == 's') size = 'small';
       else if (size == 'm') size = 'medium';
@@ -58,8 +58,8 @@ export default function ProductPage() {
     else return <>no size available</>
     return (
     <select
-      id="category"
-      defaultValue=""
+      id="sizeSelection"
+      defaultValue={sizeSelection}
       className="SortBox"
       onChange={(e) => {
         setSizeSelection(e.target.value);
@@ -69,8 +69,8 @@ export default function ProductPage() {
       <option value="SIZE" hidden={true}>
         SIZE
       </option>
-        {allSizes.map((sizes) =>
-          size.toLowerCase() === sizes.toLowerCase() ? (
+        {allSizes.map((s) =>
+          size.toLowerCase() === s.toLowerCase() ? (
             <option key={size} value={size}>
               {size}
             </option>
@@ -157,6 +157,7 @@ export default function ProductPage() {
                 id: productData[0]?.ID,
                 size: sizeSelection,
                 quantity: quantitySelection,
+                sizeID: productData[0]?.sizeID
               });
 
               setCookie(

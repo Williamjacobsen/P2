@@ -16,7 +16,9 @@ router.get("/:id", async (req, res) => {
           p2.Vendor.Name,
           p2.ProductImage.Path,
           p2.Vendor.Address,
-          p2.ProductSize.*
+          p2.ProductSize.ID AS sizeID,
+          p2.ProductSize.Size,
+          p2.ProductSize.Stock
           FROM p2.Product
           JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
           LEFT JOIN p2.ProductImage ON p2.Product.ID = p2.ProductImage.ProductID

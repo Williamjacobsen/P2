@@ -35,8 +35,6 @@ import productID from "./routes/productID.js";
 app.use("/product", productID);
 import faqRoute from "./routes/faq.js";
 app.use("/faq", faqRoute);
-import productID from "./routes/productID.js";
-app.use("/product", productID);
 
 // Stuff that needs to be made into separate files in the "route" directory
 app.get("/test", (req, res) => {
