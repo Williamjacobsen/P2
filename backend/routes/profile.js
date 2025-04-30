@@ -55,24 +55,7 @@ router.post("/sign-in", [
       email,
       password
     } = req.body;
-    // Get an array of profiles with the corresponding email from the database
-    const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
-    // Verify that profile exists
-    if (Object.keys(profileRows).length === 0) {
-      return res.status(404).json({ error: "Email does not have a profile." }); // 404 = Not Found
-    }
-    // Verify password
-    if (await bcrypt.compare(password, profileRows[0].PasswordHash) === false) {
-      return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
-    }
-    // Create an access token containing the user's profile ID
-    const profileID = profileRows[0].ID;
-    const refreshToken = await generateRefreshToken(req, profileID);
-    const accessToken = await generateAccessToken(res, refreshToken);
-    // Send back response
-    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
-    setSecureCookie(res, "profileRefreshToken", refreshToken, 60 * 60 * 24 * 7);
-    setSecureCookie(res, "profileAccessToken", accessToken, 60 * 60 * 24);
+    await signIn(req, res, email, password);
     return res.status(200).json({}); // 200 = OK
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -215,6 +198,7 @@ router.post("/create", [
       VALUES (?, ?, ?, ?)`,
       [email, passwordHash, phoneNumber, currentDateTime]); // I've used the "?"-notation because else it does not pass in the dateTime correctly.
     // Send back response
+    await signIn(req, res, email, password);
     return res.status(201).json({}); // 201 = Created
   } catch (error) {
     if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
@@ -234,6 +218,7 @@ router.post("/delete", [
     const {
       password
     } = req.body;
+    const refreshToken = req.cookies.profileRefreshToken;
     const accessToken = req.cookies.profileAccessToken;
     // Tries to get the profile from the database
     const profile = await getProfile(res, accessToken);
@@ -246,6 +231,9 @@ router.post("/delete", [
       return res.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
     }
     // Delete the profile
+    res.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
+    setSecureCookie(res, "profileRefreshToken", refreshToken, 0);
+    setSecureCookie(res, "profileAccessToken", accessToken, 0);
     await pool.query(`DELETE FROM p2.Profile WHERE ID='${profile.ID}';`);
     // Send back response
     return res.status(200).json({}); // 200 = OK
@@ -256,7 +244,7 @@ router.post("/delete", [
   }
 });
 
-router.post("/modify", [
+router.put("/modify", [
   validatePassword,
   validateProfilePropertyName,
   validateProfileNewValue_Part1Of2, // This does not take into account the property name.
@@ -479,6 +467,29 @@ function setSecureCookie(httpResponse, cookieName, value, maxAgeInSeconds) {
   });
 }
 
-
+/**
+ * Uses email and password to create refresh and access tokens 
+ * and put them into a secure cookie.
+ */
+async function signIn(httpRequest, httpResponse, email, password) {
+  // Get an array of profiles with the corresponding email from the database
+  const [profileRows] = await pool.query(`SELECT * FROM p2.Profile WHERE Email='${email}';`);
+  // Verify that profile exists
+  if (Object.keys(profileRows).length === 0) {
+    return httpResponse.status(404).json({ error: "Email does not have a profile." }); // 404 = Not Found
+  }
+  // Verify password
+  if (await bcrypt.compare(password, profileRows[0].PasswordHash) === false) {
+    return httpResponse.status(401).json({ error: "Password does not match email." }); // 401 = Unauthorized
+  }
+  // Create an access token containing the user's profile ID
+  const profileID = profileRows[0].ID;
+  const refreshToken = await generateRefreshToken(httpRequest, profileID);
+  const accessToken = await generateAccessToken(httpResponse, refreshToken);
+  // Prepare cookie
+  httpResponse.set('Cache-Control', 'no-store'); // Prevents caching of the response (for security reasons).
+  setSecureCookie(httpResponse, "profileRefreshToken", refreshToken, 60 * 60 * 24 * 7);
+  setSecureCookie(httpResponse, "profileAccessToken", accessToken, 60 * 60 * 24);
+}
 
 

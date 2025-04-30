@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import useGetProfile from "./useGetProfile";
 import { requestAccessToken } from "./ReSignInPopUp";
+import "./Profile.css";
+import usePages from "../../utils/usePages";
+
+const ordersPerPage = 5;
 
 export default function ProfileProductOrders() {
 
   // Hooks
   const navigate = useNavigate();
   const [isLoadingProfile, profile] = useGetProfile();
-  const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoadingProfile);
+  const [isLoadingOrders, sortedOrders] = useGetSortedProfileProductOrders(isLoadingProfile);
+  const [getVisiblePartOfPageArray, CurrentPageDisplay, PreviousPageButton, NextPageButton] = usePages(sortedOrders, ordersPerPage);
 
   // Is the user signed in?
   if (isLoadingProfile) {
@@ -23,40 +27,62 @@ export default function ProfileProductOrders() {
   if (isLoadingOrders) {
     return (<>Loading order history...</>);
   }
-  else if (Object.keys(orders).length === 0) {
+  else if (Object.keys(sortedOrders).length === 0) {
     return (<>You have no orders.</>)
   }
 
-  // Sort the orders by IsResolved and secondarily sort by Datetime
-  let sortedOrders = orders;
-  sortedOrders.sort((a, b) => {
-    if (a.IsResolved === 1 && b.IsResolved === 0) return true;
-    else if (a.IsResolved === 0 && b.IsResolved === 1) return false;
-    else return b.Datetime.localeCompare(a.Datetime);
-  })
-
-  //y TODO: Maybe show unresolved and resolved separately?
-
   return (
     <>
-      <h3>
-        --- Orders (sorted primarily by resolved and secondarily by time) ---
-      </h3>
-      {sortedOrders.map((order) => (
-        <>
-          <b>Has been resolved: </b>
-          {order.IsResolved}
-          <br />
-          <b>Time of purchase: </b>
-          {order.DateTime}
-          {/* NOTE: A MySQL Datetime also factors in daylight savings time (DST). */}
-          <br />
-          <b>Product ID: </b>
-          {order.ProductID}
-          <br />
-          <br />
-        </>
-      ))}
+      <div className="orders-section">
+        <CurrentPageDisplay />
+        <PreviousPageButton />
+        <NextPageButton />
+        <h3>
+          Orders
+        </h3>
+        {getVisiblePartOfPageArray().map((order) => (
+          <>
+            <b>Has been collected: </b>
+            {order.IsCollected}
+            <br />
+            <b>Ready to be collected: </b>
+            {order.IsReady}
+            <br />
+            <b>Time of purchase: </b>
+            {order.DateTimeOfPurchase}
+            {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
+            <br />
+            <b>Order ID: </b>
+            {order.ID}
+            <br />
+            <b>Name of vendor: </b>
+            {order.VendorName}
+            <br />
+            <b>CVR of vendor: </b>
+            {order.VendorCVR}
+            <br />
+            <b>Name of brand: </b>
+            {order.ProductBrand}
+            <br />
+            <b>Name of product: </b>
+            {order.ProductName}
+            <br />
+            <b>Type of clothing: </b>
+            {order.ProductClothingType}
+            <br />
+            <b>Size: </b>
+            {order.ProductSize}
+            <br />
+            <b>Gender: </b>
+            {order.ProductGender}
+            <br />
+            <b>Price: </b>
+            {order.ProductPrice} DKK
+            <br />
+            <hr />
+          </>
+        ))}
+      </div>
     </>
   );
 }
@@ -69,7 +95,7 @@ export default function ProfileProductOrders() {
  * Custom hook (which is why the function name starts with "use"). 
  * @returns the object [isLoading (a boolean), orders (an array of JSON objects with orders)].
  */
-function useGetProfileProductOrders(isLoadingProfile) {
+function useGetSortedProfileProductOrders(isLoadingProfile) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [orders, setOrders] = useState(null);
@@ -78,7 +104,15 @@ function useGetProfileProductOrders(isLoadingProfile) {
     (async () => {
       try {
         if (!isLoadingProfile) { // Before we can use the profile's information, we must ensure that the user is logged in.
-          setOrders(await requestProfileProductOrders());
+          let orders = await requestProfileProductOrders();
+          // Sort the orders by !IsCollected, then IsReady, then Datetime
+          setOrders(orders.sort((a, b) => {
+            if (a.IsCollected === 1 && b.IsCollected === 0) return true;
+            else if (a.IsCollected === 0 && b.IsCollected === 1) return false;
+            else if (a.IsReady === 1 && b.IsReady === 0) return false;
+            else if (a.IsReady === 0 && b.IsReady === 1) return true;
+            else return b.DateTimeOfPurchase.localeCompare(a.DateTimeOfPurchase);
+          }));
           setIsLoading(false);
         }
       }
@@ -100,7 +134,6 @@ function useGetProfileProductOrders(isLoadingProfile) {
  */
 async function requestProfileProductOrders() {
   try {
-    // Get data from the form to server
     const response = await fetch("http://localhost:3001/productOrder/getProfileProductOrders", {
       method: "GET",
       credentials: "include", // Ensures cookies are sent with the request
@@ -122,3 +155,4 @@ async function requestProfileProductOrders() {
     return Promise.reject(error);
   }
 }
+

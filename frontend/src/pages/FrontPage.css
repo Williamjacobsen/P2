@@ -42,6 +42,11 @@
     color: white;
   }
 
+  .fp-products h1 {
+    Font-size: 25px;
+    font-style: Arial;
+  }
+
   .buttons {
     margin-top: 20px;
     display: flex;
@@ -49,8 +54,8 @@
   }
   
   .buttons button {
-    background-color:grey;
-    color: black;
+    background-color:rgb(222, 222, 222);
+    color: rgb(0, 0, 0);
     padding: 10px 20px;
     border: none;
     border-radius: 50px;
@@ -61,43 +66,15 @@
   .buttons button:hover {
     background-color: rgb(185, 185, 185);
   }
-
-  .search-bar {
-    display: flex;
-    align-items: center;
-    margin-top: 0px;
-    max-width: auto;
-    width: 25%;
-    border: 2px solid;
-  }
   
-  .search-bar input {
-    flex: 1;
-    padding: 10px 15px;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-  }
-  
-  .search-bar button {
-    padding: 10px 20px;
-    background-color: grey;
-    color: black;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  .search-bar button:hover {
-    background-color: rgb(60, 60, 60);
-  }
-  
-  .fp-products{
+  .fp-products {
+    text-align: center;
     width: 100%;
-    height: 350px;
+    height: 600px;
     padding: 10px;
     border: 0;
     margin: 0;
+    background-color:  rgb(245, 245, 245);
   }
 
   .box-shops {
@@ -140,10 +117,4 @@
     transform: scale(1.05);
   }
 
-.fp-products {
-  text-align: center;
-}
 
-.ProductCard {
-
-}

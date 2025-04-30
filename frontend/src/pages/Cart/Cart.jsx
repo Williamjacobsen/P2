@@ -5,7 +5,7 @@ import ProductInCart from "./Product-In-Cart";
 import "./Cart.css";
 import CheckoutCard from "./Checkout-Card";
 import { deleteCookie, getAllCookieProducts } from "../../utils/cookies";
-import handleCheckout from "./PaymentFunction";
+import handleCheckout from "./handleCheckout";
 import useGetProfile from "../Profile/useGetProfile";
 
 export default function Cart() {
