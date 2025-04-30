@@ -51,7 +51,7 @@ export default function App() {
         <Route path="/vendor" element={<VenderHeader />}>
           <Route index element={<Vendor />} />
           <Route path="add-product" element={<AddProduct />} />
-          <Route path="/coupons" element={<Coupons />} />
+          <Route path="coupons" element={<Coupons />} />
         </Route>
         <Route path="*" element={<NoPage />} />
       </Routes>

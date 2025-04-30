@@ -1,6 +1,15 @@
 import { useState } from 'react';
+import { Navigate } from "react-router-dom";
+
+import useGetProfile from "../../Profile/useGetProfile";
+import useGetVendor from "../../Profile/useGetVendor";
 
 export default function CreateCoupon() {
+
+  // Hooks
+  const [isLoadingProfile, profile] = useGetProfile();
+  const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
+
   const [form, setForm] = useState({
     CouponCode: '',
     DiscountValue: '',
@@ -18,12 +27,10 @@ export default function CreateCoupon() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("djaflkjfds");
       // Extract data from form
       const CouponCode = form.CouponCode;
       const DiscountValue = form.DiscountValue;
       const IsActive = form.IsActive;
-      console.log("djaflddkjfds");
       // Post data from the form to server
       const response = await fetch("http://localhost:3001/create-coupon", {
         method: "POST",
@@ -36,7 +43,6 @@ export default function CreateCoupon() {
           IsActive
         }),
       });
-      console.log("djaflddkjfds");
       // Handle server response
       const data = await response.json(); // In case you need to get read a response from the server
       if (!response.ok) {
@@ -49,6 +55,22 @@ export default function CreateCoupon() {
       alert('Error creating coupon. Error: ' + error);
     }
   };
+
+  // Is the user signed in?
+  if (isLoadingProfile) {
+    return (<>Loading login...</>);
+  }
+  else if (profile === undefined) {
+    return (<Navigate to="/sign-in" replace />);
+  }
+
+  // Is the user a vendor?
+  if (isLoadingVendor) {
+    return (<>Loading vendor information...</>);
+  }
+  else if (vendor === null) {
+    return (<>You are not a vendor, so you do not have access to this page.</>);
+  }
 
   return (
     <form onSubmit={handleSubmit}>
