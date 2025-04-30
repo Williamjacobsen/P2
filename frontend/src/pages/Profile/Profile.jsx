@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-
+import "./Profile.css";
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
 import useGetVendor from "./useGetVendor";
-import { requestAccessToken, promptReSignIn } from "./ReSignInPopUp";
+import { requestAccessToken } from "./ReSignInPopUp";
 
 export default function Profile() {
 
@@ -28,162 +28,165 @@ export default function Profile() {
 
   return (
     <>
-      <button onClick={signOut}>
-        Sign out
-      </button>
-      <br />
-      <button onClick={signOutAllDevices}>
-        Sign out on all devices
-      </button>
-      <br />
-      <button onClick={() => navigate("/profile-product-orders")}>
-        Go to order history
-      </button>
-      <h3>
-        --- Profile Information ---
-      </h3>
-      <b>Email address: </b>
-      {profile.Email}
-      <Modal
-        openButtonText="Change email address?"
-        modalContent={<ModifyModal
-          modificationFunction={modifyProfile}
-          databasePropertyName="Email"
-          labelText="New email: "
-          inputType="email"
-          theMaxLength={150}
-        />}
-      />
-      <br />
-      <b>Phone number: </b>
-      {profile.PhoneNumber}
-      <Modal
-        openButtonText="Change phone number?"
-        modalContent={<ModifyModal
-          modificationFunction={modifyProfile}
-          databasePropertyName="PhoneNumber"
-          labelText="New phone number: "
-          inputType="text"
-          theMinLength={8}
-          theMaxLength={16}
-        />}
-      />
-      <br />
-      <Modal
-        openButtonText="Change password?"
-        modalContent={<ModifyModal
-          modificationFunction={modifyProfile}
-          databasePropertyName="Password" // Note that this is not an actual property in the database (but PasswordHash is).
-          labelText="New password "
-          inputType="password"
-          theMaxLength={500}
-        />}
-      />
-      <br />
-      <Modal
-        openButtonText="Delete profile?"
-        modalContent={(<DeleteProfileModal />)} />
-      {
-        vendor !== null && (
-          <>
-            <h3>
-              --- Vendor Profile Information ---
-            </h3>
-            <b>Vendor name: </b>
-            {vendor.Name}
-            <Modal
-              openButtonText="Change vendor name?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="Name"
-                labelText="New vendor name: "
-                inputType="text"
-                theMaxLength={100}
-              />}
-            />
-            <br />
-            <b>Address: </b>
-            {vendor.Address}
-            <Modal
-              openButtonText="Change address?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="Address"
-                labelText="New address: "
-                inputType="text"
-                theMaxLength={150}
-              />}
-            />
-            <br />
-            <b>Public contact email address: </b>
-            {vendor.Email}
-            <Modal
-              openButtonText="Change public contact email address?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="Email"
-                labelText="New public contact email: "
-                inputType="email"
-                theMaxLength={150}
-              />}
-            />
-            <br />
-            <b>Public contact phone number: </b>
-            {vendor.PhoneNumber}
-            <Modal
-              openButtonText="Change public contact phone number?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="PhoneNumber"
-                labelText="New public contact phone number: "
-                inputType="text"
-                theMinLength={8}
-                theMaxLength={16}
-              />}
-            />
-            <br />
-            <b>Public vendor description: </b>
-            "{vendor.Description}"
-            <Modal
-              openButtonText="Change public vendor description?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="Description"
-                labelText="New description: "
-                inputType="text"
-                theMaxLength={500}
-              />}
-            />
-            <br />
-            <b>Bank account number: </b>
-            {vendor.BankAccountNumber}
-            <Modal
-              openButtonText="Change bank account number?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="BankAccountNumber"
-                labelText="New bank account number: "
-                inputType="text"
-              />}
-            />
-            <br />
-            <b>CVR number: </b>
-            {vendor.CVR}
-            <Modal
-              openButtonText="Change CVR number?"
-              modalContent={<ModifyModal
-                modificationFunction={modifyVendor}
-                databasePropertyName="CVR"
-                labelText="New CVR number: "
-                inputType="text"
-                theMinLength={8}
-                theMaxLength={8}
-              />}
-            />
-            <br />
-          </>
-        )
-      }
+      <div className="profile-info">
+        <h3>
+          Profile Information
+        </h3>
+        <b>Email address: </b>
+        {profile.Email}
+        <Modal
+          openButtonText="Change email address?"
+          modalContent={<ModifyModal
+            modificationFunction={modifyProfile}
+            databasePropertyName="Email"
+            labelText="New email: "
+            inputType="email"
+            theMaxLength={150}
+          />}
+        />
+        <br />
+        <b>Phone number: </b>
+        {profile.PhoneNumber}
+        <Modal
+          openButtonText="Change phone number?"
+          modalContent={<ModifyModal
+            modificationFunction={modifyProfile}
+            databasePropertyName="PhoneNumber"
+            labelText="New phone number: "
+            inputType="text"
+            theMinLength={8}
+            theMaxLength={16}
+          />}
+        />
+        <br />
+        <Modal
+          openButtonText="Change password?"
+          modalContent={<ModifyModal
+            modificationFunction={modifyProfile}
+            databasePropertyName="Password" // Note that this is not an actual property in the database (but PasswordHash is).
+            labelText="New password "
+            inputType="password"
+            theMaxLength={500}
+          />}
+        />
+        <br />
+        <button onClick={() => navigate("/profile-product-orders")}>
+          Go to order history
+        </button>
+        <br />
+        <button onClick={signOut}>
+          Sign out
+        </button>
+        <br />
+        <button onClick={signOutAllDevices}>
+          Sign out on all devices
+        </button>
+        <br />
+        <Modal
+          openButtonText="Delete profile?"
+          modalContent={(<DeleteProfileModal />)} />
+        {
+          vendor !== null && (
+            <>
+              <h3>
+                Vendor Profile Information
+              </h3>
+              <b>Vendor name: </b>
+              {vendor.Name}
+              <Modal
+                openButtonText="Change vendor name?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="Name"
+                  labelText="New vendor name: "
+                  inputType="text"
+                  theMaxLength={100}
+                />}
+              />
+              <br />
+              <b>Address: </b>
+              {vendor.Address}
+              <Modal
+                openButtonText="Change address?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="Address"
+                  labelText="New address: "
+                  inputType="text"
+                  theMaxLength={150}
+                />}
+              />
+              <br />
+              <b>Public contact email address: </b>
+              {vendor.Email}
+              <Modal
+                openButtonText="Change public contact email address?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="Email"
+                  labelText="New public contact email: "
+                  inputType="email"
+                  theMaxLength={150}
+                />}
+              />
+              <br />
+              <b>Public contact phone number: </b>
+              {vendor.PhoneNumber}
+              <Modal
+                openButtonText="Change public contact phone number?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="PhoneNumber"
+                  labelText="New public contact phone number: "
+                  inputType="text"
+                  theMinLength={8}
+                  theMaxLength={16}
+                />}
+              />
+              <br />
+              <b>Public vendor description: </b>
+              "{vendor.Description}"
+              <Modal
+                openButtonText="Change public vendor description?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="Description"
+                  labelText="New description: "
+                  inputType="text"
+                  theMaxLength={500}
+                />}
+              />
+              <br />
+              <b>Bank account number: </b>
+              {vendor.BankAccountNumber}
+              <Modal
+                openButtonText="Change bank account number?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="BankAccountNumber"
+                  labelText="New bank account number: "
+                  inputType="text"
+                />}
+              />
+              <br />
+              <b>CVR number: </b>
+              {vendor.CVR}
+              <Modal
+                openButtonText="Change CVR number?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="CVR"
+                  labelText="New CVR number: "
+                  inputType="text"
+                  theMinLength={8}
+                  theMaxLength={8}
+                />}
+              />
+              <br />
+            </>
+          )
+        }
+      </div>
     </>
   );
 }
@@ -315,7 +318,6 @@ async function signOutAllDevices() {
  */
 async function requestProfileDeletion(password) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/delete", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
@@ -350,7 +352,6 @@ async function requestProfileDeletion(password) {
  */
 async function requestProfileModification(password, propertyName, newValue) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/modify", {
       method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
@@ -385,7 +386,6 @@ async function requestProfileModification(password, propertyName, newValue) {
  */
 async function requestVendorModification(password, propertyName, newValue) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/vendor/modify", {
       method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
@@ -418,7 +418,6 @@ async function requestVendorModification(password, propertyName, newValue) {
  */
 async function requestSignOut() {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-out-device", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
@@ -443,7 +442,6 @@ async function requestSignOut() {
  */
 async function requestSignOutAllDevices() {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-out-all-devices", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request

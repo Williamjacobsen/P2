@@ -92,6 +92,7 @@ export default function FrontPage() {
                 storeName={product.StoreName}
                 productName={product.Name}
                 price={product.Price}
+                productBrand={product.Brand}
               />
             );
           })}

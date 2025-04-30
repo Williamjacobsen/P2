@@ -18,17 +18,16 @@ const stripe = new Stripe(
 router.post(
   "/",
   [
-    validateProfileAccessToken, //r
+    validateProfileAccessToken,
   ],
   async (req, res) => {
     try {
-      handleValidationErrors(req, res, validationResult); //r
-
-      const { products: cartProducts } = req.body;
-
-      const accessToken = req.cookies.profileAccessToken; //R
-
-      const profile = await getProfile(res, accessToken); //R
+      // Handle validation errors
+      handleValidationErrors(req, res, validationResult);
+      // Get information from request
+      const { products: cartProducts } = req.body; // TODO: NEEDS INPUT VALIDATION!
+      const accessToken = req.cookies.profileAccessToken;
+      const profile = await getProfile(res, accessToken);
 
       if (!cartProducts) {
         return res.status(400).json({ error: "No products in the cart." });
@@ -92,7 +91,7 @@ router.post(
         },
       });
 
-      res.json({ id: session.id });
+      res.status(200).json({ id: session.id });
     } catch (error) {
       console.log("Error during checkout session creation:", error);
       res.status(500).json({ error: error.message });

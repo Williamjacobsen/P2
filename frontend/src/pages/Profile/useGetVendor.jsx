@@ -42,7 +42,6 @@ export default function useGetVendor(vendorID) {
  */
 async function requestVendor(vendorID) {
   try {
-    // Post data from the form to server
     const response = await fetch(`http://localhost:3001/vendor/get?vendorID=${vendorID}`, {
       method: "GET",
     });

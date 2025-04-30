@@ -2,9 +2,9 @@
 
 import React from "react";
 import { Navigate } from "react-router-dom";
-
 import Modal from "../Modal/Modal"
 import useGetProfile from "./useGetProfile";
+import "./Profile.css";
 
 export default function SignIn() {
 
@@ -21,22 +21,24 @@ export default function SignIn() {
 
   return (
     <>
-      <h3>--- Sign In ---</h3>
-      <form onSubmit={signIn}>
-        <b>
-          Email address:
-        </b> <br />
-        <input type="email" name="email" required maxLength={150} /> <br />
-        <b>
-          Password:
-        </b> <br />
-        <input type="password" name="password" required maxLength={500} /> <br />
-        <input type="submit" value="Sign in" />
-      </form >
-      <br />
-      Want to create an account?
-      <br />
-      <Modal openButtonText="Sign up" modalContent={<SignUpModal />} />
+      <div className = "Background">
+        <h3> Sign In </h3>
+        <form onSubmit={signIn}>
+          <b>
+            Email address:
+          </b> <br />
+          <input type="email" name="email" required maxLength={150} /> <br />
+          <b>
+            Password:
+          </b> <br />
+          <input type="password" name="password" required maxLength={500} /> <br />
+          <input type="submit" value="Sign in" />
+        </form >
+        <br />
+        Want to create an account?
+        <br />
+        <Modal openButtonText="Sign up" modalContent={<SignUpModal />} />
+      </div>
     </>
   );
 }
@@ -124,7 +126,6 @@ async function signUp(event) {
  */
 async function requestProfileCreation(email, password, phoneNumber) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/create", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
@@ -154,7 +155,6 @@ async function requestProfileCreation(email, password, phoneNumber) {
  */
 export async function requestSignIn(email, password) {
   try {
-    // Post data from the form to server
     const response = await fetch("http://localhost:3001/profile/sign-in", {
       method: "POST",
       credentials: "include", // Ensures cookies are sent with the request
