@@ -1,12 +1,12 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "./Product-Card";
 import "./Product-Card.css"
-import {CatalogueFilter, CatalogueSearch} from "./Catalogue-Filter";
+import { CatalogueFilter, CatalogueSearch } from "./Catalogue-Filter";
 import { useLocation } from "react-router-dom";
 
 
-export default function ProductCatalogue (){
-// Filters and sorts needs usestate to react to selections
+export default function ProductCatalogue() {
+    // Filters and sorts needs usestate to react to selections
     const [genderFilter, setGenderFilter] = useState("");
     const [priceSort, setPriceSort] = useState("");
     const [clothingTypeFilter, setClothingTypeFilter] = useState("");
@@ -24,7 +24,7 @@ export default function ProductCatalogue (){
     const location = useLocation();
 
     const genderOptionArray = [
-        'Male','Female'
+        'Male', 'Female'
     ]
     const clothingOptionArray = [
         'T-shirts',
@@ -45,7 +45,7 @@ export default function ProductCatalogue (){
     ];
 
     const priceOptionArray = [
-        'Highest Price','Lowest Price'
+        'Highest Price', 'Lowest Price'
     ]
 
     //this array is a list of storenames used to filter products by stores they are from,
@@ -58,7 +58,7 @@ export default function ProductCatalogue (){
             loadedProducts.map(
                 product => product.StoreName)));
 
-    function clearFilters(){
+    function clearFilters() {
         setSearch('')
         setClothingTypeFilter('')
         setPriceSort('')
@@ -66,7 +66,7 @@ export default function ProductCatalogue (){
         setStoreFilter('')
     }
 
-    function filterAndSortProducts(products){
+    function filterAndSortProducts(products) {
         //filter and sort are two array methods built into javascript we can use to create a new product array to the user preferences
         let productsIndices = products.map((_, index) => index);
         productsIndices = filterProductsLogic(productsIndices);
@@ -74,21 +74,21 @@ export default function ProductCatalogue (){
         return productsIndices;
     }
 
-    function sortProductsLogic(products){
+    function sortProductsLogic(products) {
 
         if (priceSort === '') {
             return products
         }
-        if (priceSort === 'Highest Price'){
-            return products.sort((product1, product2 ) => {return loadedProducts[product2].Price - loadedProducts[product1].Price;})
+        if (priceSort === 'Highest Price') {
+            return products.sort((product1, product2) => { return loadedProducts[product2].Price - loadedProducts[product1].Price; })
         }
-        if (priceSort === 'Lowest Price'){
-            return products.sort((product1, product2 ) => {return loadedProducts[product1].Price - loadedProducts[product2].Price;})
+        if (priceSort === 'Lowest Price') {
+            return products.sort((product1, product2) => { return loadedProducts[product1].Price - loadedProducts[product2].Price; })
         }
         return products;
     }
 
-    function filterProductsLogic(productIndices){
+    function filterProductsLogic(productIndices) {
         return productIndices.filter(index => {
             const product = loadedProducts[index];
             return (genderFilter === '' || product.Gender === genderFilter) &&
@@ -98,15 +98,15 @@ export default function ProductCatalogue (){
         });
     }
 
-//looks advanced, but it simply sets shownProducts to an array of size Products.length just filled with indices 1,2...,Products.length
-    function reloadShownProducts(Products){
+    //looks advanced, but it simply sets shownProducts to an array of size Products.length just filled with indices 1,2...,Products.length
+    function reloadShownProducts(Products) {
         setShownProducts(Products.map((_, index) => index))
     }
 
-//useEffect loads products array from database and sets it to the loadedProducts and shownProducts variable
+    //useEffect loads products array from database and sets it to the loadedProducts and shownProducts variable
     useEffect(() => {
-        async function loadInitialProducts(){
-            try{
+        async function loadInitialProducts() {
+            try {
                 const response = await fetch("http://localhost:3001/products");
                 if (!response.ok) {
                     throw new Error("Failed to load products");
@@ -115,7 +115,7 @@ export default function ProductCatalogue (){
                 setLoadedProducts(data);
                 //shownProducts becomes indices ranging from 0,1,...,n-1
                 setShownProducts(data.map((_, index) => index))
-            } catch(err){
+            } catch (err) {
                 console.log('Failed to load products');
             }
         }
@@ -126,7 +126,7 @@ export default function ProductCatalogue (){
     useEffect(() => {
         if (loadedProducts.length === 0) return;
         setShownProducts(filterAndSortProducts(loadedProducts));
-    }, [loadedProducts, genderFilter,priceSort,clothingTypeFilter,search,storeFilter]);
+    }, [loadedProducts, genderFilter, priceSort, clothingTypeFilter, search, storeFilter]);
 
     //this effect reads the url parameter for store and sets it to the store filter,
     //used when the user clicks a store in the front page and is redirected we need to filter for it here
@@ -135,41 +135,41 @@ export default function ProductCatalogue (){
         const storeFromUrl = params.get('store')
         const searchFromUrl = params.get('search')
 
-        if(storeFromUrl){
+        if (storeFromUrl) {
             setStoreFilter(storeFromUrl);
         }
-        else{
+        else {
             setStoreFilter('');
         }
-        if(searchFromUrl){
+        if (searchFromUrl) {
             setSearch(searchFromUrl);
         }
-        else{
+        else {
             setSearch('')
         }
     }, [location.search]);
 
-// filters take a lot of parameters (props technically) so we can update them when they change
+    // filters take a lot of parameters (props technically) so we can update them when they change
     return (
         <div>
             <div className="FilterElements">
                 <CatalogueFilter FilterName={'Gender'}
-                                 FilterOptions={genderOptionArray}
-                                 value={genderFilter}
-                                 onChange={event => setGenderFilter(event.target.value)} />
+                    FilterOptions={genderOptionArray}
+                    value={genderFilter}
+                    onChange={event => setGenderFilter(event.target.value)} />
                 <CatalogueFilter FilterName={'Product Type'}
-                                 FilterOptions={clothingOptionArray}
-                                 value={clothingTypeFilter}
-                                 onChange={event => setClothingTypeFilter(event.target.value)} />
+                    FilterOptions={clothingOptionArray}
+                    value={clothingTypeFilter}
+                    onChange={event => setClothingTypeFilter(event.target.value)} />
                 <CatalogueFilter FilterName={'Price'}
-                                 FilterOptions={priceOptionArray}
-                                 value={priceSort}
-                                 onChange={event =>setPriceSort(event.target.value)}/>
+                    FilterOptions={priceOptionArray}
+                    value={priceSort}
+                    onChange={event => setPriceSort(event.target.value)} />
                 <CatalogueFilter FilterName={'Store'}
-                                 FilterOptions={storeOptionArray}
-                                 value={storeFilter}
-                                 onChange={event => setStoreFilter(event.target.value)} />
-                <CatalogueSearch value={search} onChange={event => setSearch(event.target.value)}/>
+                    FilterOptions={storeOptionArray}
+                    value={storeFilter}
+                    onChange={event => setStoreFilter(event.target.value)} />
+                <CatalogueSearch value={search} onChange={event => setSearch(event.target.value)} />
                 {
                     // we use curly braces to enter JS inside the html (part of React functionality)
                     // then we use a short circuit logic expression that only displays this button if the filters is enabled
@@ -183,7 +183,7 @@ export default function ProductCatalogue (){
                 {shownProducts.map((productIndex) => {
                     const product = loadedProducts[productIndex]
                     return (
-                    <ProductCard id={product.ID} storeName={product.StoreName} productName={product.Name} price={product.Price}></ProductCard>
+                        <ProductCard id={product.ID} storeName={product.StoreName} productName={product.Name} price={product.Price}></ProductCard>
                     )
                 })}
             </div>
