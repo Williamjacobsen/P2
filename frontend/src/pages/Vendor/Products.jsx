@@ -43,7 +43,9 @@ export default function Products({ VendorID }) {
 							id={product.ID}
 							storeName={product.StoreName}
 							productName={product.Name}
-							price={product.Price}>
+							price={product.Price}
+							productBrand={product.Brand}
+						>
 						</ProductCard>
 					)
 				})}
