@@ -4,12 +4,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import Header from "./pages/Header/Header";
-import NoPage from "./pages/NoPage";
-import FrontPage from "./pages/FrontPage";
+import NoPage from "./pages//NoPage";
+import FrontPage from "./pages/FrontPage/FrontPage";
 import Example from "./pages/Example";
 import FAQ from "./pages/FAQ/FAQ";
 import AddFAQPage from "./pages/Vendor/AddFAQPage";
-import VenderHeader from "./pages/Vendor/VenderHeader";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
@@ -45,13 +44,10 @@ export default function App() {
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Failure />} />
+          <Route path="/vendor" element={<Vendor />} />
+          <Route path="/vendor/add-product" element={<AddProduct />} />
+          <Route path="*" element={<NoPage />} />
         </Route>
-        {/* todo: add header to vendor route */}
-        <Route path="/vendor" element={<VenderHeader />}>
-          <Route index element={<Vendor />} />
-          <Route path="add-product" element={<AddProduct />} />
-        </Route>
-        <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>
   );
