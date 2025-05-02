@@ -3,7 +3,7 @@ import "./Product-Card.css";
 import { Link } from "react-router-dom";
 import FetchImage from "../../utils/getPrimaryImage";
 
-export default function ProductCard({ id, storeName, productName, price }) {
+export default function ProductCard({ id, storeName, productName, price, productBrand }) {
   const image = FetchImage(id);
 
   return (
@@ -11,7 +11,7 @@ export default function ProductCard({ id, storeName, productName, price }) {
       <div className="product-card">
         <img src={image || "/Img/MissingImgImg.jpg"} alt="Product Image"></img>
         <h1>{storeName}</h1>
-        <h1>{productName}</h1>
+        <h1>{`${productBrand} - ${productName}`}</h1>
         <p>{`${price},00 kr`}</p>
       </div>
     </Link>

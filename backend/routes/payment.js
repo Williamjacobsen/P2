@@ -33,7 +33,8 @@ router.post(
         return res.status(400).json({ error: "No products in the cart." });
       }
 
-      const productIds = cartProducts.map((p) => p.id);
+      const productIds = cartProducts.map((p) => p.ID);
+
       const [products] = await pool.query(
         "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
         [productIds]
@@ -45,19 +46,19 @@ router.post(
       });
 
       for (const item of cartProducts) {
-        if (!productMap[item.id]) {
+        if (!productMap[item.ID]) {
           return res
             .status(400)
-            .json({ error: `Product with ID ${item.id} not found` });
+            .json({ error: `Product with ID ${item.ID} not found` });
         }
       }
 
       const line_items = [];
       for (const item of cartProducts) {
-        const product = productMap[item.id];
+        const product = productMap[item.ID];
         const discountedPrice =
           product.Price * (1 - product.DiscountProcent / 100);
-        const unit_amount = Math.round(discountedPrice * 100); // Convert to cents
+        const unit_amount = Math.round(discountedPrice * 100);
 
         if (unit_amount < 250) {
           return res.status(400).json({
@@ -84,55 +85,16 @@ router.post(
         success_url:
           "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: "http://localhost:3000/cancel",
+        metadata: {
+          customerID: profile.ID,
+          cart: JSON.stringify(cartProducts),
+        },
       });
 
-      // Add products to profile product orders and remove from stock
-      for (const item of cartProducts) {
-        for (let i = 0; i < item.quantity; i++) {
-          //r Right now, it adds the products before the purchase has been confirmed.
-          // Get needed information
-          //r Getting this information should happen before making the transaction occurs 
-          //r (the transaction should use the same variables as this - else a product might change before
-          //r the transation finishes and the user then suddenly gets a different product added to their orders.)
-          const [productRows] = await pool.query(`SELECT * FROM p2.Product WHERE ID='${item.id}';`);
-          const product = productRows[0];
-          const [vendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE ID='${product.StoreID}';`);
-          const vendor = vendorRows[0];
-          const size = -1;
-          const sizeID = -1;
-          const finalPrice = Math.round(product.Price * (1 - product.DiscountProcent / 100));
-          const currentDateTime = new Date();
-          currentDateTime.getUTCDate();
-          // Add product order to profile
-          await pool.query(
-            `INSERT INTO p2.ProductOrder
-          (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR,
-          ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              profile.ID,
-              0,
-              0,
-              currentDateTime,
-              vendor.Name,
-              vendor.CVR,
-              product.Brand,
-              product.Name,
-              product.ClothingType,
-              size,
-              product.Gender,
-              finalPrice
-            ]);
-          // Remove 1 stock of the product
-          await pool.query(`UPDATE p2.ProductSize SET Stock=Stock-1 WHERE ID='${sizeID}';`);
-        }
-      }
-      // Send back response
-      res.status(200).json({ id: session.id }); // 200 = OK
+      res.status(200).json({ id: session.id });
     } catch (error) {
-      if (res._header === null) { // If _header !== null, then the response has already been handled someplace else
-        return res.status(500).json({ error: "Internal server error: " + error });
-      }
+      console.log("Error during checkout session creation:", error);
+      res.status(500).json({ error: error.message });
     }
   }
 );
@@ -141,7 +103,6 @@ router.get("/verify-payment", async (req, res) => {
   const { session_id } = req.query;
 
   if (!session_id) {
-    console.log("No session ID provided in query");
     return res.status(400).json({ error: "Session ID is missing." });
   }
 
@@ -154,10 +115,32 @@ router.get("/verify-payment", async (req, res) => {
       session.payment_status === "paid" &&
       session.payment_intent.status === "succeeded"
     ) {
-      console.log("Payment was successful");
+      const cart = JSON.parse(session.metadata.cart);
+      const customerID = session.metadata.customerID;
+
+      for (const product of cart) {
+        const [sizeIDRows] = await pool.query(
+          "select ID from `p2`.ProductSize WHERE ProductID = ?",
+          [product.ID]
+        );
+        const sizeID = sizeIDRows[0]?.ID;
+
+        const currentDateTime = new Date();
+        currentDateTime.getUTCDate();
+
+        await pool.query(
+          "INSERT INTO ProductOrder (CustomerID, ProductID, ProductSizeID, IsReady, IsCollected, DateTimeOfPurchase) VALUES (?, ?, ?, ?, ?, ?)",
+          [customerID, product.ID, sizeID, true, false, currentDateTime]
+        );
+
+        await pool.query(
+          "UPDATE ProductSize SET Stock = Stock - ? WHERE ProductID = ? AND Size = ? AND Stock >= ?",
+          [product.quantity, product.ID, product.size, product.quantity]
+        );
+      }
+
       res.json({ success: true, message: "Payment confirmed" });
     } else {
-      console.log("Payment was not successful");
       res
         .status(400)
         .json({ success: false, message: "Payment not successful" });

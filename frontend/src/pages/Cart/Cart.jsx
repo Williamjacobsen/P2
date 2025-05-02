@@ -52,9 +52,8 @@ export default function Cart() {
 
   // Is the user signed in?
   if (isLoadingProfile) {
-    return (<>Loading login...</>);
+    return <>Loading login...</>;
   }
-
 
   //simply calculates the sum price of all the products in the cart
   function calculateTotalPrice(products) {
@@ -97,12 +96,7 @@ export default function Cart() {
           if (profile === undefined) {
             navigate("/sign-in");
           } else {
-            handleCheckout(
-              cartProducts.map((product) => ({
-                id: product.ID,
-                quantity: product.quantity,
-              }))
-            )
+            handleCheckout(cartProducts);
           }
         }}
       />
