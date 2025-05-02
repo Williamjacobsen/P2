@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run": "nodemon server.js"
+    "run": "nodemon server.js",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -18,5 +19,14 @@
     "mysql2": "^3.14.0",
     "nodemon": "^3.1.9",
     "stripe": "^18.0.0"
+  },
+  "devDependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "node-schedule": "^2.1.1",
+    "supertest": "^7.1.0",
+    "vitest": "^3.1.2"
   }
 }
