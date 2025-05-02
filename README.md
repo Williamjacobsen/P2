@@ -26,7 +26,8 @@ Required packages in the frontend folder (these ARE NOT installed in the project
 * "npm install"
 
 Included packages in the backend folder (these ARE ALREADY installed in the project):
-* "npm install bcrypt jsonwebtoken node-schedule cookie-parser express-validator"
+* "npm install bcrypt jsonwebtoken node-schedule cookie-parser express-validator vitest supertest --save-dev"
+* --save-dev lets our testing framework use the packages.
 
 FAQ:
 * If you get an error saying that running scripts is disabled on the system, then enter the command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser" and try running "npm install" again.

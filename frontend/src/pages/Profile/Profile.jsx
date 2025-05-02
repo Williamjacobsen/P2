@@ -34,6 +34,7 @@ export default function Profile() {
         </h3>
         <b>Email address: </b>
         {profile.Email}
+        <br />
         <Modal
           openButtonText="Change email address?"
           modalContent={<ModifyModal
@@ -47,6 +48,7 @@ export default function Profile() {
         <br />
         <b>Phone number: </b>
         {profile.PhoneNumber}
+        <br />
         <Modal
           openButtonText="Change phone number?"
           modalContent={<ModifyModal
@@ -70,10 +72,6 @@ export default function Profile() {
           />}
         />
         <br />
-        <button onClick={() => navigate("/profile-product-orders")}>
-          Go to order history
-        </button>
-        <br />
         <button onClick={signOut}>
           Sign out
         </button>
@@ -93,6 +91,7 @@ export default function Profile() {
               </h3>
               <b>Vendor name: </b>
               {vendor.Name}
+              <br />
               <Modal
                 openButtonText="Change vendor name?"
                 modalContent={<ModifyModal
@@ -106,6 +105,7 @@ export default function Profile() {
               <br />
               <b>Address: </b>
               {vendor.Address}
+              <br />
               <Modal
                 openButtonText="Change address?"
                 modalContent={<ModifyModal
@@ -119,6 +119,7 @@ export default function Profile() {
               <br />
               <b>Public contact email address: </b>
               {vendor.Email}
+              <br />
               <Modal
                 openButtonText="Change public contact email address?"
                 modalContent={<ModifyModal
@@ -132,6 +133,7 @@ export default function Profile() {
               <br />
               <b>Public contact phone number: </b>
               {vendor.PhoneNumber}
+              <br />
               <Modal
                 openButtonText="Change public contact phone number?"
                 modalContent={<ModifyModal
@@ -146,6 +148,7 @@ export default function Profile() {
               <br />
               <b>Public vendor description: </b>
               "{vendor.Description}"
+              <br />
               <Modal
                 openButtonText="Change public vendor description?"
                 modalContent={<ModifyModal
@@ -159,6 +162,7 @@ export default function Profile() {
               <br />
               <b>Bank account number: </b>
               {vendor.BankAccountNumber}
+              <br />
               <Modal
                 openButtonText="Change bank account number?"
                 modalContent={<ModifyModal
@@ -171,6 +175,7 @@ export default function Profile() {
               <br />
               <b>CVR number: </b>
               {vendor.CVR}
+              <br />
               <Modal
                 openButtonText="Change CVR number?"
                 modalContent={<ModifyModal
