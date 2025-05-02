@@ -8,7 +8,7 @@ export default function ProductCard({ id, storeName, productName, price, product
 
   return (
     <Link to={`/product/${id}`} className="product-card-link">
-      <div className="product-card">
+      <div className="product-card" role="product-card">
         <img src={image || "/Img/MissingImgImg.jpg"} alt="Product Image"></img>
         <h1>{storeName}</h1>
         <h1>{`${productBrand} - ${productName}`}</h1>
