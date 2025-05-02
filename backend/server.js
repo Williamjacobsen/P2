@@ -23,6 +23,8 @@ import productImagesRoute from "./routes/product-images-example-for-martin.js";
 app.use("/product-images", productImagesRoute);
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
+import deleteProductRoute from "./routes/delete-product.js";
+app.use("/delete-product", deleteProductRoute);
 import profileRoute from "./routes/profile.js";
 app.use("/profile", profileRoute);
 import vendorRoute from "./routes/vendor.js";
