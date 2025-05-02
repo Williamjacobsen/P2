@@ -1,9 +1,10 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import "./FrontPage.css";
 import BoxShop from "./FrontPageStores";
-import ProductCard from "./ProductCatalogue/Product-Card";
-import { useState, useEffect } from "react";
+import ProductCard from "../ProductCatalogue/Product-Card";
+
 
 export default function FrontPage() {
   const navigate = useNavigate();

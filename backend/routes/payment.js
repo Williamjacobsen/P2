@@ -125,23 +125,12 @@ router.get("/verify-payment", async (req, res) => {
         );
         const sizeID = sizeIDRows[0]?.ID;
 
-        const date_time = new Date();
-        const date =
-          date_time.getFullYear() +
-          "-" +
-          ("0" + (date_time.getMonth() + 1)).slice(-2) +
-          "-" +
-          ("0" + date_time.getDate()).slice(-2) +
-          " " +
-          ("0" + date_time.getHours()).slice(-2) +
-          "-" +
-          ("0" + date_time.getMinutes()).slice(-2) +
-          "-" +
-          ("0" + date_time.getSeconds()).slice(-2);
+        const currentDateTime = new Date();
+        currentDateTime.getUTCDate();
 
         await pool.query(
           "INSERT INTO ProductOrder (CustomerID, ProductID, ProductSizeID, IsReady, IsCollected, DateTimeOfPurchase) VALUES (?, ?, ?, ?, ?, ?)",
-          [customerID, product.ID, sizeID, true, false, date]
+          [customerID, product.ID, sizeID, true, false, currentDateTime]
         );
 
         await pool.query(
