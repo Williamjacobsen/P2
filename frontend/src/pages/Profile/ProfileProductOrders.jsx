@@ -49,7 +49,7 @@ export default function ProfileProductOrders() {
             {order.IsReady}
             <br />
             <b>Time of purchase: </b>
-            {order.DateTimeOfPurchase}
+            {order.DateTimeOfPurchase.replace("T", " ").replace("Z", "")}
             {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
             <br />
             <b>Order ID: </b>
@@ -76,7 +76,10 @@ export default function ProfileProductOrders() {
             <b>Gender: </b>
             {order.ProductGender}
             <br />
-            <b>Price: </b>
+            <b>Quantity: </b>
+            {order.Quantity}
+            <br />
+            <b>Total price: </b>
             {order.ProductPrice} DKK
             <br />
             <hr />
