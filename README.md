@@ -30,7 +30,8 @@ Required packages in the frontend folder (these ARE NOT installed in the project
 * "npm install"
 
 Included packages in the backend folder (these ARE ALREADY installed in the project):
-* "npm install bcrypt jsonwebtoken node-schedule cookie-parser express-validator vitest supertest --save-dev"
+* "npm install bcrypt jsonwebtoken node-schedule cookie-parser express-validator "
+* "npm install vitest supertest -D" (the "-D" makes it a dev dependency. Dev dependencies are for tools and packages needed during development but not in production)
 * --save-dev lets our testing framework use the packages.
 
 FAQ:
