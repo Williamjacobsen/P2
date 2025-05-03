@@ -17,6 +17,10 @@ For MySQL (only relevant if you have disabled starting it on system boot-up):
 4) Right-click it and press "start".
 5) You can now connect to your MySQL database using the MySQL Workbench app.
 
+How to start tests:
+* For frontend, navigate to the frontend directory ("cd frontend") and then run "npm run test".
+* For backend, navigate to the backend directory ("cd backend") and then run "npm run test".
+
 # Included and required packages
 
 How to navigate inside the terminal:
