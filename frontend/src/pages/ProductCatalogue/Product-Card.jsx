@@ -17,7 +17,7 @@ export default function ProductCard({
   const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
 
   return (
-    <div className="product-card-container">
+    <div className="product-card-container" role={'product-card'}>
       <div
         className="product-card"
         style={{ height: showVendorButtons ? "450px" : "420px" }}

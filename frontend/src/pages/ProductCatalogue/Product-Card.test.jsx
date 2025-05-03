@@ -1,20 +1,21 @@
 import {render, fireEvent} from "@testing-library/react";
+import React from "react";
 import '@testing-library/jest-dom';
-import {ProductCard} from "./Product-Card";
-import {BrowserRouter} from "react-router-dom";
+import ProductCard from "./Product-Card";
+import { BrowserRouter } from "react-router-dom";
 
 describe('ProductCard', () => {
 
     it('should display product name, brand name, storename and price', () => {
 
-        const {getAllByRole, getByRole } = render(
+        const {getAllByRole, getByText } = render(
             <BrowserRouter>
                 <ProductCard
-                    key={1}
-                    productName={'NameOfProduct'}
-                    storeName={'NameOfStore'}
+                    id={1}
+                    productName="NameOfProduct"
+                    storeName="NameOfStore"
                     price={500}
-                    productBrand={'Brand'}
+                    productBrand="Brand"
                 />
             </BrowserRouter>
         );
@@ -23,7 +24,6 @@ describe('ProductCard', () => {
         expect(headings[0]).toHaveTextContent('NameOfStore');
         expect(headings[1]).toHaveTextContent(`Brand - NameOfProduct`);
 
-        const actualPrice = getByRole('paragraph', {name: `500,00 kr`})
-        expect(actualPrice).toHaveTextContent(`500,00 kr`);
+        expect(getByText('500,00 kr')).toBeInTheDocument();
     });
 });
