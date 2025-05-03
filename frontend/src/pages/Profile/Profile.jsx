@@ -103,6 +103,21 @@ export default function Profile() {
                 />}
               />
               <br />
+              <b>FAQ: </b>
+              <br />
+              {vendor.FAQ}
+              <br />
+              <Modal
+                openButtonText="Change FAQ?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="FAQ"
+                  labelText="New FAQ: "
+                  inputType="text"
+                  theMaxLength={2000}
+                />}
+              />
+              <br />
               <b>Address: </b>
               {vendor.Address}
               <br />
@@ -226,7 +241,7 @@ function ModifyModal({ modificationFunction, databasePropertyName, labelText, in
         <b>
           {labelText}
         </b> <br />
-        <input type={inputType} name="newValue" required minLength={theMinLength} maxLength={theMaxLength} /> <br />
+        <textarea type={inputType} name="newValue" required minLength={theMinLength} maxLength={theMaxLength} /> <br />
         <input type="submit" value="Apply" />
       </form >
     </>
@@ -282,6 +297,8 @@ async function modifyVendor(event) {
     const password = formData.get("password");
     const newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
+    console.log("new value: " + newValue); //r
+    console.log("property: " + propertyName); //R
     // Modify profile in server
     await requestVendorModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)
@@ -391,6 +408,8 @@ async function requestProfileModification(password, propertyName, newValue) {
  */
 async function requestVendorModification(password, propertyName, newValue) {
   try {
+    console.log("new value: " + newValue); //r
+    console.log("property: " + propertyName); //R
     const response = await fetch("http://localhost:3001/vendor/modify", {
       method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request
