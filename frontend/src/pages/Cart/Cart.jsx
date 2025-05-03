@@ -63,7 +63,7 @@ export default function Cart() {
 
     let sum = 0;
     for (const product of products) {
-      sum += product.Price * product.quantity;
+      sum += (product.Price -(product.Price * product.DiscountProcent) / 100) * product.quantity;
     }
     return sum;
   }
@@ -81,6 +81,7 @@ export default function Cart() {
               storeAddress={product.StoreAddress}
               quantity={product.quantity}
               size={product.size}
+              discount={product.DiscountProcent}
               removeFunction={() => {
                 deleteCookie(`Product-${product.ID}`, "/");
                 //we reload the cookies now that one has been deleted.

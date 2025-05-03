@@ -76,6 +76,7 @@ export default function Products({ VendorID }) {
               price={product.Price}
               productBrand={product.Brand}
               showVendorButtons={true}
+              discount={product.DiscountProcent}
               onDelete={handleDelete}
             ></ProductCard>
           );

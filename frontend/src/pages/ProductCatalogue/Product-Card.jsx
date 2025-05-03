@@ -11,8 +11,10 @@ export default function ProductCard({
   productBrand,
   showVendorButtons,
   onDelete,
+  discount
 }) {
   const image = FetchImage(id);
+  const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
 
   return (
     <div className="product-card-container">
@@ -27,7 +29,9 @@ export default function ProductCard({
           ></img>
           <h1>{storeName}</h1>
           <h1>{`${productBrand} - ${productName}`}</h1>
-          <p>{`${price},00 kr`}</p>
+          {/* used a short circuit logical expression the paragraph only shows if there is a discount */}
+          {discount > 0 && <p>-{discount}%</p>}
+          <p style={{ color: discount > 0 ? "red" : "black" }}>{`${finalPrice.toFixed(0)},00 kr`}</p>
         </Link>
         {showVendorButtons && (
           <button onClick={() => onDelete(id)}>Delete</button>

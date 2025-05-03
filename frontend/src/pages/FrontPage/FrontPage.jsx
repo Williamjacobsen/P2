@@ -94,6 +94,7 @@ export default function FrontPage() {
                 productName={product.Name}
                 price={product.Price}
                 productBrand={product.Brand}
+                discount={product.DiscountProcent}
               />
             );
           })}
