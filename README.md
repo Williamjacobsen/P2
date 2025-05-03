@@ -17,6 +17,10 @@ For MySQL (only relevant if you have disabled starting it on system boot-up):
 4) Right-click it and press "start".
 5) You can now connect to your MySQL database using the MySQL Workbench app.
 
+How to start tests:
+* For frontend, navigate to the frontend directory ("cd frontend") and then run "npm run test".
+* For backend, navigate to the backend directory ("cd backend") and then run "npm run test".
+
 # Included and required packages
 
 How to navigate inside the terminal:
@@ -26,7 +30,8 @@ Required packages in the frontend folder (these ARE NOT installed in the project
 * "npm install"
 
 Included packages in the backend folder (these ARE ALREADY installed in the project):
-* "npm install bcrypt jsonwebtoken node-schedule cookie-parser express-validator vitest supertest --save-dev"
+* "npm install bcrypt jsonwebtoken node-schedule cookie-parser express-validator "
+* "npm install vitest supertest -D" (the "-D" makes it a dev dependency. Dev dependencies are for tools and packages needed during development but not in production)
 * --save-dev lets our testing framework use the packages.
 
 FAQ:
