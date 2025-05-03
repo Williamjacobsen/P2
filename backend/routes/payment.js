@@ -73,6 +73,41 @@ router.post("/", [validateProfileAccessToken], async (req, res) => {
       });
     }
 
+    // Becuase metadata values can have up to 500 characters:
+
+    // cartProducts:
+    // [{
+    //  ID: 1,
+    //  StoreID: 1,
+    //  Name: 'Daedric boots',
+    //  Price: 1000,
+    //  DiscountProcent: 10,
+    //  Description: 'Enjoy slavery wearing these.',
+    //  ClothingType: 'Footwear',
+    //  Brand: 'Nwah',
+    //  Gender: 'Male',
+    //  StoreName: 'UrbanTrendz',
+    //  Path: null,
+    //  StoreAddress: 'Nørrebrogade 21, Copenhagen',
+    //  size: 'medium',
+    //  quantity: 3
+    // }, ...],
+
+    // Needed data in metadata
+    // CustomerID
+    // ID
+    // Size
+    // Quantity
+
+    // To allow for more products, and faster requests, metadata could be a string of values like '4, 21, 4',
+    // but instead we make it a dictionary for readablilty (less optimal)
+
+    const necessaryDataForMetadata = cartProducts.map((item) => ({
+      id: item.ID,
+      size: item.size,
+      quantity: item.quantity,
+    }));
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
@@ -82,7 +117,7 @@ router.post("/", [validateProfileAccessToken], async (req, res) => {
       cancel_url: "http://localhost:3000/cancel",
       metadata: {
         customerID: profile.ID,
-        cart: JSON.stringify(cartProducts),
+        items: JSON.stringify(necessaryDataForMetadata),
       },
     });
 
@@ -109,20 +144,34 @@ router.get("/verify-payment", async (req, res) => {
       session.payment_status === "paid" &&
       session.payment_intent.status === "succeeded"
     ) {
-      const cart = JSON.parse(session.metadata.cart);
+      const items = JSON.parse(session.metadata.items);
       const customerID = session.metadata.customerID;
 
-      for (const product of cart) {
+      for (const item of items) {
+        const [productRows] = await pool.query(
+          `SELECT Price, DiscountProcent, Name, Brand, ClothingType, Gender, StoreID FROM Product WHERE ID = ?`,
+          [item.id]
+        );
+        const productData = productRows[0];
+
+        const [productStoreRows] = await pool.query(
+          `SELECT Name FROM Vendor WHERE ID = ?`,
+          [productData.StoreID]
+        );
+        const storeName = productStoreRows[0]?.Name;
+
         const currentDateTime = new Date();
         currentDateTime.getUTCDate();
 
         const [vendorCVRRows] = await pool.query(
           "SELECT CVR FROM Vendor WHERE Name = ?",
-          [product.StoreName]
+          [storeName]
         );
         const vendorCVR = vendorCVRRows[0]?.CVR;
 
-        const finalPrice = product.quantity * (product.Price * (1 - product.DiscountProcent / 100));
+        const finalPrice =
+          item.quantity *
+          (productData.Price * (1 - productData.DiscountProcent / 100));
 
         await pool.query(
           "INSERT INTO ProductOrder (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR, ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -131,21 +180,21 @@ router.get("/verify-payment", async (req, res) => {
             false,
             false,
             currentDateTime,
-            product.StoreName,
+            storeName,
             vendorCVR,
-            product.Brand,
-            product.Name,
-            product.ClothingType,
-            product.size,
-            product.Gender,
+            productData.Brand,
+            productData.Name,
+            productData.ClothingType,
+            item.size,
+            productData.Gender,
             finalPrice,
-            product.quantity,
+            item.quantity,
           ]
         );
 
         await pool.query(
           "UPDATE ProductSize SET Stock = Stock - ? WHERE ProductID = ? AND Size = ? AND Stock >= ?",
-          [product.quantity, product.ID, product.size, product.quantity]
+          [item.quantity, item.id, item.size, item.quantity]
         );
       }
 
