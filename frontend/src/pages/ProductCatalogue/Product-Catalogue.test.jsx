@@ -2,7 +2,6 @@ import {render, fireEvent, waitFor, screen} from "@testing-library/react";
 import React from "react";
 import '@testing-library/jest-dom';
 import ProductCatalogue from "./Product-Catalogue";
-import ProductCard from "./Product-Card";
 import {BrowserRouter} from "react-router-dom";
 
 
