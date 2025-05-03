@@ -36,9 +36,9 @@ describe("End-to-end vendor profile creation, sign out, sign in, modification, a
     // ]
     // Create vendor
     await pool.query(`INSERT INTO p2.Vendor 
-      (Name, Address, Email, PhoneNumber, Description, BankAccountNumber, CVR) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      ["Test name", "Test address", "Test email", "837492758475839", "Test description", "1010101010", "10101010"]);
+      (Name, Address, Email, PhoneNumber, Description, BankAccountNumber, CVR, FAQ) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ["Test name", "Test address", "Test email", "837492758475839", "Test description", "1010101010", "10101010", "Test FAQ"]);
     const [testVendorRows] = await pool.query(`SELECT * FROM p2.Vendor WHERE Email='Test email' AND PhoneNumber='837492758475839';`)
     expect(Object.keys(testVendorRows).length).toBe(1);
     testVendor = testVendorRows[0];
@@ -96,6 +96,14 @@ describe("End-to-end vendor profile creation, sign out, sign in, modification, a
       .get(`/vendor/get?vendorID=${testVendor.ID}`);
     expect(response2.status).toBe(200);
     expect(response2.body.vendor.Name).toEqual(newName);
+  });
+
+  test("Get profile product orders", async function () {
+    const response = await request(app)
+      .get("/productOrder/getProfileProductOrders")
+      .set("Cookie", authentificationCookies);
+    expect(response.status).toBe(200);
+    expect(response.body.productOrders.length).toBe(0);
   });
 
   test("Sign out", async function () {
