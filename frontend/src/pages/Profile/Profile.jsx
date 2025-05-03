@@ -105,7 +105,9 @@ export default function Profile() {
               <br />
               <b>FAQ: </b>
               <br />
-              {vendor.FAQ}
+              <div class="text-with-new-lines">
+                {vendor.FAQ.replaceAll("newLineCharacter", "\n")}
+              </div>
               <br />
               <Modal
                 openButtonText="Change FAQ?"
@@ -295,10 +297,13 @@ async function modifyVendor(event) {
     // Get data
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password");
-    const newValue = formData.get("newValue");
+    let newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
-    console.log("new value: " + newValue); //r
-    console.log("property: " + propertyName); //R
+    // In case of FAQ, change new lines "\n" to something
+    // that gets past the server's input sanitization
+    if (propertyName === "FAQ") {
+      newValue = newValue.replaceAll("\n", "newLineCharacter");
+    }
     // Modify profile in server
     await requestVendorModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)
@@ -408,8 +413,6 @@ async function requestProfileModification(password, propertyName, newValue) {
  */
 async function requestVendorModification(password, propertyName, newValue) {
   try {
-    console.log("new value: " + newValue); //r
-    console.log("property: " + propertyName); //R
     const response = await fetch("http://localhost:3001/vendor/modify", {
       method: "PUT",
       credentials: "include", // Ensures cookies are sent with the request

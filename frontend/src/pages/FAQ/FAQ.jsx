@@ -15,7 +15,15 @@ export default function FAQ() {
 
   return (
     <>
-      Cool.
+      <hr />
+      <div class="text-with-new-lines" >
+        {vendors[0].FAQ.replaceAll("newLineCharacter", "\n")}
+      </div>
+      <br />
+      <hr />
+      <div class="text-with-new-lines">
+        {vendors[1].FAQ.replaceAll("newLineCharacter", "\n")}
+      </div>
     </>
   );
 }

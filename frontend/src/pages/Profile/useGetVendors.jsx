@@ -14,7 +14,7 @@ export default function useGetVendors() {
     (async () => {
       try {
         setVendors(await requestVendors());
-        setIsLoading();
+        setIsLoading(false);
       }
       catch (error) {
         alert(error);
