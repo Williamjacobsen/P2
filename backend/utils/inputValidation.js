@@ -132,7 +132,8 @@ export const validateVendorPropertyName = check("propertyName")
     "PhoneNumber",
     "Description",
     "BankAccountNumber",
-    "CVR"
+    "CVR",
+    "FAQ"
   ])
 /**
  * This does not take into account the corresponding property name,
@@ -187,6 +188,11 @@ export function validateVendorNewValue_Part2Of2(httpResponse, propertyName, newV
       break;
     case "CVR":
       if (newValue.length > 8) {
+        inputIsInvalid = true;
+      }
+      break;
+    case "FAQ":
+      if (newValue.length > 2000) {
         inputIsInvalid = true;
       }
       break;
