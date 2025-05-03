@@ -9,25 +9,24 @@ import useGetProfile from "../Profile/useGetProfile";
 import useGetVendor from "../Profile/useGetVendor";
 
 export default function Header() {
-
   // Hooks
   const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
 
   // Is the user signed in?
   if (isLoadingProfile) {
-    return (<>Loading login...</>);
+    return <>Loading login...</>;
   }
   // Is the user signed in?
   if (isLoadingVendor) {
-    return (<>Loading vendor profile information...</>);
+    return <>Loading vendor profile information...</>;
   }
 
   return (
     <div>
       <DefaultHeader profile={profile} />
       <VendorHeader vendor={vendor} />
-      < Outlet />
+      <Outlet />
     </div>
   );
 }
@@ -37,29 +36,50 @@ function DefaultHeader({ profile }) {
     <header class="default-header sticky">
       <div>
         <ul>
-          <li> <Link to="/"> Website name </Link> </li>
+          <li>
+            {" "}
+            <Link to="/"> Website name </Link>{" "}
+          </li>
         </ul>
       </div>
       <div>
         <ul>
-          <li> <Link to="/product-catalogue"> Products </Link> </li>
-          <li> <Link to="/faq"> Help </Link> </li>
+          <li>
+            {" "}
+            <Link to="/product-catalogue"> Products </Link>{" "}
+          </li>
+          <li>
+            {" "}
+            <Link to="/faq"> Help </Link>{" "}
+          </li>
           {profile === undefined && (
             <>
-              <li> <Link to="/sign-in"> Sign In </Link> </li>
+              <li>
+                {" "}
+                <Link to="/sign-in"> Sign In </Link>{" "}
+              </li>
             </>
           )}
           {profile !== undefined && (
             <>
-              <li> <Link to="/profile"> Profile </Link> </li>
-              <li> <Link to="/profile-product-orders"> Your Orders </Link> </li>
+              <li>
+                {" "}
+                <Link to="/profile"> Profile </Link>{" "}
+              </li>
+              <li>
+                {" "}
+                <Link to="/profile-product-orders"> Your Orders </Link>{" "}
+              </li>
             </>
           )}
         </ul>
       </div>
       <div>
         <ul>
-          <li> <Link to="/cart"> Cart </Link> </li>
+          <li>
+            {" "}
+            <Link to="/cart"> Cart </Link>{" "}
+          </li>
         </ul>
       </div>
     </header>
@@ -67,7 +87,6 @@ function DefaultHeader({ profile }) {
 }
 
 function VendorHeader({ vendor }) {
-
   if (vendor === null) {
     return;
   }
@@ -77,26 +96,40 @@ function VendorHeader({ vendor }) {
       <header class="vendor-header sticky">
         <div>
           <ul>
-            <li> <b>Vendor: </b> {vendor.Name} </li>
+            <li>
+              {" "}
+              <b>Vendor: </b> {vendor.Name}{" "}
+            </li>
           </ul>
         </div>
         <div>
           <ul>
-            <li> <Link to="/vendor"> Products </Link> </li>
-            <li> <Link to="/vendor/add-product"> Add Product </Link> </li>
-            <li> <Link to="/NOT IMPLEMENTED"> Coupons (NOT IMPLEMENTED) </Link> </li>
-            <li> <Link to="/NOT IMPLEMENTED"> Orders (NOT IMPLEMENTED) </Link> </li>
+            <li>
+              {" "}
+              <Link to="/vendor"> Products </Link>{" "}
+            </li>
+            <li>
+              {" "}
+              <Link to="/vendor/add-product"> Add Product </Link>{" "}
+            </li>
+            <li>
+              {" "}
+              <Link to="/NOT IMPLEMENTED">
+                {" "}
+                Coupons (NOT IMPLEMENTED){" "}
+              </Link>{" "}
+            </li>
+            <li>
+              {" "}
+              <Link to="/NOT IMPLEMENTED"> Orders (NOT IMPLEMENTED) </Link>{" "}
+            </li>
           </ul>
         </div>
-        <div>
-          {/* This is left empty for styling purposes*/}
-        </div>
+        <div>{/* This is left empty for styling purposes*/}</div>
       </header>
     </>
-  )
+  );
 }
-
-
 
 //r
 function OldDefaultHeader() {
@@ -151,4 +184,4 @@ function OldDefaultHeader() {
       </ul>
     </nav>
   );
-};
+}
