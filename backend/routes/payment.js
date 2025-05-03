@@ -122,6 +122,8 @@ router.get("/verify-payment", async (req, res) => {
         );
         const vendorCVR = vendorCVRRows[0]?.CVR;
 
+        const finalPrice = product.quantity * (product.Price * (1 - product.DiscountProcent / 100));
+
         await pool.query(
           "INSERT INTO ProductOrder (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR, ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [
@@ -136,7 +138,7 @@ router.get("/verify-payment", async (req, res) => {
             product.ClothingType,
             product.size,
             product.Gender,
-            product.Price,
+            finalPrice,
             product.quantity,
           ]
         );
