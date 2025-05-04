@@ -126,8 +126,9 @@ app.get("/shopCircles", async (req, res) => {
 app.get("/VendorProducts/:vendorid", async (req, res) => {
   const { vendorid } = req.params; // VendorID is grabbed from the url parameter
 
-  if (!vendorid) {
-    return res.status(400).json({ message: "Vendor ID is required" });
+  const vendorIdNum = Number(vendorid);
+  if (!Number.isInteger(vendorIdNum) || vendorIdNum <= 0) {
+    return res.status(400).json({ message: "Vendor ID must be a positive integer" });
   }
 
   try {
