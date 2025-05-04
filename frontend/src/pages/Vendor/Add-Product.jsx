@@ -48,18 +48,16 @@ export default function AddProduct() {
 
   // Is the user signed in?
   if (isLoadingProfile) {
-    return (<>Loading login...</>);
-  }
-  else if (profile === undefined) {
-    return (<Navigate to="/sign-in" replace />);
+    return <>Loading login...</>;
+  } else if (profile === undefined) {
+    return <Navigate to="/sign-in" replace />;
   }
 
   // Is the user a vendor?
   if (isLoadingVendor) {
-    return (<>Loading vendor information...</>);
-  }
-  else if (vendor === null) {
-    return (<>You are not a vendor, so you do not have access to this page.</>);
+    return <>Loading vendor information...</>;
+  } else if (vendor === null) {
+    return <>You are not a vendor, so you do not have access to this page.</>;
   }
 
   const handleImageChange = (e) => {
@@ -96,6 +94,7 @@ export default function AddProduct() {
 
       const response = await fetch("http://localhost:3001/add-product", {
         method: "POST",
+        credentials: "include", // Ensures cookies are sent with the request
         body: formData,
       });
       if (!response.ok) throw new Error("Failed to add product");

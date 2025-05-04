@@ -10,9 +10,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 router.delete("/:id", async (req, res) => {
-  const productId = req.params.id;
-
   try {
+    const productId = req.params.id;
+
     const [images] = await pool.query(
       `SELECT Path FROM p2.ProductImage WHERE ProductID = ?`,
       [productId]
