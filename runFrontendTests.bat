@@ -1,1 +1,1 @@
-start cmd /k "cd frontend && npm run test && a"
+start cmd /k "cd frontend && npm test"

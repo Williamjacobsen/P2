@@ -127,7 +127,8 @@ export default function AddProduct() {
         credentials: "include",
         body: formData,
       });
-      if (!response.ok) throw new Error("Failed to add product");
+      const res = await response.json();
+      if (!response.ok) throw new Error(res.error);
 
       setName("");
       setPrice(0.0);
@@ -144,7 +145,7 @@ export default function AddProduct() {
       alert("Product added successfully!");
     } catch (error) {
       console.error(error);
-      alert("Error adding product");
+      alert(error);
     }
   };
 
@@ -169,7 +170,7 @@ export default function AddProduct() {
               value={price}
               placeholder="Price..."
               onChange={(e) => setPrice(parseFloat(e.target.value))}
-            />  
+            />
           </div>
           <div>
             <h4>Discount %</h4>

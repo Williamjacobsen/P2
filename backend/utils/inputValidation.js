@@ -257,3 +257,82 @@ export const validateSessionIdParam = [
     .notEmpty()
     .withMessage("session_id cannot be empty"),
 ];
+
+// Validate GET /add-product
+export const validateAddProduct = [
+  check("storeID")
+    .notEmpty()
+    .withMessage("storeID is required")
+    .isInt({ gt: 0 })
+    .withMessage("storeID must be a positive integer"),
+  check("name")
+    .notEmpty()
+    .withMessage("name is required")
+    .isString()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("name must be 1-100 chars"),
+  check("price")
+    .notEmpty()
+    .withMessage("price is required")
+    .isFloat({ min: 0 })
+    .withMessage("price must be ≥ 0"),
+  check("discountProcent")
+    .notEmpty()
+    .withMessage("discountProcent is required")
+    .isFloat({ min: 0, max: 100 })
+    .withMessage("discountProcent 0-100"),
+  check("description")
+    .notEmpty()
+    .withMessage("description is required")
+    .isString()
+    .isLength({ min: 1, max: 250 })
+    .withMessage("description 1-250 chars"),
+  check("clothingType")
+    .notEmpty()
+    .withMessage("clothingType is required")
+    .isString(),
+  check("brand")
+    .notEmpty()
+    .withMessage("brand is required")
+    .isString()
+    .isLength({ min: 1, max: 50 })
+    .withMessage("brand 1-50 chars"),
+  check("gender").notEmpty().withMessage("gender is required").isString(),
+
+  // sizes array
+  check("size").custom((_, { req }) => {
+    const sizes = Array.isArray(req.body.size)
+      ? req.body.size
+      : [req.body.size].filter(Boolean); // removes undefined
+    if (!sizes.length) throw new Error("At least one size is required");
+    sizes.forEach((s) => {
+      if (typeof s !== "string" || s.length < 1 || s.length > 10) {
+        throw new Error("Each size must be 1-10 chars");
+      }
+    });
+    return true;
+  }),
+
+  // stock array
+  check("stock").custom((_, { req }) => {
+    const stocks = Array.isArray(req.body.stock)
+      ? req.body.stock
+      : [req.body.stock].filter(Boolean);
+    if (!stocks.length) throw new Error("At least one stock value is required");
+    stocks.forEach((st) => {
+      if (!Number.isInteger(parseInt(st, 10)) || parseInt(st, 10) < 0) {
+        throw new Error("Each stock must be a non-negative integer");
+      }
+    });
+    return true;
+  }),
+
+  check("images").custom((_, { req }) => {
+    // The first argument _ would normally be the parsed value of req.body.images
+    // but since file uploads arent in the body we ignore it.
+    if (!req.files || req.files.length === 0) {
+      throw new Error("At least one picture is required");
+    }
+    return true;
+  }),
+];
