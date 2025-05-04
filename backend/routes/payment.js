@@ -127,15 +127,17 @@ router.post(
       res.status(200).json({ id: session.id });
     } catch (error) {
       console.log("Error during checkout session creation:", error);
-      res.status(500).json({ error: error.message });
+      if (res._header === null) {
+        res.status(500).json({ error: error.message });
+      }
     }
   }
 );
 
 router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
-  handleValidationErrors(req, res, validationResult);
-
   try {
+    handleValidationErrors(req, res, validationResult);
+
     const session_id = req.query.session_id;
 
     if (!session_id) {
@@ -212,7 +214,9 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
     }
   } catch (error) {
     console.error("Error verifying payment:", error);
-    res.status(500).json({ error: error.message });
+    if (res._header === null) {
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 

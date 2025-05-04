@@ -27,7 +27,8 @@ export default function Orders() {
       }
       try {
         const ordersReq = await fetch(
-          `http://localhost:3001/vendor-orders/${storeID}`
+          `http://localhost:3001/vendor-orders/${storeID}`,
+          { credentials: "include" }
         );
         if (!ordersReq.ok) throw new Error("Update failed");
 
@@ -55,6 +56,20 @@ export default function Orders() {
     );
   }
 
+  // Is the user signed in?
+  if (isLoadingProfile) {
+    return <>Loading login...</>;
+  } else if (profile === undefined) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  // Is the user a vendor?
+  if (isLoadingVendor) {
+    return <>Loading vendor information...</>;
+  } else if (vendor === null) {
+    return <>You are not a vendor, so you do not have access to this page.</>;
+  }
+
   async function handleUpdate(orderID) {
     const orderToUpdate = orders.find((order) => order.ID === orderID);
     if (!orderToUpdate) return;
@@ -78,20 +93,6 @@ export default function Orders() {
     } catch (err) {
       console.error(err);
     }
-  }
-
-  // Is the user signed in?
-  if (isLoadingProfile) {
-    return <>Loading login...</>;
-  } else if (profile === undefined) {
-    return <Navigate to="/sign-in" replace />;
-  }
-
-  // Is the user a vendor?
-  if (isLoadingVendor) {
-    return <>Loading vendor information...</>;
-  } else if (vendor === null) {
-    return <>You are not a vendor, so you do not have access to this page.</>;
   }
 
   return (

@@ -8,6 +8,7 @@ import { validationResult } from "express-validator";
 import {
   handleValidationErrors,
   validateProfileAccessToken,
+  validateAddProduct,
 } from "../utils/inputValidation.js";
 import { getProfile } from "./profile.js";
 
@@ -50,8 +51,9 @@ const upload = multer({ storage, fileFilter });
 
 router.post(
   "/",
-  [validateProfileAccessToken],
+  validateProfileAccessToken,
   upload.array("images", 10),
+  ...validateAddProduct,
   async (req, res) => {
     try {
       handleValidationErrors(req, res, validationResult);
@@ -119,7 +121,9 @@ router.post(
       });
     } catch (error) {
       console.error("Error adding product:", error);
-      res.status(500).json({ message: "Error adding product to database" });
+      if (res._header === null) {
+        res.status(500).json({ message: error });
+      }
     }
   }
 );
