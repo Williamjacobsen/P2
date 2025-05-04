@@ -51,7 +51,6 @@ const ensureArray = (val) => {
 };
 
 console.log("add-product: 6 - ensureArray function created");
-
 console.log("add-product: 7 - multer upload middleware created");
 
 router.post(
@@ -60,7 +59,7 @@ router.post(
   upload.array("images", 10),
   ...validateAddProduct,
   async (req, res) => {
-    console.log("POST / - Received request");
+    console.log("add-product: POST / - Received request");
     console.log("Request body:", req.body);
     console.log("Request files:", req.files);
 
@@ -69,7 +68,10 @@ router.post(
       const accessToken = req.cookies.profileAccessToken;
       const profile = await getProfile(res, accessToken);
 
+      console.log("Fetched profile:", profile);
+
       if (!profile.VendorID) {
+        console.log("VendorID missing - user is not a Vendor");
         throw new Error("User is not a Vendor");
       }
 
@@ -180,11 +182,9 @@ router.post(
       });
     } catch (error) {
       console.error("Error adding product:", error);
-      res.status(500).json({
-        message: "Error adding product to database",
-        error: error,
-        req_body: req.body,
-      });
+      if (res._header === null) {
+        res.status(500).json({ message: error });
+      }
     }
   }
 );

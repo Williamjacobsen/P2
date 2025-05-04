@@ -1,6 +1,14 @@
 import express from "express";
 import pool from "../db.js";
 import Stripe from "stripe";
+import { validationResult } from "express-validator";
+import {
+  handleValidationErrors,
+  validateProfileAccessToken,
+  validateCartProducts,
+  validateSessionIdParam,
+} from "../utils/inputValidation.js";
+import { getProfile } from "./profile.js";
 
 const router = express.Router();
 
@@ -8,129 +16,201 @@ const stripe = new Stripe(
   "sk_test_51RAr8OPGyAJCpFedxTTr7jZH696z7Bs2GZnqOjEX9xdU0LCOJbWJknMoauzhrgvR0Fku9XgMeNXKaOed0OZiGwf700IkAC8dQF"
 );
 
-router.post("/", async (req, res) => {
-  try {
-    console.log("POST /checkout-session triggered");
-    const { products: cartProducts } = req.body;
-    console.log("Received cart products:", cartProducts);
+router.post(
+  "/",
+  [validateProfileAccessToken, ...validateCartProducts],
+  async (req, res) => {
+    try {
+      handleValidationErrors(req, res, validationResult);
+      const cartProducts = req.body.products;
+      const accessToken = req.cookies.profileAccessToken;
+      const profile = await getProfile(res, accessToken);
 
-    if (!cartProducts) {
-      console.log("No products found in request body");
-      return res.status(400).json({ error: "No products in the cart." });
-    }
-
-    const productIds = cartProducts.map((p) => p.id);
-    console.log("Fetching products from DB with IDs:", productIds);
-
-    const [products] = await pool.query(
-      "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
-      [productIds]
-    );
-
-    console.log("Products fetched from DB:", products);
-
-    const productMap = {};
-    products.forEach((product) => {
-      productMap[product.ID] = product;
-    });
-
-    for (const item of cartProducts) {
-      if (!productMap[item.id]) {
-        console.log(`Product with ID ${item.id} not found in DB`);
-        return res
-          .status(400)
-          .json({ error: `Product with ID ${item.id} not found` });
+      if (!profile.VendorID) {
+        throw new Error("User is not a Vendor");
       }
-    }
 
-    const line_items = [];
-    for (const item of cartProducts) {
-      const product = productMap[item.id];
-      const discountedPrice =
-        product.Price * (1 - product.DiscountProcent / 100);
-      const unit_amount = Math.round(discountedPrice * 100); // Convert to cents
+      if (!cartProducts) {
+        return res.status(400).json({ error: "No products in the cart." });
+      }
 
-      console.log(
-        `Product ${product.Name} (ID: ${product.ID}) - original price: ${product.Price}, discount: ${product.DiscountProcent}%, final unit amount: ${unit_amount}`
+      const productIds = cartProducts.map((p) => p.id);
+      console.log("Fetching products from DB with IDs:", productIds);
+
+      const [products] = await pool.query(
+        "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
+        [productIds]
       );
 
-      if (unit_amount < 250) {
-        console.log(
-          `Product "${product.Name}" price after discount is below minimum`
-        );
-        return res.status(400).json({
-          error: `Product "${product.Name}" (ID: ${product.ID}) price after discount is too low (minimum 2.5 DKK).`,
+      console.log("Products fetched from DB:", products);
+
+      const productMap = {};
+      products.forEach((product) => {
+        productMap[product.ID] = product;
+      });
+
+      for (const item of cartProducts) {
+        if (!productMap[item.ID]) {
+          return res
+            .status(400)
+            .json({ error: `Product with ID ${item.ID} not found` });
+        }
+      }
+
+      const line_items = [];
+      for (const item of cartProducts) {
+        const product = productMap[item.ID];
+        const discountedPrice =
+          product.Price * (1 - product.DiscountProcent / 100);
+        const unit_amount = Math.round(discountedPrice * 100);
+
+        if (unit_amount < 250) {
+          return res.status(400).json({
+            error: `Product "${product.Name}" (ID: ${product.ID}) price after discount is too low (minimum 2.5 DKK).`,
+          });
+        }
+
+        line_items.push({
+          price_data: {
+            currency: "dkk",
+            product_data: {
+              name: product.Name,
+            },
+            unit_amount: unit_amount,
+          },
+          quantity: item.quantity,
         });
       }
 
-      line_items.push({
-        price_data: {
-          currency: "dkk",
-          product_data: {
-            name: product.Name,
-          },
-          unit_amount: unit_amount,
-        },
+      const necessaryDataForMetadata = cartProducts.map((item) => ({
+        id: item.ID,
+        size: item.size,
         quantity: item.quantity,
+      }));
+
+      console.log("Creating Stripe session with line items:", line_items);
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items,
+        mode: "payment",
+        success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        metadata: {
+          customerID: profile.ID,
+          items: JSON.stringify(necessaryDataForMetadata),
+        },
       });
+
+      console.log("Stripe session created:", session.id);
+
+      res.status(200).json({ id: session.id });
+    } catch (error) {
+      console.log("Error during checkout session creation:", error);
+      if (res._header === null) {
+        res.status(500).json({ error: error.message });
+      }
     }
-
-    console.log("Creating Stripe session with line items:", line_items);
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items,
-      mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
-    });
-
-    console.log("Stripe session created:", session.id);
-
-    res.json({ id: session.id });
-  } catch (error) {
-    console.log("Error during checkout session creation:", error);
-    res.status(500).json({ error: error.message });
   }
-});
+);
 
 router.get("/verify-payment", async (req, res) => {
-  console.log("request: ");
-  console.log(req);
-  console.log(req.query);
-
-  const { session_id } = req.query;
-  console.log("GET /verify-payment triggered with session_id:", session_id);
-
-  if (!session_id) {
-    console.log("No session ID provided in query");
-    return res.status(400).json({ error: "Session ID is missing." });
-  }
-
   try {
+    handleValidationErrors(req, res, validationResult);
+
+    const session_id = req.query.session_id;
+
+    if (!session_id) {
+      return res.status(400).json({ error: "Session ID is missing." });
+    }
+
+    const [existingOrders] = await pool.query(
+      "SELECT 1 FROM ProductOrder WHERE StripeSessionID = ? LIMIT 1",
+      [session_id]
+    );
+
+    if (existingOrders.length > 0) {
+      return res.json({ success: true, message: "Payment already confirmed" });
+    }
+
     const session = await stripe.checkout.sessions.retrieve(session_id, {
       expand: ["payment_intent"],
     });
-
-    console.log("Retrieved Stripe session:", session.id);
-    console.log("Payment status:", session.payment_status);
-    console.log("Payment intent status:", session.payment_intent.status);
 
     if (
       session.payment_status === "paid" &&
       session.payment_intent.status === "succeeded"
     ) {
-      console.log("Payment was successful");
+      const items = JSON.parse(session.metadata.items);
+      const customerID = session.metadata.customerID;
+
+      for (const item of items) {
+        const [productRows] = await pool.query(
+          `SELECT Price, DiscountProcent, Name, Brand, ClothingType, Gender, StoreID FROM Product WHERE ID = ?`,
+          [item.id]
+        );
+        const productData = productRows[0];
+
+        const [productStoreRows] = await pool.query(
+          `SELECT Name FROM Vendor WHERE ID = ?`,
+          [productData.StoreID]
+        );
+        const storeName = productStoreRows[0]?.Name;
+
+        const currentDateTime = new Date();
+        currentDateTime.getUTCDate();
+
+        const [vendorCVRRows] = await pool.query(
+          "SELECT CVR FROM Vendor WHERE Name = ?",
+          [storeName]
+        );
+        const vendorCVR = vendorCVRRows[0]?.CVR;
+
+        const finalPrice =
+          item.quantity *
+          (productData.Price * (1 - productData.DiscountProcent / 100));
+
+        await pool.query(
+          "INSERT INTO ProductOrder (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR, ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice, Quantity, StripeSessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            customerID,
+            false,
+            false,
+            currentDateTime,
+            storeName,
+            vendorCVR,
+            productData.Brand,
+            productData.Name,
+            productData.ClothingType,
+            item.size,
+            productData.Gender,
+            finalPrice,
+            item.quantity,
+            session_id,
+          ]
+        );
+
+        await pool.query(
+          "UPDATE ProductSize SET Stock = Stock - ? WHERE ProductID = ? AND Size = ? AND Stock >= ?",
+          [item.quantity, item.id, item.size, item.quantity]
+        );
+      }
+
       res.json({ success: true, message: "Payment confirmed" });
     } else {
-      console.log("Payment was not successful");
+      console.log("Payment not successful - status:", {
+        payment_status: session.payment_status,
+        payment_intent_status: session.payment_intent?.status,
+      });
       res
         .status(400)
         .json({ success: false, message: "Payment not successful" });
     }
   } catch (error) {
     console.error("Error verifying payment:", error);
-    res.status(500).json({ error: error.message });
+    if (res._header === null) {
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 
