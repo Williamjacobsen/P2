@@ -5,7 +5,7 @@ import request from "supertest";
 import app from "../app";
 import pool from "../db";
 
-describe("End-to-end vendor profile creation, sign out, sign in, modification, and deletion", async function () {
+describe("profile.js, vendor.js, and productOrder.js", async function () {
   // NOTE: Fails if an existing user is using the same email or phone number.
   // Temporary test profile information:
   const originalEmail = "the@EmailThatIsBeingTested1";

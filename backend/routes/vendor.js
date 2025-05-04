@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { validationResult } from "express-validator"; //R remove body
+import { validationResult } from "express-validator";
 
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
