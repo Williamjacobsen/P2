@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 import "./FAQ.css";
-import useGetVendors from "../Profile/useGetVendors";
+import useGetVendor from "../Profile/useGetVendor";
 
 export default function FAQ() {
   // Hooks
-  const [isLoadingVendors, vendors] = useGetVendors();
+  const [isLoadingVendors, vendors] = useGetVendor();
 
   // Loading vendors
   if (isLoadingVendors) {
