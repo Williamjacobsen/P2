@@ -6,7 +6,7 @@ import { Outlet, Link } from "react-router-dom";
 import "./Header.css";
 
 import useGetProfile from "../Profile/useGetProfile";
-import useGetVendor from "../Profile/useGetVendor";
+import useGetVendor from "../Profile/useGetVendors";
 
 export default function Header() {
   // Hooks
