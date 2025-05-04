@@ -127,19 +127,30 @@ router.post(
       res.status(200).json({ id: session.id });
     } catch (error) {
       console.log("Error during checkout session creation:", error);
-      res.status(500).json({ error: error.message });
+      if (res._header === null) {
+        res.status(500).json({ error: error.message });
+      }
     }
   }
 );
 
 router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
-  handleValidationErrors(req, res, validationResult);
-
   try {
+    handleValidationErrors(req, res, validationResult);
+
     const session_id = req.query.session_id;
 
     if (!session_id) {
       return res.status(400).json({ error: "Session ID is missing." });
+    }
+
+    const [existingOrders] = await pool.query(
+      "SELECT 1 FROM ProductOrder WHERE StripeSessionID = ? LIMIT 1",
+      [session_id]
+    );
+
+    if (existingOrders.length > 0) {
+      return res.json({ success: true, message: "Payment already confirmed" });
     }
 
     const session = await stripe.checkout.sessions.retrieve(session_id, {
@@ -180,7 +191,7 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
           (productData.Price * (1 - productData.DiscountProcent / 100));
 
         await pool.query(
-          "INSERT INTO ProductOrder (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR, ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "INSERT INTO ProductOrder (CustomerProfileID, IsReady, IsCollected, DateTimeOfPurchase, VendorName, VendorCVR, ProductBrand, ProductName, ProductClothingType, ProductSize, ProductGender, ProductPrice, Quantity, StripeSessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [
             customerID,
             false,
@@ -195,6 +206,7 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
             productData.Gender,
             finalPrice,
             item.quantity,
+            session_id,
           ]
         );
 
@@ -206,13 +218,19 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
 
       res.json({ success: true, message: "Payment confirmed" });
     } else {
+      console.log("Payment not successful - status:", {
+        payment_status: session.payment_status,
+        payment_intent_status: session.payment_intent?.status,
+      });
       res
         .status(400)
         .json({ success: false, message: "Payment not successful" });
     }
   } catch (error) {
     console.error("Error verifying payment:", error);
-    res.status(500).json({ error: error.message });
+    if (res._header === null) {
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 

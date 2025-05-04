@@ -5,8 +5,9 @@ import emailjs from "@emailjs/browser";
 import useGetProfile from "../Profile/useGetProfile";
 import { useSearchParams } from "react-router-dom";
 
-
 export default function Success() {
+  const [hasVerified, setHasVerified] = useState(false);
+
   const [isReadyToSendEmail, setIsReadyToSendEmail] = useState(false);
   const [isLoading, profile] = useGetProfile();
   const emailSentRef = useRef(false);
@@ -21,16 +22,18 @@ export default function Success() {
 
   useEffect(() => {
     async function checkPayment() {
+      if (hasVerified || !sessionId) return;
+
       try {
         const res = await fetch(
           `http://localhost:3001/checkout/verify-payment?session_id=${sessionId}`
         );
-
         const data = await res.json();
 
         if (data.success) {
           console.log("Payment successful");
           setStatus("Payment successful");
+          setHasVerified(true);
         } else {
           console.log("Payment not successful");
           setStatus("Payment not successful");
@@ -41,12 +44,8 @@ export default function Success() {
       }
     }
 
-    if (sessionId) {
-      checkPayment();
-    } else {
-      console.log("No session ID found in URL params.");
-    }
-  }, [sessionId]);
+    checkPayment();
+  }, [sessionId, hasVerified]);
 
   useEffect(() => {
     setCookieProducts(getAllCookieProducts());
@@ -90,7 +89,9 @@ export default function Success() {
 
     let sum = 0;
     for (const product of products) {
-      sum += (product.Price -(product.Price * product.DiscountProcent) / 100) * product.quantity;
+      sum +=
+        (product.Price - (product.Price * product.DiscountProcent) / 100) *
+        product.quantity;
     }
     return sum;
   }
@@ -163,7 +164,13 @@ export default function Success() {
         <div key={product.id}>
           <br></br>
           <p>You have ordered from: {product.StoreName}</p>
-          <p>Price of item: {(product.Price -(product.Price * product.DiscountProcent)).toFixed(0)},00 DKK</p>
+          <p>
+            Price of item:{" "}
+            {(product.Price - product.Price * product.DiscountProcent).toFixed(
+              0
+            )}
+            ,00 DKK
+          </p>
           <p>
             Ordered item: {product.Name} from {product.Brand}, in amount of{" "}
             {product.quantity} and size {product.size}

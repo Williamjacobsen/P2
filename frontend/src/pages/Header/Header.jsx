@@ -33,7 +33,7 @@ export default function Header() {
 
 function DefaultHeader({ profile }) {
   return (
-    <header class="default-header sticky">
+    <header class="default-header sticky" style={{ zIndex: 99 }}>
       <div>
         <ul>
           <li>
@@ -93,7 +93,7 @@ function VendorHeader({ vendor }) {
 
   return (
     <>
-      <header class="vendor-header sticky">
+      <header class="vendor-header sticky" style={{ zIndex: 99 }}>
         <div>
           <ul>
             <li>
