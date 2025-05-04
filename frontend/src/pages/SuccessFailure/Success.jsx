@@ -12,7 +12,7 @@ export default function Success() {
   const [isLoading, profile] = useGetProfile();
   const emailSentRef = useRef(false);
 
-  /* Everything from here till emailjs part is just copy paste from Cart.jsx */
+  /* Everything from here till emailjs part is just copy paste from Cart.jsx except payment stuff */
   const [cartProducts, setCartProducts] = useState([]);
   const [cookieProducts, setCookieProducts] = useState([]);
 
