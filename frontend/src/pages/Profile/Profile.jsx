@@ -34,6 +34,7 @@ export default function Profile() {
         </h3>
         <b>Email address: </b>
         {profile.Email}
+        <br />
         <Modal
           openButtonText="Change email address?"
           modalContent={<ModifyModal
@@ -47,6 +48,7 @@ export default function Profile() {
         <br />
         <b>Phone number: </b>
         {profile.PhoneNumber}
+        <br />
         <Modal
           openButtonText="Change phone number?"
           modalContent={<ModifyModal
@@ -70,10 +72,6 @@ export default function Profile() {
           />}
         />
         <br />
-        <button onClick={() => navigate("/profile-product-orders")}>
-          Go to order history
-        </button>
-        <br />
         <button onClick={signOut}>
           Sign out
         </button>
@@ -93,6 +91,7 @@ export default function Profile() {
               </h3>
               <b>Vendor name: </b>
               {vendor.Name}
+              <br />
               <Modal
                 openButtonText="Change vendor name?"
                 modalContent={<ModifyModal
@@ -104,8 +103,26 @@ export default function Profile() {
                 />}
               />
               <br />
+              <b>FAQ: </b>
+              <br />
+              <div class="text-with-new-lines">
+                {vendor.FAQ.replaceAll("newLineCharacter", "\n")}
+              </div>
+              <br />
+              <Modal
+                openButtonText="Change FAQ?"
+                modalContent={<ModifyModal
+                  modificationFunction={modifyVendor}
+                  databasePropertyName="FAQ"
+                  labelText="New FAQ: "
+                  inputType="text"
+                  theMaxLength={2000}
+                />}
+              />
+              <br />
               <b>Address: </b>
               {vendor.Address}
+              <br />
               <Modal
                 openButtonText="Change address?"
                 modalContent={<ModifyModal
@@ -119,6 +136,7 @@ export default function Profile() {
               <br />
               <b>Public contact email address: </b>
               {vendor.Email}
+              <br />
               <Modal
                 openButtonText="Change public contact email address?"
                 modalContent={<ModifyModal
@@ -132,6 +150,7 @@ export default function Profile() {
               <br />
               <b>Public contact phone number: </b>
               {vendor.PhoneNumber}
+              <br />
               <Modal
                 openButtonText="Change public contact phone number?"
                 modalContent={<ModifyModal
@@ -146,6 +165,7 @@ export default function Profile() {
               <br />
               <b>Public vendor description: </b>
               "{vendor.Description}"
+              <br />
               <Modal
                 openButtonText="Change public vendor description?"
                 modalContent={<ModifyModal
@@ -159,6 +179,7 @@ export default function Profile() {
               <br />
               <b>Bank account number: </b>
               {vendor.BankAccountNumber}
+              <br />
               <Modal
                 openButtonText="Change bank account number?"
                 modalContent={<ModifyModal
@@ -171,6 +192,7 @@ export default function Profile() {
               <br />
               <b>CVR number: </b>
               {vendor.CVR}
+              <br />
               <Modal
                 openButtonText="Change CVR number?"
                 modalContent={<ModifyModal
@@ -221,7 +243,7 @@ function ModifyModal({ modificationFunction, databasePropertyName, labelText, in
         <b>
           {labelText}
         </b> <br />
-        <input type={inputType} name="newValue" required minLength={theMinLength} maxLength={theMaxLength} /> <br />
+        <textarea type={inputType} name="newValue" required minLength={theMinLength} maxLength={theMaxLength} /> <br />
         <input type="submit" value="Apply" />
       </form >
     </>
@@ -275,8 +297,13 @@ async function modifyVendor(event) {
     // Get data
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password");
-    const newValue = formData.get("newValue");
+    let newValue = formData.get("newValue");
     const propertyName = formData.get("databasePropertyName");
+    // In case of FAQ, change new lines "\n" to something
+    // that gets past the server's input sanitization
+    if (propertyName === "FAQ") {
+      newValue = newValue.replaceAll("\n", "newLineCharacter");
+    }
     // Modify profile in server
     await requestVendorModification(password, propertyName, newValue);
     // Reload the page (to refresh changes)

@@ -1,14 +1,17 @@
+.text-with-new-lines {
+  white-space: pre-line;
+}
 
 .Background {
   display: flex;
   flex-direction: column;
-  align-items: center; 
-  justify-content: center; 
-  height: 100vh; 
-  background-color: rgb(245, 245, 245); 
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: rgb(245, 245, 245);
   font-family: Arial;
 }
-  
+
 form {
   display: flex;
   flex-direction: column;
@@ -16,9 +19,9 @@ form {
   background-color: white;
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-  
+
 form input[type="email"],
 form input[type="password"] {
   margin: 10px 0;
@@ -27,8 +30,10 @@ form input[type="password"] {
   border: 1px solid;
   border-radius: 4px;
 }
-  
-form input[type="submit"], .profile-info button, .orders-section button {
+
+form input[type="submit"],
+.profile-info button,
+.orders-section button {
   margin-top: 10px;
   margin-right: 10px;
   padding: 10px 20px;
@@ -53,7 +58,7 @@ h3 {
   flex-direction: column;
   margin: 40px auto;
   padding: 20px;
-  background-color:rgb(245, 245, 245);
+  background-color: rgb(245, 245, 245);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

@@ -5,6 +5,7 @@ import emailjs from "@emailjs/browser";
 import useGetProfile from "../Profile/useGetProfile";
 import { useSearchParams } from "react-router-dom";
 
+
 export default function Success() {
   const [isReadyToSendEmail, setIsReadyToSendEmail] = useState(false);
   const [isLoading, profile] = useGetProfile();
@@ -89,7 +90,7 @@ export default function Success() {
 
     let sum = 0;
     for (const product of products) {
-      sum += product.Price * product.quantity;
+      sum += (product.Price -(product.Price * product.DiscountProcent) / 100) * product.quantity;
     }
     return sum;
   }
@@ -162,7 +163,7 @@ export default function Success() {
         <div key={product.id}>
           <br></br>
           <p>You have ordered from: {product.StoreName}</p>
-          <p>Price of item: {product.Price} DKK</p>
+          <p>Price of item: {(product.Price -(product.Price * product.DiscountProcent)).toFixed(0)},00 DKK</p>
           <p>
             Ordered item: {product.Name} from {product.Brand}, in amount of{" "}
             {product.quantity} and size {product.size}

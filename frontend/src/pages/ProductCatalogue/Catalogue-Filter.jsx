@@ -15,7 +15,7 @@ function FilterOption({optionName, IsTitle = false}) {
 export function CatalogueFilter({FilterName, FilterOptions, value, onChange}) {
     return (
         <div>
-            <label htmlFor={FilterName}></label>
+            <label className="Hide" htmlFor={FilterName}>{FilterName}</label>
             <select
                 id={FilterName}
                 className="SortBox"

@@ -1,10 +1,5 @@
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
+import app from "./app.js";
 
-import pool from "./db.js";
-
-const app = express();
 const port = 3001;
 
 // Middleware
@@ -146,3 +141,5 @@ app.get("/VendorProducts/:vendorid", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
+export default app; // Export (for testing)
