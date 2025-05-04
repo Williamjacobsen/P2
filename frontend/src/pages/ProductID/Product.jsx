@@ -57,26 +57,29 @@ export default function ProductPage() {
     }
     else return <>no size available</>
     return (
-    <select
-      id="sizeSelection"
-      defaultValue={sizeSelection}
-      className="SortBox"
-      onChange={(e) => {
-        setSizeSelection(e.target.value);
-    }}
-      style={{ width: "300px" }}
-    >
-      <option value="SIZE" hidden={true}>
-        SIZE
-      </option>
-        {allSizes.map((s) =>
-          size.toLowerCase() === s.toLowerCase() ? (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ) : null
-        )}
-      </select>
+    <div>
+      <label htmlFor="sizeSelection" hidden>Size</label>
+      <select
+        id="sizeSelection"
+        defaultValue={sizeSelection}
+        className="SortBox"
+        onChange={(e) => {
+          setSizeSelection(e.target.value);
+      }}
+        style={{ width: "300px" }}
+      >
+        <option value="SIZE" hidden={true}>
+          SIZE
+        </option>
+          {allSizes.map((s) =>
+            size.toLowerCase() === s.toLowerCase() ? (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ) : null
+          )}
+        </select>
+      </div>
     );
   }
   
@@ -122,11 +125,12 @@ export default function ProductPage() {
         <p className="product-brand">{productData[0]?.Brand}</p>
         <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
-        <p className="product-price">{productData[0]?.Price},00 kr</p>
+        <p className="product-price">{productData[0]?.DiscountProcent > 0 ? productData[0]?.Price - (productData[0]?.Price * productData[0]?.DiscountProcent) / 100 : productData[0]?.Price},00 kr</p>
         <div>
           <SizeSelector/> {/* The function extracts straight from productData so no need for it here */}
         </div>
         <div>
+          <label htmlFor="category" hidden>Quantity</label>
           <select
             id="category"
             defaultValue="1"
@@ -159,7 +163,7 @@ export default function ProductPage() {
                 quantity: quantitySelection,
                 sizeID: productData[0]?.sizeID
               });
-
+              
               setCookie(
                 `Product-${productData[0]?.ID}`,
                 cookievalue,
