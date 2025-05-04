@@ -1,0 +1,118 @@
+.background {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 4rem 8rem;
+  width: 100%;
+  min-height: 65vh;
+  background-image: url("https://photos.watchmedier.dk/Images/article13220816.ece/ALTERNATES/schema-16_9/EDC%20Aalborg.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  color: white;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.content {
+  top: 0;
+  max-width: 50%;
+  z-index: 2;
+}
+
+.content h1 {
+  font-size: 4rem;
+  outline-width: white;
+}
+
+.content h1 span {
+  color: white;
+}
+
+.fp-products h1 {
+  font-size: 25px;
+  font-style: Arial;
+}
+
+.buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.buttons button {
+  background-color: rgb(222, 222, 222);
+  color: rgb(0, 0, 0);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.buttons button:hover {
+  background-color: rgb(185, 185, 185);
+}
+
+.fp-products {
+  text-align: center;
+  width: 100%;
+  height: 600px;
+  padding: 10px;
+  border: 0;
+  margin: 0;
+  background-color: rgb(245, 245, 245);
+}
+
+.box-shops {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  position: absolute;
+  right: 20%;
+  top: 2%;
+  margin: 40px auto;
+  padding: 20px;
+  max-width: 800px;
+}
+
+.shop-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  z-index: 2;
+  color: white;
+}
+
+.shop-circle img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid black;
+}
+
+.shop-circle span {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.shop-circle:hover img {
+  transform: scale(1.05);
+}
