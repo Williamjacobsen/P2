@@ -25,14 +25,17 @@ export default function Orders() {
           <>You are not a vendor, so you do not have access to this page.</>
         );
       }
+      try {
+        const ordersReq = await fetch(
+          `http://localhost:3001/vendor-orders/${storeID}`
+        );
+        if (!ordersReq.ok) throw new Error("Update failed");
 
-      const ordersReq = await fetch(
-        `http://localhost:3001/vendor-orders/${storeID}`
-      );
-
-      const ordersData = await ordersReq.json();
-      console.log(ordersData);
-      setOrders(ordersData);
+        const ordersData = await ordersReq.json();
+        setOrders(ordersData);
+      } catch (err) {
+        console.error(err);
+      }
     }
     getOrders();
   }, [isLoadingVendor]);
