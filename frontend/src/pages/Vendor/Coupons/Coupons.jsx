@@ -16,6 +16,8 @@ export default function CreateCoupon() {
     IsActive: true
   });
 
+  const [couponToDelete, setCouponToDelete] = useState('');
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm(prev => ({
@@ -56,6 +58,38 @@ export default function CreateCoupon() {
     }
   };
 
+const handleDelete = async (e) => {
+  e.preventDefault();
+  if (!couponToDelete) {
+    alert('Please enter a coupon code');
+    return;
+  }
+  
+  try {
+    const response = await fetch("http://localhost:3001/create-coupon", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        CouponCode: couponToDelete
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to delete coupon');
+    }
+    
+    alert('Coupon deleted successfully!');
+    setCouponToDelete(''); // Clear input after deletion
+  } catch (error) {
+    console.error('Error:', error);
+    alert(`Error deleting coupon: ${error.message}`);
+  }
+}
+
+
   // Is the user signed in?
   if (isLoadingProfile) {
     return (<>Loading login...</>);
@@ -73,14 +107,26 @@ export default function CreateCoupon() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="CouponCode" placeholder="Coupon Code" onChange={handleChange} required />
-      <input name="DiscountValue" type="number" step="0.01" placeholder="Discount Value" onChange={handleChange} required />
-      <label>
-        <input type="checkbox" name="IsActive" checked={form.IsActive} onChange={handleChange} />
-        Active
-      </label>
-      <button type="submit">Create Coupon</button>
-    </form>
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input name="CouponCode" placeholder="Coupon Code" onChange={handleChange} required />
+        <input name="DiscountValue" type="number" step="0.01" placeholder="Discount Value" onChange={handleChange} required />
+        <label>
+          <input type="checkbox" name="IsActive" checked={form.IsActive} onChange={handleChange} />
+          Active
+        </label>
+        <button type="submit">Create Coupon</button>
+      </form>
+      
+      <form onSubmit={handleDelete}>
+        <input 
+          value={couponToDelete} 
+          onChange={(e) => setCouponToDelete(e.target.value)} 
+          placeholder="Enter Coupon to Delete" 
+          required
+        />
+        <button type="submit">Delete Coupon</button>
+      </form>
+    </div>
   );
 }
