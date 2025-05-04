@@ -24,7 +24,6 @@ const clothingOptions = [
 ];
 
 export default function AddProduct() {
-
   const [storeID, setStoreID] = useState(-1);
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0.0);

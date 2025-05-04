@@ -121,7 +121,7 @@ function VendorHeader({ vendor }) {
             </li>
             <li>
               {" "}
-              <Link to="/NOT IMPLEMENTED"> Orders (NOT IMPLEMENTED) </Link>{" "}
+              <Link to="vendor/orders"> Orders </Link>{" "}
             </li>
           </ul>
         </div>
