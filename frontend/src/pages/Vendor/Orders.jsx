@@ -134,7 +134,11 @@ export default function Orders() {
           </h4>
           <button
             onClick={() => handleUpdate(order.ID)}
-            style={{ fontSize: "17px", position: "relative", left: "5%" }}
+            style={{
+              fontSize: "17px",
+              position: "relative",
+              left: "5%",
+            }}
           >
             Update
           </button>
