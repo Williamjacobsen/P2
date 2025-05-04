@@ -1,64 +1,45 @@
-// Tutorial on custom hooks (because this file revolves around a custom hook) in React: https://www.youtube.com/watch?v=I2Bgi0Qcdvc
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 /**
  * React hook (which is why the function name starts with "use").
- * Gets a vendor object from the server's database.
- * The booleans state "isLoading" is true until the get has finished.
- * The vendor object state "vendor" is the result of the get.
- * @param vendorID string.
- * @param bypass boolean. Defaults to false. If true, getting the vendor will be skipped and the loading will instantly finish.
- * @returns the object [isLoading (a boolean), vendor (a vendor object)]
+ * Gets an array of vendor JSON objects from the server's database.
+ * @returns the object [isLoading (a boolean), vendors (an array of JSON object)].
  */
-export default function useGetVendor(vendorID, bypass = false) {
-
+export default function useGetVendors() {
   const [isLoading, setIsLoading] = useState(true);
-  const [vendor, setVendor] = useState(null);
+  const [vendors, setVendors] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
-        if (!bypass) { // This needs to be placed here because React hooks cannot be called conditionally.
-          setVendor(await requestVendor(vendorID));
-        }
-        setIsLoading();
-      }
-      catch (error) {
+        setVendors(await requestVendors());
+        setIsLoading(false);
+      } catch (error) {
         alert(error);
       }
     })();
   }, []);
 
-  return [isLoading, vendor];
+  return [isLoading, vendors];
 }
 
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Helpers
-// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-
 /**
- * @returns either a JSON object with the vendor (from the MySQL database), or a Promise.reject() with an error message.
+ * Tries to get all vendors from the server.
+ * @returns either a list of vendor objects (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestVendor(vendorID) {
+async function requestVendors() {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
-    // Post data from the form to server
-    const response = await fetch("http://localhost:3001/vendor/get", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        vendorID
-      }),
-    });
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/vendor/get-all`,
+      {
+        method: "GET",
+      }
+    );
     // Handle server response
     const data = await response.json();
     if (!response.ok) return Promise.reject(data.errorMessage);
-    return data.vendor;
-  }
-  catch (error) {
+    return data.vendors;
+  } catch (error) {
     return Promise.reject(error);
   }
 }

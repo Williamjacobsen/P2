@@ -1,32 +1,28 @@
 import React, { useState, useEffect } from "react";
+
 import "./FAQ.css";
+import useGetVendors from "../Profile/useGetVendors";
 
 export default function FAQ() {
-    const faq = [
-      { question: "How long is the return policy?", answer: "14 days." },
+  // Hooks
+  const [isLoadingVendors, vendors] = useGetVendors();
 
-      { question: "What happens if I don't return the item within the 14 days?", answer: "You will have to pay for item." },
-
-      { question: "Can I exchange the item for free if I got the wrong size?", answer: "Yes you are able to change the sizing." },
-
-      { question: "How do I pay for my order?", answer: "You can either pay online or in person." },
-
-      { question: "Are you able to get your item shipped?", answer: "No, you are not able to get the item shipped to you." },
-
-    ];
-  
+  // Loading vendors
+  if (isLoadingVendors) {
+    return <>Loading vendors...</>;
+  }
 
   return (
-    <div className= "faq-container">
-      <h1>Frequently Asked Questions</h1>
-      {faq.map((data, i) => {
-        return (
-          <div key={i} classnAME="faq-item">
-            <h2 className="faq-question">{data.questions}</h2>
-            <p className="faq-answer">{data.answers}</p>
-          </div>
-        );
-      })}
-    </div>
+    <>
+      <hr />
+      <div class="text-with-new-lines">
+        {vendors[0].FAQ.replaceAll("newLineCharacter", "\n")}
+      </div>
+      <br />
+      <hr />
+      <div class="text-with-new-lines">
+        {vendors[1].FAQ.replaceAll("newLineCharacter", "\n")}
+      </div>
+    </>
   );
 }

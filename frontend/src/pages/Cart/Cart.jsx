@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import ProductInCart from "./Product-In-Cart";
 import "./Cart.css";
 import CheckoutCard from "./Checkout-Card";
 import { deleteCookie, getAllCookieProducts } from "../../utils/cookies";
-import handleCheckout from "./PaymentFunction";
+import handleCheckout from "./handleCheckout";
+import useGetProfile from "../Profile/useGetProfile";
 
 export default function Cart() {
   const [cartProducts, setCartProducts] = useState([]);
@@ -43,6 +46,15 @@ export default function Cart() {
     fetchAllProductData();
   }, [cookieProducts]);
 
+  // Hooks
+  const navigate = useNavigate();
+  const [isLoadingProfile, profile] = useGetProfile();
+
+  // Is the user signed in?
+  if (isLoadingProfile) {
+    return <>Loading login...</>;
+  }
+
   //simply calculates the sum price of all the products in the cart
   function calculateTotalPrice(products) {
     if (products.length === 0) {
@@ -51,7 +63,9 @@ export default function Cart() {
 
     let sum = 0;
     for (const product of products) {
-      sum += product.Price * product.quantity;
+      sum +=
+        (product.Price - (product.Price * product.DiscountProcent) / 100) *
+        product.quantity;
     }
     return sum;
   }
@@ -69,6 +83,7 @@ export default function Cart() {
               storeAddress={product.StoreAddress}
               quantity={product.quantity}
               size={product.size}
+              discount={product.DiscountProcent}
               removeFunction={() => {
                 deleteCookie(`Product-${product.ID}`, "/");
                 //we reload the cookies now that one has been deleted.
@@ -80,14 +95,13 @@ export default function Cart() {
       </div>
       <CheckoutCard
         price={calculateTotalPrice(cartProducts)}
-        PaymentFunction={() =>
-          handleCheckout(
-            cartProducts.map((product) => ({
-              id: product.ID,
-              quantity: product.quantity,
-            }))
-          )
-        }
+        PaymentFunction={() => {
+          if (profile === undefined) {
+            navigate("/sign-in");
+          } else {
+            handleCheckout(cartProducts);
+          }
+        }}
       />
     </div>
   );

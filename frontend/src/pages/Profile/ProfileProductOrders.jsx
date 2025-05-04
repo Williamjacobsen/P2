@@ -1,61 +1,92 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useCheckLoginValidity from "./useCheckLoginValidity";
-import { getCookie } from "../../utils/cookies"
+import useGetProfile from "./useGetProfile";
+import { requestAccessToken } from "./ReSignInPopUp";
+import "./Profile.css";
+import usePages from "../../utils/usePages";
+
+const ordersPerPage = 5;
 
 export default function ProfileProductOrders() {
-
   // Hooks
   const navigate = useNavigate();
-  const [isLoadingLogin, isLoginValid] = useCheckLoginValidity();
-  const [isLoadingOrders, orders] = useGetProfileProductOrders(isLoginValid);
+  const [isLoadingProfile, profile] = useGetProfile();
+  const [isLoadingOrders, sortedOrders] =
+    useGetSortedProfileProductOrders(isLoadingProfile);
+  const [
+    getVisiblePartOfPageArray,
+    CurrentPageDisplay,
+    PreviousPageButton,
+    NextPageButton,
+  ] = usePages(sortedOrders, ordersPerPage);
 
   // Is the user signed in?
-  if (isLoadingLogin) {
-    return (<>Loading login...</>);
-  }
-  else if (!isLoginValid) {
+  if (isLoadingProfile) {
+    return <>Loading login...</>;
+  } else if (profile === undefined) {
     navigate("/sign-in");
   }
 
   // Is loading orders?
   if (isLoadingOrders) {
-    return (<>Loading order history...</>);
+    return <>Loading order history...</>;
+  } else if (Object.keys(sortedOrders).length === 0) {
+    return <>You have no orders.</>;
   }
-  else if (Object.keys(orders).length === 0) {
-    return (<>You have no orders.</>)
-  }
-
-  // Sort the orders by IsResolved and secondarily sort by Datetime
-  let sortedOrders = orders;
-  sortedOrders.sort((a, b) => {
-    if (a.IsResolved === 1 && b.IsResolved === 0) return true;
-    else if (a.IsResolved === 0 && b.IsResolved === 1) return false;
-    else return b.Datetime.localeCompare(a.Datetime);
-  })
-
-  //y TODO: Maybe show unresolved and resolved seperately?
 
   return (
     <>
-      <h3>
-        --- Orders (sorted primarily by resolved and secondarily by time) ---
-      </h3>
-      {sortedOrders.map((order) => (
-        <>
-          <b>Has been resolved: </b>
-          {order.IsResolved}
-          <br />
-          <b>Time of purchase: </b>
-          {order.Datetime}
-          {/* NOTE: A MySQL Datetime also factors in daylight savings time (DST). */}
-          <br />
-          <b>Product ID: </b>
-          {order.ProductID}
-          <br />
-          <br />
-        </>
-      ))}
+      <div className="orders-section">
+        <CurrentPageDisplay />
+        <PreviousPageButton />
+        <NextPageButton />
+        <h3>Orders</h3>
+        {getVisiblePartOfPageArray().map((order) => (
+          <>
+            <b>Has been collected: </b>
+            {order.IsCollected}
+            <br />
+            <b>Ready to be collected: </b>
+            {order.IsReady}
+            <br />
+            <b>Time of purchase: </b>
+            {order.DateTimeOfPurchase.replace("T", " ").replace("Z", "")}
+            {/* NOTE: A MySQL DateTime also factors in daylight savings time (DST). */}
+            <br />
+            <b>Order ID: </b>
+            {order.ID}
+            <br />
+            <b>Name of vendor: </b>
+            {order.VendorName}
+            <br />
+            <b>CVR of vendor: </b>
+            {order.VendorCVR}
+            <br />
+            <b>Name of brand: </b>
+            {order.ProductBrand}
+            <br />
+            <b>Name of product: </b>
+            {order.ProductName}
+            <br />
+            <b>Type of clothing: </b>
+            {order.ProductClothingType}
+            <br />
+            <b>Size: </b>
+            {order.ProductSize}
+            <br />
+            <b>Gender: </b>
+            {order.ProductGender}
+            <br />
+            <b>Quantity: </b>
+            {order.Quantity}
+            <br />
+            <b>Total price: </b>
+            {order.ProductPrice} DKK
+            <br />
+            <hr />
+          </>
+        ))}
+      </div>
     </>
   );
 }
@@ -65,29 +96,37 @@ export default function ProfileProductOrders() {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * Custom hook (which is why the function name starts with "use"). 
- * @returns the object [isLoading (a boolean), orders (an array of objects with orders)].
+ * Custom hook (which is why the function name starts with "use").
+ * @returns the object [isLoading (a boolean), orders (an array of JSON objects with orders)].
  */
-function useGetProfileProductOrders(isLoginValidated) {
-
+function useGetSortedProfileProductOrders(isLoadingProfile) {
   const [isLoading, setIsLoading] = useState(true);
   const [orders, setOrders] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
-        if (isLoginValidated) { // Before we can use the profile's information, we must ensure that the user is logged in.
-          const email = getCookie("profileEmail");
-          const password = getCookie("profilePassword");
-          setOrders(await requestProfileProductOrders(email, password));
+        if (!isLoadingProfile) {
+          // Before we can use the profile's information, we must ensure that the user is logged in.
+          let orders = await requestProfileProductOrders();
+          // Sort the orders by !IsCollected, then IsReady, then Datetime
+          setOrders(
+            orders.sort((a, b) => {
+              if (a.IsCollected === 1 && b.IsCollected === 0) return true;
+              else if (a.IsCollected === 0 && b.IsCollected === 1) return false;
+              else if (a.IsReady === 1 && b.IsReady === 0) return false;
+              else if (a.IsReady === 0 && b.IsReady === 1) return true;
+              else
+                return b.DateTimeOfPurchase.localeCompare(a.DateTimeOfPurchase);
+            })
+          );
           setIsLoading(false);
         }
-      }
-      catch (error) {
+      } catch (error) {
         alert(error);
       }
     })();
-  }, [isLoginValidated]); // If the state "isLoginValidated" changes (so, once the profile gets validated), we must run this useEffect again. 
+  }, [isLoadingProfile]); // If the state "isLoadingProfile" changes (so, once the profile gets validated), we must run this useEffect again.
 
   return [isLoading, orders];
 }
@@ -97,28 +136,29 @@ function useGetProfileProductOrders(isLoginValidated) {
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 /**
- * @returns either a vendor object (from the MySQL database), or a Promise.reject() with an error message.
+ * @returns either null, an array of product order objects (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestProfileProductOrders(email, password) {
+async function requestProfileProductOrders() {
   try {
-    //y TODO: implement password encryption (right now it is just being sent directly)
-    // Post data from the form to server
-    const response = await fetch("http://localhost:3001/productOrder/getProfileProductOrders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/productOrder/getProfileProductOrders`,
+      {
+        method: "GET",
+        credentials: "include", // Ensures cookies are sent with the request
+      }
+    );
     // Handle server response
     const data = await response.json();
-    if (!response.ok) return Promise.reject(data.errorMessage);
+    if (!response.ok) {
+      if (data.error === "Access token is invalid") {
+        await requestAccessToken();
+        return await requestProfileProductOrders();
+      } else {
+        return Promise.reject(data.error);
+      }
+    }
     return data.productOrders;
-  }
-  catch (error) {
+  } catch (error) {
     return Promise.reject(error);
   }
 }
