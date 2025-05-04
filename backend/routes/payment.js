@@ -6,6 +6,8 @@ import { validationResult } from "express-validator";
 import {
   handleValidationErrors,
   validateProfileAccessToken,
+  validateCartProducts,
+  validateSessionIdParam,
 } from "../utils/inputValidation.js";
 import { getProfile } from "./profile.js";
 
@@ -15,127 +17,131 @@ const stripe = new Stripe(
   "sk_test_51RAr8OPGyAJCpFedxTTr7jZH696z7Bs2GZnqOjEX9xdU0LCOJbWJknMoauzhrgvR0Fku9XgMeNXKaOed0OZiGwf700IkAC8dQF"
 );
 
-router.post("/", [validateProfileAccessToken], async (req, res) => {
-  try {
-    // Handle validation errors
-    handleValidationErrors(req, res, validationResult);
-    // Get information from request
-    const { products: cartProducts } = req.body; // TODO: NEEDS INPUT VALIDATION!
-    const accessToken = req.cookies.profileAccessToken;
-    const profile = await getProfile(res, accessToken);
+router.post(
+  "/",
+  [validateProfileAccessToken, ...validateCartProducts],
+  async (req, res) => {
+    try {
+      handleValidationErrors(req, res, validationResult);
+      const cartProducts = req.body.products;
+      const accessToken = req.cookies.profileAccessToken;
+      const profile = await getProfile(res, accessToken);
 
-    if (!cartProducts) {
-      return res.status(400).json({ error: "No products in the cart." });
-    }
-
-    const productIds = cartProducts.map((p) => p.ID);
-
-    const [products] = await pool.query(
-      "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
-      [productIds]
-    );
-
-    const productMap = {};
-    products.forEach((product) => {
-      productMap[product.ID] = product;
-    });
-
-    for (const item of cartProducts) {
-      if (!productMap[item.ID]) {
-        return res
-          .status(400)
-          .json({ error: `Product with ID ${item.ID} not found` });
+      if (!cartProducts) {
+        return res.status(400).json({ error: "No products in the cart." });
       }
-    }
 
-    const line_items = [];
-    for (const item of cartProducts) {
-      const product = productMap[item.ID];
-      const discountedPrice =
-        product.Price * (1 - product.DiscountProcent / 100);
-      const unit_amount = Math.round(discountedPrice * 100);
+      const productIds = cartProducts.map((p) => p.ID);
 
-      if (unit_amount < 250) {
-        return res.status(400).json({
-          error: `Product "${product.Name}" (ID: ${product.ID}) price after discount is too low (minimum 2.5 DKK).`,
+      const [products] = await pool.query(
+        "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
+        [productIds]
+      );
+
+      const productMap = {};
+      products.forEach((product) => {
+        productMap[product.ID] = product;
+      });
+
+      for (const item of cartProducts) {
+        if (!productMap[item.ID]) {
+          return res
+            .status(400)
+            .json({ error: `Product with ID ${item.ID} not found` });
+        }
+      }
+
+      const line_items = [];
+      for (const item of cartProducts) {
+        const product = productMap[item.ID];
+        const discountedPrice =
+          product.Price * (1 - product.DiscountProcent / 100);
+        const unit_amount = Math.round(discountedPrice * 100);
+
+        if (unit_amount < 250) {
+          return res.status(400).json({
+            error: `Product "${product.Name}" (ID: ${product.ID}) price after discount is too low (minimum 2.5 DKK).`,
+          });
+        }
+
+        line_items.push({
+          price_data: {
+            currency: "dkk",
+            product_data: {
+              name: product.Name,
+            },
+            unit_amount: unit_amount,
+          },
+          quantity: item.quantity,
         });
       }
 
-      line_items.push({
-        price_data: {
-          currency: "dkk",
-          product_data: {
-            name: product.Name,
-          },
-          unit_amount: unit_amount,
-        },
+      // Becuase metadata values can have up to 500 characters:
+
+      // cartProducts:
+      // [{
+      //  ID: 1,
+      //  StoreID: 1,
+      //  Name: 'Daedric boots',
+      //  Price: 1000,
+      //  DiscountProcent: 10,
+      //  Description: 'Enjoy slavery wearing these.',
+      //  ClothingType: 'Footwear',
+      //  Brand: 'Nwah',
+      //  Gender: 'Male',
+      //  StoreName: 'UrbanTrendz',
+      //  Path: null,
+      //  StoreAddress: 'Nørrebrogade 21, Copenhagen',
+      //  size: 'medium',
+      //  quantity: 3
+      // }, ...],
+
+      // Needed data in metadata
+      // CustomerID
+      // ID
+      // Size
+      // Quantity
+
+      // To allow for more products, and faster requests, metadata could be a string of values like '4, 21, 4',
+      // but instead we make it a dictionary for readablilty (less optimal)
+
+      const necessaryDataForMetadata = cartProducts.map((item) => ({
+        id: item.ID,
+        size: item.size,
         quantity: item.quantity,
+      }));
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items,
+        mode: "payment",
+        success_url:
+          "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url: "http://localhost:3000/cancel",
+        metadata: {
+          customerID: profile.ID,
+          items: JSON.stringify(necessaryDataForMetadata),
+        },
       });
+
+      res.status(200).json({ id: session.id });
+    } catch (error) {
+      console.log("Error during checkout session creation:", error);
+      res.status(500).json({ error: error.message });
     }
-
-    // Becuase metadata values can have up to 500 characters:
-
-    // cartProducts:
-    // [{
-    //  ID: 1,
-    //  StoreID: 1,
-    //  Name: 'Daedric boots',
-    //  Price: 1000,
-    //  DiscountProcent: 10,
-    //  Description: 'Enjoy slavery wearing these.',
-    //  ClothingType: 'Footwear',
-    //  Brand: 'Nwah',
-    //  Gender: 'Male',
-    //  StoreName: 'UrbanTrendz',
-    //  Path: null,
-    //  StoreAddress: 'Nørrebrogade 21, Copenhagen',
-    //  size: 'medium',
-    //  quantity: 3
-    // }, ...],
-
-    // Needed data in metadata
-    // CustomerID
-    // ID
-    // Size
-    // Quantity
-
-    // To allow for more products, and faster requests, metadata could be a string of values like '4, 21, 4',
-    // but instead we make it a dictionary for readablilty (less optimal)
-
-    const necessaryDataForMetadata = cartProducts.map((item) => ({
-      id: item.ID,
-      size: item.size,
-      quantity: item.quantity,
-    }));
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items,
-      mode: "payment",
-      success_url:
-        "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:3000/cancel",
-      metadata: {
-        customerID: profile.ID,
-        items: JSON.stringify(necessaryDataForMetadata),
-      },
-    });
-
-    res.status(200).json({ id: session.id });
-  } catch (error) {
-    console.log("Error during checkout session creation:", error);
-    res.status(500).json({ error: error.message });
   }
-});
+);
 
-router.get("/verify-payment", async (req, res) => {
-  const { session_id } = req.query;
-
-  if (!session_id) {
-    return res.status(400).json({ error: "Session ID is missing." });
-  }
+router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
+  handleValidationErrors(req, res, validationResult);
 
   try {
+    const session_id = req.query.session_id;
+
+    if (!session_id) {
+      return res.status(400).json({ error: "Session ID is missing." });
+    }
+
     const session = await stripe.checkout.sessions.retrieve(session_id, {
       expand: ["payment_intent"],
     });
