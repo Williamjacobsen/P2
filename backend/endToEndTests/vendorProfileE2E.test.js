@@ -6,13 +6,14 @@ import app from "../app";
 import pool from "../db";
 
 describe("profile.js, vendor.js, and productOrder.js", async function () {
-  // NOTE: Fails if an existing user is using the same email or phone number.
-  // Temporary test profile information:
+  // NOTE: Fails if an existing user is already using the same email or phone number.
+
+  // Temporary mock profile information:
   const originalEmail = "the@EmailThatIsBeingTested1";
   const changedEmail = "new@EmailThatIsBeingTested1";
   const password = "thePassword";
   const phoneNumber = "837492758475838"
-
+  // Some variables needed in multiple tests:
   let authentificationCookies;
   let testVendor = null;
 
@@ -91,7 +92,7 @@ describe("profile.js, vendor.js, and productOrder.js", async function () {
       .set("Content-Type", "application/json")
       .send(jsonBody);
     expect(response.status).toBe(201);
-    // Get vendor
+    // Get vendor and verify that change has happened
     const response2 = await request(app)
       .get(`/vendor/get?vendorID=${testVendor.ID}`);
     expect(response2.status).toBe(200);
@@ -115,7 +116,7 @@ describe("profile.js, vendor.js, and productOrder.js", async function () {
     const response2 = await request(app)
       .post("/profile/generate-access-token")
       .set("Cookie", authentificationCookies);
-    expect(response2.status).toBe(401); // Because refresh token has been deleted
+    expect(response2.status).toBe(401); // Because refresh token has been deleted by the sign out
   });
 
   test("Sign in (wrong password)", async function () {
@@ -148,10 +149,10 @@ describe("profile.js, vendor.js, and productOrder.js", async function () {
     const response = await request(app)
       .post("/profile/generate-access-token")
       .set("Cookie", authentificationCookies);
-    expect(response.status).toBe(201); // Because refresh token has been deleted
+    expect(response.status).toBe(201);
     const newCookies = response.headers['set-cookie'];
     authentificationCookies[1] = newCookies[0];
-    // "[1] because the accessToken cookie comes after the refreshToken cookie in the string array pertaining to the cookies.
+    // "[1] because the accessToken cookie comes after the refreshToken cookie in the string array containing the cookies.
   });
 
   test("Get profile (getting email address)", async function () {
@@ -190,7 +191,7 @@ describe("profile.js, vendor.js, and productOrder.js", async function () {
   });
 
   test("Delete profile", async function () {
-    // Make profile into a non-vendor profile
+    // Make profile into a non-vendor profile (else you aren't authorized to delete it)
     await pool.query(`UPDATE p2.Profile SET VendorID=NULL WHERE Email='${changedEmail}';`);
     // Delete
     const jsonBody = {
