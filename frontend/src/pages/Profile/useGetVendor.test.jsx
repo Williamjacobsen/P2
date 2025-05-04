@@ -10,19 +10,19 @@ describe("useGetVendor", function () {
     const vendorID = 10;
     const mockVendor = { ID: vendorID }; // Simplified mock vendor
 
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
+    global.fetch = vi.fn(function () {
+      return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ vendor: mockVendor }),
       })
-    );
+    });
 
     const { result } = renderHook(() => useGetVendor(vendorID));
 
     expect(result.current[0]).toBe(true); // isLoading
     expect(result.current[1]).toBeNull(); // vendor
 
-    await waitFor(() => {
+    await waitFor(function () {
       expect(result.current[0]).toBe(false); // isLoading
       expect(result.current[1]).toEqual(mockVendor); // vendor
     });

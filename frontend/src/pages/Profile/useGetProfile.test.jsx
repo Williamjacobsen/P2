@@ -9,19 +9,19 @@ describe("useGetProfile", function () {
 
     const mockProfile = { ID: 10 }; // Simplified mock profile
 
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
+    global.fetch = vi.fn(function () {
+      return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ profile: mockProfile }),
       })
-    );
+    });
 
     const { result } = renderHook(() => useGetProfile());
 
     expect(result.current[0]).toBe(true); // isLoading
     expect(result.current[1]).toBeNull(); // profile
 
-    await waitFor(() => {
+    await waitFor(function () {
       expect(result.current[0]).toBe(false); // isLoading
       expect(result.current[1]).toEqual(mockProfile); // profile
     });
