@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
  * Gets an array of vendor JSON objects from the server's database.
  * @returns the object [isLoading (a boolean), vendors (an array of JSON object)].
  */
-export default function useGetVendors() {
+export default function useGetVendor() {
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState([]);
 
