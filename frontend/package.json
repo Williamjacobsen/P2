@@ -5,9 +5,6 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^3.6.0",
     "@stripe/stripe-js": "^7.0.0",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-scripts": "^5.0.1",
@@ -38,7 +35,10 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@vitest/ui": "^3.1.2",
     "jsdom": "^24.0.0",
     "react-router-dom": "^7.4.0",
