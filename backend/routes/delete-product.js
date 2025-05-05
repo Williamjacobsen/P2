@@ -18,7 +18,6 @@ const __dirname = path.dirname(__filename);
 
 router.delete("/:id", validateProfileAccessToken, async (req, res) => {
   try {
-    console.log("a");
     handleValidationErrors(req, res, validationResult);
     const accessToken = req.cookies.profileAccessToken;
     const profile = await getProfile(res, accessToken);
@@ -27,36 +26,24 @@ router.delete("/:id", validateProfileAccessToken, async (req, res) => {
       throw new Error("User is not a Vendor");
     }
 
-    console.log("b");
-
     const productId = req.params.id;
-
-    console.log("c");
 
     const [images] = await pool.query(
       `SELECT Path FROM p2.ProductImage WHERE ProductID = ?`,
       [productId]
     );
 
-    console.log("d");
-
     await pool.query(`DELETE FROM p2.ProductImage WHERE ProductID = ?`, [
       productId,
     ]);
-
-    console.log("e");
 
     await pool.query(`DELETE FROM p2.ProductSize WHERE ProductID = ?`, [
       productId,
     ]);
 
-    console.log("f");
-
     const [result] = await pool.query(`DELETE FROM p2.Product WHERE ID = ?`, [
       productId,
     ]);
-
-    console.log("g");
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Product not found" });
