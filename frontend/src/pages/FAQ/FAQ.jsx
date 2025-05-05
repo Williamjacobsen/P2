@@ -15,7 +15,7 @@ export default function FAQ() {
     <div className="faq-basic">
       <h1>Frequently Asked Questions</h1>
 
-      {/* hardcoded FAQs for hjemmesiden */}
+      {/* Hardcoded FAQs */}
       <div className="faq-item">
         <div className="faq-question">What is the website's contact information?</div>
         <div className="faq-answer">clothing@gmail.com and +45 12 12 12 12</div>
@@ -25,15 +25,15 @@ export default function FAQ() {
         <div className="faq-answer">Aalborg Central</div>
       </div>
 
-      {/* Vendor FAQs*/}
+      {/* Vendor FAQs */}
       {vendors.map((vendor, index) => (
         <div key={index} className="faq-item text-with-new-lines">
-          <div>Name: {vendor.Name}</div> 
-          <br><div>Contact phone number: {vendor.PhoneNumber}</div> </br>
-          <br><div>Email: {vendor.Email}</div></br>
-          <br><div>Address: {vendor.Address}</div></br>
-          <br><div>Description: {vendor.Description}</div></br>
-          <div>{vendor.FAQ.replaceAll("newLineCharacter", "\n")}</div>
+          <p><strong>Name:</strong> {vendor.Name}</p>
+          <p><strong>Contact phone number:</strong> {vendor.PhoneNumber}</p>
+          <p><strong>Email:</strong> {vendor.Email}</p>
+          <p><strong>Address:</strong> {vendor.Address}</p>
+          <p><strong>Description:</strong> {vendor.Description}</p>
+          <p style={{ whiteSpace: "pre-line" }}>{vendor.FAQ.replaceAll("newLineCharacter", "\n")}</p>
         </div>
       ))}
     </div>
