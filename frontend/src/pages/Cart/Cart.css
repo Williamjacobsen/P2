@@ -1,66 +1,92 @@
-/* Product-In-Cart.jsx */
+
+.cartPage {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 40px;
+    flex-wrap: nowrap;
+}
+
+
+.cartContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+    max-width: 800px;
+}
+
+
 .cartProduct {
-    width: 600px;
-    height: 300px;
     background: lightblue;
     display: flex;
     padding: 10px;
-    gap: 10px;
+    gap: 12px;
     box-sizing: border-box;
     position: relative;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 800px;
+    min-height: 220px;
+    height: auto;
+    align-items: stretch;
 }
-.checkoutCard{
-    width: 600px;
-    height: 300px;
-    background: lightblue;
-    display: flex;
-    flex-wrap: wrap;
+
+
+.cartImg {
+    width: 180px;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
 }
-.cartImg{
-    margin: 10px;
-    width: 200px;
-    height: 280px;
-}
+
 .cartText {
     flex-grow: 1;
     font-size: 14px;
-    overflow: hidden;
-}
-.cartRemove {
+    overflow-wrap: break-word;
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+/* Remove button area */
+.cartRemove {
     position: absolute;
     bottom: 10px;
     right: 10px;
 }
+
 .cartRemoveButton {
-    font-size: larger;
+    font-size: 16px;
     padding: 6px 12px;
-}
-.cartRemoveButton:hover{
     cursor: pointer;
 }
 
-/* Cart.jsx */
-.cartPage{
-    display: flex;
-    flex-direction: row;
-    gap: 500px;
-}
-.cartContainer{
-    margin-left: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
 
-/* Checkout-Card.jsx */
-.checkoutCard{
+.checkoutCard {
+    width: 300px;
+    background: lightblue;
+    padding: 20px;
+    border-radius: 10px;
     text-align: center;
     display: flex;
     flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 40px;
+    height: fit-content;
 }
-.paymentButton{
-    height: 100px;
+
+.totalPrice {
+    font-size: 24px;
+    margin: 0;
+}
+
+.paymentButton {
+    height: 60px;
+    font-size: 18px;
+    cursor: pointer;
 }

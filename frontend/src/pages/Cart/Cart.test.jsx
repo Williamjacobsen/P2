@@ -34,7 +34,7 @@ describe('ProductCard', () => {
                         Gender: "Male",
                         StoreName: "UrbanTrendz",
                         Path: null,
-                        StoreAddress: "Nørrebrogade 21, Copenhagen",
+                        Address: "Nørrebrogade 21, Copenhagen",
                     },
                 ]),
             })
