@@ -114,7 +114,7 @@ function VendorHeader({ vendor }) {
             </li>
             <li>
               {" "}
-              <Link to="vendor/orders"> Orders </Link>{" "}
+              <Link to="/vendor/orders"> Orders </Link>{" "}
             </li>
             <li>
               {" "}
