@@ -46,42 +46,6 @@ export default function ProductPage() {
   };
 
   /** Find and input sizes */
-  const SizeSelector = () => {
-    const allSizes = ['small', 'medium', 'large', 's', 'm', 'l'];
-    let size = null;
-    if (productData[0]?.Size !== null && productData[0]?.Size !== undefined) {
-      size = productData[0]?.Size.toLowerCase();
-      if (size == 's') size = 'small';
-      else if (size == 'm') size = 'medium';
-      else if (size == 'l') size = 'large';
-    }
-    else return <>no size available</>
-    return (
-    <div>
-      <label htmlFor="sizeSelection" hidden>Size</label>
-      <select
-        id="sizeSelection"
-        defaultValue={sizeSelection}
-        className="SortBox"
-        onChange={(e) => {
-          setSizeSelection(e.target.value);
-      }}
-        style={{ width: "300px" }}
-      >
-        <option value="SIZE" hidden={true}>
-          SIZE
-        </option>
-          {allSizes.map((s) =>
-            size.toLowerCase() === s.toLowerCase() ? (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ) : null
-          )}
-        </select>
-      </div>
-    );
-  }
   
   return (
     <div className="container">
@@ -127,7 +91,28 @@ export default function ProductPage() {
         <p className="product-name">{productData[0]?.Name}</p>
         <p className="product-price">{productData[0]?.DiscountProcent > 0 ? productData[0]?.Price - (productData[0]?.Price * productData[0]?.DiscountProcent) / 100 : productData[0]?.Price},00 kr</p>
         <div>
-          <SizeSelector/> {/* The function extracts straight from productData so no need for it here */}
+          <div>
+            <label htmlFor="sizeSelection" hidden>Size</label>
+            <select
+                id="sizeSelection"
+                defaultValue={sizeSelection}
+                className="SortBox"
+                onChange={(e) => {
+                  setSizeSelection(e.target.value);
+                }}
+                style={{ width: "300px" }}
+            >
+              <option value="SIZE" hidden={true}>
+                SIZE
+              </option>
+              {productData.map((product) => {
+                return (
+                    <option key={product.Size} value={product.Size}>
+                      {product.Size}
+                    </option>
+                );})}
+            </select>
+          </div> {/* The function extracts straight from productData so no need for it here */}
         </div>
         <div>
           <label htmlFor="category" hidden>Quantity</label>
