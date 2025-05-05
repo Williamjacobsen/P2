@@ -18,7 +18,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(cookieParser()); // This allows reading cookies from incoming requests.
 
 // Routes
-import productImagesRoute from "./routes/product-images-example-for-martin.js";
+import productImagesRoute from "./routes/product-images.js";
 app.use("/product-images", productImagesRoute);
 import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
@@ -36,8 +36,6 @@ import payment from "./routes/payment.js";
 app.use("/checkout", payment);
 import productID from "./routes/productID.js";
 app.use("/product", productID);
-import faqRoute from "./routes/faq.js";
-app.use("/faq", faqRoute);
 import catalogueRoute from "./routes/catalogue.js";
 app.use("/products", catalogueRoute);
 
