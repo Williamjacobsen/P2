@@ -27,7 +27,7 @@ function ProductInCart({
         <h1>{storeName}</h1>
         <h2>{storeAddress}</h2>
         <p>{productName}</p>
-        <p>{size}</p>
+        <p>{`Size: ${size}`}</p>
         {discount > 0 && <h1>-{discount}%</h1>}
         <h1>{`${finalPrice?.toFixed(0)},00 kr`}</h1>
         <h1>{`Quantity: ${quantity}`}</h1>
