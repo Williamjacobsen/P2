@@ -24,8 +24,8 @@ import {
 
 
 // JWT tokens
-const accessTokenSecretKey = "placeholderSecret1"; // This is essentially a password, so it should be more complex than this placeholder.
-const refreshTokenSecretKey = "placeholderSecret2"; // This is essentially a password, so it should be more complex than this placeholder.
+const accessTokenSecretKey = "19829hdjasljhf98312uojhsdlkjoiewrjofiadsj"; // This is essentially a password, so I smashed my head onto my keyboard a couple of times.
+const refreshTokenSecretKey = "32148djkshzkjdhasi7rufykjh324i7hy7ge9f8r"; // This is essentially a password, so I smashed my head onto my keyboard a couple of times.
 const accessTokenExpirationAge = "5m";
 const refreshTokenExpirationAgeInDays = 7;
 
@@ -37,7 +37,7 @@ const refreshTokenExpirationAgeInDays = 7;
 const saltingRounds = 11;
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Router
+// Routes
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 const router = express.Router();

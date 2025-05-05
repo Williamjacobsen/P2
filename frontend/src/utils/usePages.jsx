@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react"; //vitest complains unless i do this im sorry.
 
 /**
  * Used to get the functions and React components needed to set up pages functionality.
