@@ -41,6 +41,10 @@ export default function Success() {
         if (data.success) {
           if (data?.products) {
             SendEmail(data.products);
+
+            for (let product of data.products) {
+              deleteCookie(`Product-${product?.ID}`, "/");
+            }
           }
 
           console.log("Payment successful");
