@@ -9,7 +9,7 @@ import {
 } from "../utils/inputValidation.js"
 
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-// Router
+// Routes
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 
 const router = express.Router();
@@ -23,7 +23,7 @@ router.get("/getProfileProductOrders", [
     handleValidationErrors(req, res, validationResult);
     // Get data from request
     const accessToken = req.cookies.profileAccessToken;
-    // Check that profile exists and password is right
+    // Check that profile exists and password is correct
     const profile = await getProfile(res, accessToken);
     const profileID = profile.ID;
     // Get product orders for that profile

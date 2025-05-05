@@ -194,7 +194,7 @@ export default function ProductCatalogue() {
                 {getVisiblePartOfPageArray().map((productIndex) => {
                     const product = loadedProducts[productIndex]
                     return (
-                        <ProductCard id={product.ID} storeName={product.StoreName} productName={product.Name} price={product.Price} productBrand={product.Brand}></ProductCard>
+                        <ProductCard id={product.ID} storeName={product.StoreName} productName={product.Name} price={product.Price} productBrand={product.Brand} discount={product.DiscountProcent}></ProductCard>
                     )
                 })}
             </div>

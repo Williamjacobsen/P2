@@ -24,7 +24,6 @@ const clothingOptions = [
 ];
 
 export default function AddProduct() {
-
   const [storeID, setStoreID] = useState(-1);
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0.0);
@@ -49,19 +48,41 @@ export default function AddProduct() {
 
   // Is the user signed in?
   if (isLoadingProfile) {
-    return (<>Loading login...</>);
-  }
-  else if (profile === undefined) {
-    return (<Navigate to="/sign-in" replace />);
+    return <>Loading login...</>;
+  } else if (profile === undefined) {
+    return <Navigate to="/sign-in" replace />;
   }
 
   // Is the user a vendor?
   if (isLoadingVendor) {
-    return (<>Loading vendor information...</>);
+    return <>Loading vendor information...</>;
+  } else if (vendor === null) {
+    return <>You are not a vendor, so you do not have access to this page.</>;
   }
-  else if (vendor === null) {
-    return (<>You are not a vendor, so you do not have access to this page.</>);
-  }
+
+  const validate = () => {
+    const errs = {};
+    if (!name || name.length > 100) errs.name = "Name required (1-100 chars)";
+    const priceNum = parseFloat(price);
+    if (isNaN(priceNum) || priceNum < 0) errs.price = "Price must be ≥ 0";
+    const discNum = parseFloat(discountProcent);
+    if (isNaN(discNum) || discNum < 0 || discNum > 100)
+      errs.discount = "Discount 0-100";
+    if (!description || description.length > 250)
+      errs.description = "Description 1-250 chars";
+    if (!clothingOptions.includes(clothingType))
+      errs.clothingType = "Select a valid clothing type";
+    if (!genderOptions.includes(gender)) errs.gender = "Select a valid gender";
+    if (!brand || brand.length > 50) errs.brand = "Brand required (1-50 chars)";
+    if (sizes.length < 1) errs.sizes = "Add at least one size";
+    sizes.forEach(({ size, stock }, i) => {
+      if (!size || size.length > 10) errs[`size_${i}`] = "Size 1-10 chars";
+      if (!Number.isInteger(stock) || stock < 0)
+        errs[`stock_${i}`] = "Stock ≥ 0 integer";
+    });
+    if (images.length < 1) errs.images = "At least one image required";
+    return errs;
+  };
 
   const handleImageChange = (e) => {
     if (e.target.files) setImages(Array.from(e.target.files));
@@ -79,6 +100,12 @@ export default function AddProduct() {
   };
 
   const handleAddProduct = async () => {
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      alert("Fix validation errors: " + JSON.stringify(errs));
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("storeID", storeID);
@@ -97,9 +124,11 @@ export default function AddProduct() {
 
       const response = await fetch("http://localhost:3001/add-product", {
         method: "POST",
+        credentials: "include",
         body: formData,
       });
-      if (!response.ok) throw new Error("Failed to add product");
+      const res = await response.json();
+      if (!response.ok) throw new Error(res.error);
 
       setName("");
       setPrice(0.0);
@@ -116,7 +145,7 @@ export default function AddProduct() {
       alert("Product added successfully!");
     } catch (error) {
       console.error(error);
-      alert("Error adding product");
+      alert(error);
     }
   };
 

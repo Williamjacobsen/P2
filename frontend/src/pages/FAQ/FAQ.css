@@ -1,27 +1,37 @@
-.faq-container {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
-    font-family: sans-serif;
-  }
-  
-  .faq-item {
-    background: #f5f5f5;
-    margin: 15px 0;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-  }
-  
-  .faq-question {
-    margin: 0 0 10px;
-    font-size: 18px;
-    color: #333;
-  }
-  
-  .faq-answer {
-    margin: 0;
-    font-size: 16px;
-    color: #555;
-  }
-  
+/* Container layout */
+.faq-basic, .faq-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+/* FAQ item box */
+.faq-item {
+  background: #f9f9f9;
+  margin: 15px 0;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+/* Handle new lines in vendor FAQ text */
+.text-with-new-lines {
+  white-space: pre-line;
+}
+
+/* Question heading */
+.faq-question {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Answer text */
+.faq-answer {
+  margin: 0;
+  font-size: 16px;
+  color: #555;
+}

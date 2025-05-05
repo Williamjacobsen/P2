@@ -21,7 +21,7 @@ export default function useGetVendor(vendorID) {
           return [isLoading, vendor];
         }
         setVendor(await requestVendor(vendorID));
-        setIsLoading();
+        setIsLoading(false);
       }
       catch (error) {
         alert(error);

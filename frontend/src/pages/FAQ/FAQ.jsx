@@ -1,44 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./FAQ.css";
+import useGetVendors from "../Profile/useGetVendors";
 
 export default function FAQ() {
-  const [faqList, setFaqList] = useState([]);
+  // Hooks
+  const [isLoadingVendors, vendors] = useGetVendors();
 
-  useEffect(() => {
-    fetchFAQs();
-  }, []);
-
-  const fetchFAQs = async () => {
-    try {
-      const res = await fetch(`http://localhost:3001/faq`);
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setFaqList(data);
-      } else {
-        setFaqList([]);
-        console.error("Fetched FAQs are not an array:", data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch FAQs:", error);
-      setFaqList([]);
-    }
-  };
+  // Loading vendors
+  if (isLoadingVendors) {
+    return <>Loading vendors...</>;
+  }
 
   return (
-    <div className="faq-container">
+    <div className="faq-basic">
       <h1>Frequently Asked Questions</h1>
 
-      {faqList.length > 0 ? (
-        faqList.map((data) => (
-          <div key={data.ID} className="faq-item">
-            <h2 className="faq-question">{data.Question}</h2>
-            <p className="faq-answer">{data.Answer}</p>
-          </div>
-        ))
-      ) : (
-        <p>No FAQs available yet.</p>
-      )}
+      {/* Hardcoded FAQs */}
+      <div className="faq-item">
+        <div className="faq-question">What is the website's contact information?</div>
+        <div className="faq-answer">clothing@gmail.com and +45 12 12 12 12</div>
+      </div>
+      <div className="faq-item">
+        <div className="faq-question">Where are the stores located?</div>
+        <div className="faq-answer">Aalborg Central</div>
+      </div>
+
+      {/* Vendor FAQs */}
+      {vendors.map((vendor, index) => (
+        <div key={index} className="faq-item text-with-new-lines">
+          <p><strong>Name:</strong> {vendor.Name}</p>
+          <p><strong>Contact phone number:</strong> {vendor.PhoneNumber}</p>
+          <p><strong>Email:</strong> {vendor.Email}</p>
+          <p><strong>Address:</strong> {vendor.Address}</p>
+          <p><strong>Description:</strong> {vendor.Description}</p>
+          <p style={{ whiteSpace: "pre-line" }}>{vendor.FAQ.replaceAll("newLineCharacter", "\n")}</p>
+        </div>
+      ))}
     </div>
   );
 }

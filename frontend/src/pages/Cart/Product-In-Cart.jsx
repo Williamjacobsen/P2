@@ -11,8 +11,10 @@ function ProductInCart({
   productName,
   price,
   removeFunction,
+  discount,
 }) {
   const image = FetchImage(id);
+  const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
 
   return (
     <div className={"cartProduct"}>
@@ -26,7 +28,8 @@ function ProductInCart({
         <h2>{storeAddress}</h2>
         <p>{productName}</p>
         <p>{size}</p>
-        <h1>{`${price},00 kr`}</h1>
+        {discount > 0 && <h1>-{discount}%</h1>}
+        <h1>{`${finalPrice?.toFixed(0)},00 kr`}</h1>
         <h1>{quantity}</h1>
       </div>
       <div className={"cartRemove"}>
