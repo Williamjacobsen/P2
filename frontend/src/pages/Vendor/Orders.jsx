@@ -79,6 +79,7 @@ export default function Orders() {
         `http://localhost:3001/vendor-orders/update/${orderID}`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
