@@ -40,6 +40,7 @@ export default function Products({ VendorID }) {
         `http://localhost:3001/delete-product/${productId}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 
