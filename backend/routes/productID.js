@@ -13,7 +13,7 @@ router.get("/:id", async (req, res) => {
       const [result] = await pool.query(
         `SELECT 
           p2.Product.*, 
-          p2.Vendor.Name,
+          p2.Vendor.Name as StoreName,
           p2.ProductImage.Path,
           p2.Vendor.Address,
           p2.ProductSize.ID AS sizeID,

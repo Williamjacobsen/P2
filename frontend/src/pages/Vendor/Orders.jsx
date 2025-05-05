@@ -39,7 +39,7 @@ export default function Orders() {
       }
     }
     getOrders();
-  }, [isLoadingVendor]);
+  }, [isLoadingVendor, vendor, storeID]);
 
   function handleCheckboxChange(orderID, field, value) {
     setOrders((orders) =>
@@ -79,6 +79,7 @@ export default function Orders() {
         `http://localhost:3001/vendor-orders/update/${orderID}`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
