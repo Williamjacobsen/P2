@@ -22,12 +22,17 @@ export default function FAQ() {
       </div>
       <div className="faq-item">
         <div className="faq-question">Where are the stores located?</div>
-        <div className="faq-answer">Aalborg Central (example)</div>
+        <div className="faq-answer">Aalborg Central</div>
       </div>
 
       {/* Vendor FAQs*/}
       {vendors.map((vendor, index) => (
         <div key={index} className="faq-item text-with-new-lines">
+          <div>Name: {vendor.Name}</div> 
+          <br><div>Contact phone number: {vendor.PhoneNumber}</div> </br>
+          <br><div>Email: {vendor.Email}</div></br>
+          <br><div>Address: {vendor.Address}</div></br>
+          <br><div>Description: {vendor.Description}</div></br>
           <div>{vendor.FAQ.replaceAll("newLineCharacter", "\n")}</div>
         </div>
       ))}
