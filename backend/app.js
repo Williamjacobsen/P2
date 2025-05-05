@@ -38,6 +38,8 @@ import productID from "./routes/productID.js";
 app.use("/product", productID);
 import faqRoute from "./routes/faq.js";
 app.use("/faq", faqRoute);
+import catalogueRoute from "./routes/catalogue.js";
+app.use("/products", catalogueRoute);
 
 // Stuff that needs to be made into separate files in the "route" directory
 app.get("/test", (req, res) => {
@@ -94,20 +96,6 @@ app.post("/example/save-text", async (req, res) => {
 app.get("/faq", async (req, res) => {
   const [result] = await pool.query("SELECT * FROM p2.faq;");
   res.status(200).json(result);
-});
-
-app.get("/products", async (req, res) => {
-  try {
-    const [result] = await pool.query(`
-      SELECT p2.product.*, p2.vendor.Name AS StoreName
-      FROM p2.product
-      JOIN p2.vendor ON p2.product.StoreID = p2.vendor.ID;
-    `);
-    res.status(200).json(result);
-  } catch (err) {
-    console.error("Error fetching product:", err);
-    res.status(500).json({ error: "Failed to fetch products" });
-  }
 });
 
 app.get("/shopCircles", async (req, res) => {
