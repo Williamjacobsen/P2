@@ -39,7 +39,7 @@ export default function Orders() {
       }
     }
     getOrders();
-  }, [isLoadingVendor]);
+  }, [isLoadingVendor, vendor, storeID]);
 
   function handleCheckboxChange(orderID, field, value) {
     setOrders((orders) =>
