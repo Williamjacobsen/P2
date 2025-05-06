@@ -96,6 +96,31 @@ router.put("/modify", [
   }
 });
 
+router.get("/vendor-products/:vendorid", async (req, res) => {
+  const { vendorid } = req.params; // VendorID is grabbed from the url parameter
+
+  const vendorIdNum = Number(vendorid);
+  if (!Number.isInteger(vendorIdNum) || vendorIdNum <= 0) {
+    return res.status(400).json({ message: "Vendor ID must be a positive integer" });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `
+      SELECT p2.Product.*, p2.Vendor.Name AS StoreName
+      FROM p2.Product
+             JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+      WHERE p2.Product.StoreID = ?
+    `,
+      [vendorid]
+    ); // Use parameterized query to safely inject vendorid
+    res.status(200).json(result);
+  } catch (err) {
+    console.log("error in database query for vendorproducts", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 // Helpers
 // ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――

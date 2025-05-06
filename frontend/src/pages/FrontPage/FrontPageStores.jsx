@@ -8,7 +8,7 @@ export default function BoxShop() {
   useEffect(() => {
     const shopCircles = async () => {
       try {
-        const response = await fetch("http://localhost:3001/shopCircles")
+        const response = await fetch("http://localhost:3001/front-page/shop-circles")
         if (!response.ok) {
           throw new Error("Failed To Fetch ShopCircles");
         }
