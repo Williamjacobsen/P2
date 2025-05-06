@@ -7,7 +7,7 @@
     padding: 10px;
     gap: 10px;
     box-sizing: border-box;
-    position: relative;
+    position: relative; 
 }
 .checkoutCard{
     width: 600px;

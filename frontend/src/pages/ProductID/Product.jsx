@@ -1,12 +1,14 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
 import "./ProductCSS.css";
 import { setCookie } from "../../utils/cookies.js";
+import { getAllCookieProducts } from "../../utils/cookies.js";
 import useGetVendor from "../Profile/useGetVendor.jsx";
+import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart.js";
 
-export default function ProductPage() {
+export default function ProductPage({ setCartAmount }) {
+
   const { id } = useParams();
   const [productData, setProductData] = useState([]);
   const [mainImage, setMainImage] = useState();
@@ -44,6 +46,7 @@ export default function ProductPage() {
   const onImgClick = (image) => {
     setMainImage(image);
   };
+
 
   return (
     <div className="container">
@@ -124,31 +127,29 @@ export default function ProductPage() {
               </option>
             ))}
           </select>
-          <button
-            id="button"
-            defaultValue=""
-            style={{ width: "200px" }}
-            onClick={() => {
-              if (!sizeSelection) {
-                alert("Please Select a size");
-                return;
-              }
-              const cookievalue = JSON.stringify({
-                id: productData[0]?.ID,
-                size: sizeSelection,
-                quantity: quantitySelection,
-              });
+            <button
+              onClick={() => {
+                if (!sizeSelection) {
+                  alert("Please Select a size");
+                  return;
+                }
+                const cartItem = {
+                  id: productData[0]?.ID,
+                  size: sizeSelection,
+                  quantity: quantitySelection,
+                };
+                
+          
+                // Remove individual cookie approach
+                setCookie(`Product-${productData[0]?.ID}`, JSON.stringify(cartItem), null, "/");
 
-              setCookie(
-                `Product-${productData[0]?.ID}`,
-                cookievalue,
-                null,
-                "/"
-              );
-            }}
-          >
+
+
+                setCartAmount(AmountOfItemsInCart());
+              }}
+            >
             ADD TO CART
-          </button>
+            </button>
           {/* Made to make a cookie with product, id, keep cookie till browser closed, path '/' which means entire website so every page can see. Check cookies.js for more info */}
         </div>
         <div>

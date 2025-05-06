@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+//import { useCart } from "./CartContext";  
 import ProductInCart from "./Product-In-Cart";
 import "./Cart.css";
 import CheckoutCard from "./Checkout-Card";
 import { deleteCookie, getAllCookieProducts } from "../../utils/cookies";
 import handleCheckout from "./handleCheckout";
 import useGetProfile from "../Profile/useGetProfile";
+import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart";
 
-export default function Cart() {
+export default function Cart( {setCartAmount}) {
+
   const [cartProducts, setCartProducts] = useState([]);
   const [cookieProducts, setCookieProducts] = useState([]);
+  //const { removeFromCart } = useCart();
 
   useEffect(() => {
     setCookieProducts(getAllCookieProducts());
@@ -67,7 +70,16 @@ export default function Cart() {
     }
     return sum;
   }
-
+/*
+  const handleRemoveItem = (productId) => {
+    // Remove from context
+    removeFromCart(productId);
+    // Remove from cookies
+    deleteCookie(`Product-${productId}`, "/");
+    // Update local state
+    setCookieProducts(getAllCookieProducts());
+  };
+*/
   return (
     <div className={"cartPage"}>
       <div className={"cartContainer"}>
@@ -86,6 +98,8 @@ export default function Cart() {
                 deleteCookie(`Product-${product.ID}`, "/");
                 //we reload the cookies now that one has been deleted.
                 setCookieProducts(getAllCookieProducts());
+                
+                setCartAmount(AmountOfItemsInCart());
               }}
             />
           );
