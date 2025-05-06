@@ -17,7 +17,7 @@ export default function Header({ cartAmount, setCartAmount }) {
     setCartAmount(AmountOfItemsInCart());
   }, [])
 
-  
+
 
   // Hooks
   const [isLoadingProfile, profile] = useGetProfile();
