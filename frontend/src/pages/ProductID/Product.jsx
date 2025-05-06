@@ -47,7 +47,12 @@ export default function ProductPage({ setCartAmount }) {
     setMainImage(image);
   };
 
+<<<<<<< HEAD
 
+=======
+  /** Find and input sizes */
+  
+>>>>>>> 654622d86ff31a2d280587cb01ff1187161a6862
   return (
     <div className="container">
       <div className="left-content">
@@ -90,26 +95,33 @@ export default function ProductPage({ setCartAmount }) {
         <p className="product-brand">{productData[0]?.Brand}</p>
         <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
-        <p className="product-price">{productData[0]?.Price},00 kr</p>
+        <p className="product-price">{productData[0]?.DiscountProcent > 0 ? productData[0]?.Price - (productData[0]?.Price * productData[0]?.DiscountProcent) / 100 : productData[0]?.Price},00 kr</p>
         <div>
-          <select
-            id="category"
-            defaultValue=""
-            className="SortBox"
-            onChange={(e) => {
-              setSizeSelection(e.target.value);
-            }}
-            style={{ width: "300px" }}
-          >
-            <option value="SIZE" hidden={true}>
-              SIZE
-            </option>
-            <option value="small">small</option>
-            <option value="medium">medium</option>
-            <option value="large">large</option>
-          </select>
+          <div>
+            <label htmlFor="sizeSelection" hidden>Size</label>
+            <select
+                id="sizeSelection"
+                defaultValue={sizeSelection}
+                className="SortBox"
+                onChange={(e) => {
+                  setSizeSelection(e.target.value);
+                }}
+                style={{ width: "300px" }}
+            >
+              <option value="SIZE" hidden={true}>
+                SIZE
+              </option>
+              {productData.map((product) => {
+                return (
+                    <option key={product.Size} value={product.Size}>
+                      {product.Size}
+                    </option>
+                );})}
+            </select>
+          </div> {/* The function extracts straight from productData so no need for it here */}
         </div>
         <div>
+          <label htmlFor="category" hidden>Quantity</label>
           <select
             id="category"
             defaultValue="1"
@@ -121,12 +133,13 @@ export default function ProductPage({ setCartAmount }) {
             <option value="AMOUNT" hidden={true}>
               AMOUNT
             </option>
-            {[...Array(10)].map((e, i) => (
+            {[...Array(productData[0]?.Stock)].map((e, i) => (
               <option value={i + 1} key={i}>
                 {i + 1}
               </option>
             ))}
           </select>
+<<<<<<< HEAD
             <button
               onClick={() => {
                 if (!sizeSelection) {
@@ -148,6 +161,32 @@ export default function ProductPage({ setCartAmount }) {
                 setCartAmount(AmountOfItemsInCart());
               }}
             >
+=======
+          <button
+            id="button"
+            defaultValue=""
+            style={{ width: "200px" }}
+            onClick={() => {
+              if (!sizeSelection) {
+                alert("Please Select a size");
+                return;
+              }
+              const cookievalue = JSON.stringify({
+                id: productData[0]?.ID,
+                size: sizeSelection,
+                quantity: quantitySelection,
+                sizeID: productData[0]?.sizeID
+              });
+              
+              setCookie(
+                `Product-${productData[0]?.ID}`,
+                cookievalue,
+                null,
+                "/"
+              );
+            }}
+          >
+>>>>>>> 654622d86ff31a2d280587cb01ff1187161a6862
             ADD TO CART
             </button>
           {/* Made to make a cookie with product, id, keep cookie till browser closed, path '/' which means entire website so every page can see. Check cookies.js for more info */}

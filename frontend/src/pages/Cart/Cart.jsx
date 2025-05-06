@@ -28,6 +28,12 @@ export default function Cart( {setCartAmount}) {
               .then((res) => res.json())
               .then((data) => {
                 const dbProduct = data[0];
+
+                if(!dbProduct){
+                    //if product that user had in their cart was deleted from database this gets rid of it from the users cart
+                    deleteCookie(`Product-${product.id}`, "/");
+                }
+
                 //ok so, we grab product info from the database with fetch which gives us an array with a single object in it
                 //the reason for that is SQL returns rows even if there is just one match for the query
                 //then we extract the single object from the array the db gives back with data[0],
@@ -90,7 +96,7 @@ export default function Cart( {setCartAmount}) {
               storeName={product.StoreName}
               price={product.Price}
               productName={`${product.Brand} - ${product.Name}`}
-              storeAddress={product.StoreAddress}
+              storeAddress={product.Address}
               quantity={product.quantity}
               size={product.size}
               discount={product.DiscountProcent}
@@ -110,7 +116,10 @@ export default function Cart( {setCartAmount}) {
         PaymentFunction={() => {
           if (profile === undefined) {
             navigate("/sign-in");
-          } else {
+          } else if (cartProducts.length === 0 || cartProducts.length < 0){
+              alert("No products in cart");
+          }
+          else {
             handleCheckout(cartProducts);
           }
         }}

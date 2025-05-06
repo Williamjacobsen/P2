@@ -8,20 +8,18 @@ import NoPage from "./pages//NoPage";
 import FrontPage from "./pages/FrontPage/FrontPage";
 import Example from "./pages/Example";
 import FAQ from "./pages/FAQ/FAQ";
-import AddFAQPage from "./pages/Vendor/AddFAQPage";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
 import AddProduct from "./pages/Vendor/Add-Product";
-import Product from "./pages/ProductID/Product"
+import Orders from "./pages/Vendor/Orders";
+import Product from "./pages/ProductID/Product";
 import Profile from "./pages/Profile/Profile";
 import SignIn from "./pages/Profile/SignIn";
 import Cart from "./pages/Cart/Cart";
-import ProfileProductOrders from "./pages/Profile/ProfileProductOrders"
-import DisplayProductImages from "./DisplayProductImagesExampleForMartin";
+import ProfileProductOrders from "./pages/Profile/ProfileProductOrders";
 import ReSignInPopUp from "./pages/Profile/ReSignInPopUp";
 import Success from "./pages/SuccessFailure/Success";
 import Failure from "./pages/SuccessFailure/Failure";
-
 
 export default function App() {
   const [cartAmount, setCartAmount] = useState(0);
@@ -37,7 +35,6 @@ export default function App() {
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
-          <Route path="/add-faq" element={<AddFAQPage />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
           <Route path="/Product/:id" element={<Product  setCartAmount={setCartAmount} />} />
           <Route path="/profile" element={<Profile />} />
@@ -48,6 +45,7 @@ export default function App() {
           <Route path="/cancel" element={<Failure />} />
           <Route path="/vendor" element={<Vendor />} />
           <Route path="/vendor/add-product" element={<AddProduct />} />
+          <Route path="/vendor/orders" element={<Orders />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

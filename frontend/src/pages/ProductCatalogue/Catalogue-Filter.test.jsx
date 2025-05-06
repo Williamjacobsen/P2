@@ -1,12 +1,12 @@
 import {render, fireEvent} from "@testing-library/react";
+import React from "react";
 import '@testing-library/jest-dom';
 import {CatalogueFilter} from "./Catalogue-Filter";
-import {CatalogueSearch} from "./Catalogue-Filter";
 
 describe('CatalogueFilter', () => {
     const filterName = "Category";
     const filterOptions = ["Option 1", "Option 2"];
-    const mockOnChange = jest.fn(); // mock function for onChange
+    const mockOnChange = vi.fn(); // mock function for onChange
 
     it('renders without crashing', () => {
         const { getByRole } = render(

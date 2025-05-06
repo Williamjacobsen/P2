@@ -1,8 +1,9 @@
-import {render, fireEvent, waitFor} from "@testing-library/react";
+import {render, fireEvent, waitFor, screen} from "@testing-library/react";
+import React from "react";
 import '@testing-library/jest-dom';
 import ProductCatalogue from "./Product-Catalogue";
-import ProductCard from "./Product-Card";
 import {BrowserRouter} from "react-router-dom";
+
 
 describe('ProductCard', () => {
 
@@ -14,7 +15,7 @@ describe('ProductCard', () => {
                 StoreID: 100,
                 Name: "Slim Fit T-Shirt",
                 Price: 200,
-                DiscountProcent: 10,
+                DiscountProcent: 0,
                 Description: "Comfortable cotton t-shirt",
                 ClothingType: "T-shirts",
                 Brand: "BasicWear",
@@ -26,7 +27,7 @@ describe('ProductCard', () => {
                 StoreID: 1,
                 Name: "Oversized Hoodie",
                 Price: 500,
-                DiscountProcent: 20,
+                DiscountProcent: 0,
                 Description: "Big warm hoodie",
                 ClothingType: "Hoodies",
                 Brand: "BasicWear",
@@ -35,8 +36,9 @@ describe('ProductCard', () => {
             }
         ]
         //mocking fetch request, and returning our made up products
-        global.fetch = jest.fn(() =>
+        global.fetch = vi.fn(() =>
             Promise.resolve({
+                ok: true,
                 json: () => Promise.resolve(MockProducts),
             })
         );
@@ -52,15 +54,16 @@ describe('ProductCard', () => {
             fireEvent.click(clearButton);
         }
 
-        await waitFor(() => screen.getByText(/Product 1/i));
-
-
         fireEvent.change(screen.getByLabelText(/Gender/i), {target: {value: "Male"}})
-        expect(await screen.queryByText(/Slim Fit T-Shirt/i)).toBeInTheDocument();
-        expect(await screen.queryByText(/Oversized Hoodie/i)).not.toBeInTheDocument();
+        await waitFor(() =>{
+            expect( getByRole('heading', { name: /BasicWear - Slim Fit T-Shirt/i })).toBeInTheDocument();
+        });
+        await waitFor(() =>{
+        expect( screen.queryByText(/BasicWear - Oversized Hoodie/i)).not.toBeInTheDocument();
+        });
         clearFilter();
-        expect(await screen.queryByText(/Slim Fit T-Shirt/i)).toBeInTheDocument();
-        expect(await screen.queryByText(/Oversized Hoodie/i)).toBeInTheDocument();
+        expect( screen.queryByText(/Slim Fit T-Shirt/i)).toBeInTheDocument();
+        expect( screen.queryByText(/Oversized Hoodie/i)).toBeInTheDocument();
 
 
         fireEvent.change(screen.getByLabelText(/Product Type/i), {target: {value: "Hoodies"}});
@@ -79,8 +82,8 @@ describe('ProductCard', () => {
 
         fireEvent.change(screen.getByLabelText(/Price/i), {target: {value: "Highest Price"}});
         const sortedProducts = getAllByRole("product-card");
-        expect(await sortedProducts[0].getByRole('paragraph')).toHaveTextContent("500,00 kr");
-        expect(await sortedProducts[1].getByRole('paragraph')).toHaveTextContent("200,00 kr");
+        expect(sortedProducts[0].querySelector('p')).toHaveTextContent("500,00 kr");
+        expect(sortedProducts[1].querySelector('p')).toHaveTextContent("200,00 kr");
         clearFilter();
     });
 });

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import useGetProfile from "./useGetProfile";
 import { requestAccessToken } from "./ReSignInPopUp";
 import "./Profile.css";

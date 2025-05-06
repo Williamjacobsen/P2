@@ -6,12 +6,12 @@ const stripePromise = loadStripe(
 );
 
 export default async function handleCheckout(products) {
-  try { //R 
+  try {
     const stripe = await stripePromise;
 
     const response = await fetch("http://localhost:3001/checkout", {
       method: "POST",
-      credentials: "include", // Ensures cookies are sent with the request //r
+      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },
@@ -20,7 +20,7 @@ export default async function handleCheckout(products) {
 
     const session = await response.json();
 
-    if (!response.ok) { //R 
+    if (!response.ok) {
       return Promise.reject(session.error);
     }
 
@@ -29,11 +29,9 @@ export default async function handleCheckout(products) {
     });
 
     if (result.error) {
-      //r redirct to failure?
-      return Promise.reject(result.error.message); //R
+      return Promise.reject(result.error.message);
     }
   }
-  //R 
   catch (error) {
     alert(error);
   }

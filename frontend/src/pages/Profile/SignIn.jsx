@@ -21,7 +21,7 @@ export default function SignIn() {
 
   return (
     <>
-      <div className = "Background">
+      <div className="Background">
         <h3> Sign In </h3>
         <form onSubmit={signIn}>
           <b>
@@ -84,7 +84,7 @@ async function signIn(event) {
     // Get authetification tokens from server
     await requestSignIn(email, password);
     // Reload the page (this navigates to the profile page because the user is now signed in)
-    window.location.reload(); //R for some reason, the page reload is too fast for the server to have updated yet??
+    window.location.reload();
   }
   catch (error) {
     // Alert the user of the error (for example wrong password)
