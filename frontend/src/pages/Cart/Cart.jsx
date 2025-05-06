@@ -102,7 +102,10 @@ export default function Cart() {
         PaymentFunction={() => {
           if (profile === undefined) {
             navigate("/sign-in");
-          } else {
+          } else if (cartProducts.length === 0 || cartProducts.length < 0){
+              alert("No products in cart");
+          }
+          else {
             handleCheckout(cartProducts);
           }
         }}
