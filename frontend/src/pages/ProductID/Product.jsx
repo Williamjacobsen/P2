@@ -47,12 +47,6 @@ export default function ProductPage({ setCartAmount }) {
     setMainImage(image);
   };
 
-<<<<<<< HEAD
-
-=======
-  /** Find and input sizes */
-  
->>>>>>> 654622d86ff31a2d280587cb01ff1187161a6862
   return (
     <div className="container">
       <div className="left-content">
@@ -139,29 +133,6 @@ export default function ProductPage({ setCartAmount }) {
               </option>
             ))}
           </select>
-<<<<<<< HEAD
-            <button
-              onClick={() => {
-                if (!sizeSelection) {
-                  alert("Please Select a size");
-                  return;
-                }
-                const cartItem = {
-                  id: productData[0]?.ID,
-                  size: sizeSelection,
-                  quantity: quantitySelection,
-                };
-                
-          
-                // Remove individual cookie approach
-                setCookie(`Product-${productData[0]?.ID}`, JSON.stringify(cartItem), null, "/");
-
-
-
-                setCartAmount(AmountOfItemsInCart());
-              }}
-            >
-=======
           <button
             id="button"
             defaultValue=""
@@ -184,9 +155,10 @@ export default function ProductPage({ setCartAmount }) {
                 null,
                 "/"
               );
+
+              setCartAmount(AmountOfItemsInCart());
             }}
           >
->>>>>>> 654622d86ff31a2d280587cb01ff1187161a6862
             ADD TO CART
             </button>
           {/* Made to make a cookie with product, id, keep cookie till browser closed, path '/' which means entire website so every page can see. Check cookies.js for more info */}
