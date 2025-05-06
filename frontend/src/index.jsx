@@ -28,10 +28,6 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<><Header cartAmount={cartAmount} setCartAmount={setCartAmount} /><ReSignInPopUp /></>} >
-          <Route
-            path="/DisplayProductImages"
-            element={<DisplayProductImages />}
-          />
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
