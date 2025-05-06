@@ -45,8 +45,6 @@ export default function ProductPage() {
     setMainImage(image);
   };
 
-  /** Find and input sizes */
-  
   return (
     <div className="container">
       <div className="left-content">
@@ -127,10 +125,10 @@ export default function ProductPage() {
             <option value="AMOUNT" hidden={true}>
               AMOUNT
             </option>
-            {[...Array(productData[0]?.Stock)].map((e, i) => (
-              <option value={i + 1} key={i}>
-                {i + 1}
-              </option>
+            {[...Array(productData.find(product => product.Size === sizeSelection)?.Stock || 0)].map((_,i) => (
+                <option value={i + 1} key={i}>
+                  {i + 1}
+                </option>
             ))}
           </select>
           <button
