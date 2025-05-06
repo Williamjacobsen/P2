@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
@@ -22,30 +22,21 @@ import Success from "./pages/SuccessFailure/Success";
 import Failure from "./pages/SuccessFailure/Failure";
 
 export default function App() {
+  const [cartAmount, setCartAmount] = useState(0);
+  
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Header />
-              <ReSignInPopUp />
-            </>
-          }
-        >
+        <Route path="/" element={<><Header cartAmount={cartAmount} setCartAmount={setCartAmount} /><ReSignInPopUp /></>} >
           <Route index element={<FrontPage />} />
           <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
-          <Route path="/Product/:id" element={<Product />} />
+          <Route path="/Product/:id" element={<Product  setCartAmount={setCartAmount} />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/Cart" element={<Cart />} />
-          <Route
-            path="/profile-product-orders"
-            element={<ProfileProductOrders />}
-          />
+          <Route path="/Cart" element={<Cart setCartAmount={setCartAmount}/>} />
+          <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Failure />} />
           <Route path="/vendor" element={<Vendor />} />

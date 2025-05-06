@@ -1,12 +1,14 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
 import "./ProductCSS.css";
 import { setCookie } from "../../utils/cookies.js";
+import { getAllCookieProducts } from "../../utils/cookies.js";
 import useGetVendor from "../Profile/useGetVendor.jsx";
+import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart.js";
 
-export default function ProductPage() {
+export default function ProductPage({ setCartAmount }) {
+
   const { id } = useParams();
   const [productData, setProductData] = useState([]);
   const [mainImage, setMainImage] = useState();
@@ -153,10 +155,12 @@ export default function ProductPage() {
                 null,
                 "/"
               );
+
+              setCartAmount(AmountOfItemsInCart());
             }}
           >
             ADD TO CART
-          </button>
+            </button>
           {/* Made to make a cookie with product, id, keep cookie till browser closed, path '/' which means entire website so every page can see. Check cookies.js for more info */}
         </div>
         <div>

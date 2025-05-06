@@ -41,21 +41,21 @@
   justify-content: center;
 }
 
-.product-grid > * {
-  width: calc(33.333% - 20px); /* Ensures 3 per row */
-  min-width: 200px; /* Ensures they don't get too small */
-}
+
 .SortBox {
   width: 100px;
   padding: 10px;
   font-size: small;
 }
+
 .FilterElements {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr); /* 4 columns per row */
+  display: flex;
   flex-wrap: wrap;
-  margin: 0 auto;
+  gap: 10px;
+  padding: 20px;
   justify-content: center;
+  background-color: white;
+  border-bottom: 1px solid rgb(220, 220, 220);
 }
 
 .product-card-link {
@@ -87,13 +87,18 @@
   cursor: pointer;
   border-radius: 4px;
 }
-.Hide {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  clip: rect(0, 0, 0, 0);
-  overflow: hidden;
+
+button {
+  margin-top: 10px;
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: rgb(222, 222, 222);
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgb(200, 200, 200);
 }

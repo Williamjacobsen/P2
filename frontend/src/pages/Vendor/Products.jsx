@@ -20,7 +20,7 @@ export default function Products({ VendorID }) {
     async function fetchVendorProducts() {
       try {
         const response = await fetch(
-          `http://localhost:3001/VendorProducts/${VendorID}`
+          `http://localhost:3001/vendor/vendor-products/${VendorID}`
         );
         if (!response.ok) {
           throw new Error("failed to fetch vendor products");
