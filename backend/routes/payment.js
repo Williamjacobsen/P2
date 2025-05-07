@@ -219,6 +219,16 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
           [item.quantity, item.id, item.size, item.quantity]
         );
 
+        // Vi laver en pool, som indsætter et produkts i BestSeller
+        //Hvis der allerede findes et produkt med samme KEY i bestSeller, så skal den blot opdatere AmountSold
+        await pool.query(
+          `INSERT INTO p2.productstatistics (ProductID, AmountSold)
+             VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE
+             AmountSold = AmountSold + ?;`,
+          [item.id, item.quantity, item.quantity]
+        );
+
         products.push({
           ID: item.id,
           name: productData.Name,

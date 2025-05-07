@@ -5,15 +5,12 @@ import emailjs from "@emailjs/browser";
 import useGetProfile from "../Profile/useGetProfile";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-export default function Success() {
+export default function Success({ setCartAmount }) {
   /** EMAIL ERROR: 426 Upgrade Required (It means that we have run out of free API usage) */
 
   const navigate = useNavigate();
-
   const [hasVerified, setHasVerified] = useState(false);
-
   const emailSentRef = useRef(false);
-
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState("Checking payment...");
@@ -45,6 +42,8 @@ export default function Success() {
             for (let product of data.products) {
               deleteCookie(`Product-${product?.ID}`, "/");
             }
+
+            setCartAmount(0);
           }
 
           console.log("Payment successful");
