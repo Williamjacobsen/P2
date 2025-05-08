@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../SearchBar.css';
 
 export default function BoxShop() {
   const [shops, setShops] = useState([])
@@ -29,9 +28,6 @@ export default function BoxShop() {
           to={`/Product-Catalogue?store=${encodeURIComponent(shop.Name)}`}
           key={shop.id}
           className="shop-circle">
-          {/*
-          <img src={shop.image} />
-          */}
           <span>{shop.Name}</span>
         </Link>
       ))}

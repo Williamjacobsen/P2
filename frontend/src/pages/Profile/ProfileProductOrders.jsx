@@ -88,26 +88,6 @@ export default function ProfileProductOrders() {
           </>
         ))}
       </div>
-
-      <h3>
-        --- Orders (sorted primarily by resolved and secondarily by time) ---
-      </h3>
-      {sortedOrders.map((order) => (
-        <>
-          {console.log(order.IsResolved)}
-          <b>Has been resolved: </b>
-          {order.IsResolved}
-          <br />
-          <b>Time of purchase: </b>
-          {order.DateTime}
-          {/* NOTE: A MySQL Datetime also factors in daylight savings time (DST). */}
-          <br />
-          <b>Product ID: </b>
-          {order.ProductID}
-          <br />
-          <br />
-        </>
-      ))}
     </>
   );
 }

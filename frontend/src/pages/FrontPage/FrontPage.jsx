@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import "./FrontPage.css";
 import BoxShop from "./FrontPageStores";
 import ProductCard from "../ProductCatalogue/Product-Card";
