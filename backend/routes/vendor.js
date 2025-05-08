@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { validationResult } from "express-validator";
+import { validationResult, check } from "express-validator";
 
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
@@ -96,11 +96,24 @@ router.put("/modify", [
   }
 });
 
-router.get("/vendor-products/:vendorid", async (req, res) => {
+router.get("/vendor-products/:vendorid", [
+  // I'd have used the validateVendorID export from inputValidation.js,
+  // but the person who wrote this route used the name "vendorid" instead of "vendorID". Oh well...
+  check("vendorid")
+    .bail()
+    .escape()
+    .notEmpty()
+    .isInt()
+], async (req, res) => {
+  // Handle validation errors
+  const validationErrors = validationResult(req);
+  if (!validationErrors.isEmpty()) {
+    return res.status(400).json({ error: "Input is invalid for the input: '" + validationErrors.array()[0].path + "'" }); // 400 = Bad request
+  }
+
   const { vendorid } = req.params; // VendorID is grabbed from the url parameter
 
-  const vendorIdNum = Number(vendorid);
-  if (!Number.isInteger(vendorIdNum) || vendorIdNum <= 0) {
+  if (vendorid <= 0) {
     return res.status(400).json({ message: "Vendor ID must be a positive integer" });
   }
 
