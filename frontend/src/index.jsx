@@ -6,7 +6,6 @@ import reportWebVitals from "./reportWebVitals";
 import Header from "./pages/Header/Header";
 import NoPage from "./pages//NoPage";
 import FrontPage from "./pages/FrontPage/FrontPage";
-import Example from "./pages/Example";
 import FAQ from "./pages/FAQ/FAQ";
 import Vendor from "./pages/Vendor/Vendor";
 import ProductCatalogue from "./pages/ProductCatalogue/Product-Catalogue";
@@ -23,21 +22,20 @@ import Failure from "./pages/SuccessFailure/Failure";
 
 export default function App() {
   const [cartAmount, setCartAmount] = useState(0);
-  
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<><Header cartAmount={cartAmount} setCartAmount={setCartAmount} /><ReSignInPopUp /></>} >
           <Route index element={<FrontPage />} />
-          <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
-          <Route path="/Product/:id" element={<Product  setCartAmount={setCartAmount} />} />
+          <Route path="/Product/:id" element={<Product setCartAmount={setCartAmount} />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/Cart" element={<Cart setCartAmount={setCartAmount}/>} />
+          <Route path="/Cart" element={<Cart setCartAmount={setCartAmount} />} />
           <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
-          <Route path="/success" element={<Success setCartAmount={setCartAmount}/>} />
+          <Route path="/success" element={<Success setCartAmount={setCartAmount} />} />
           <Route path="/cancel" element={<Failure />} />
           <Route path="/vendor" element={<Vendor />} />
           <Route path="/vendor/add-product" element={<AddProduct />} />
