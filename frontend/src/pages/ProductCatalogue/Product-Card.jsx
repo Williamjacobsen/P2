@@ -10,14 +10,15 @@ export default function ProductCard({
   price,
   productBrand,
   showVendorButtons,
+  onEdit,
   onDelete,
-  discount
+  discount,
 }) {
   const image = FetchImage(id);
   const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
 
   return (
-    <div className="product-card-container" role={'product-card'}>
+    <div className="product-card-container" role={"product-card"}>
       <div
         className="product-card"
         style={{ height: showVendorButtons ? "450px" : "420px" }}
@@ -31,10 +32,15 @@ export default function ProductCard({
           <h1>{`${productBrand} - ${productName}`}</h1>
           {/* used a short circuit logical expression the paragraph only shows if there is a discount */}
           {discount > 0 && <p>-{discount}%</p>}
-          <p style={{ color: discount > 0 ? "red" : "black" }}>{`${finalPrice.toFixed(0)},00 kr`}</p>
+          <p
+            style={{ color: discount > 0 ? "red" : "black" }}
+          >{`${finalPrice.toFixed(0)},00 kr`}</p>
         </Link>
         {showVendorButtons && (
-          <button onClick={() => onDelete(id)}>Delete</button>
+          <>
+            <button onClick={() => onEdit(id)}>Edit</button>
+            <button onClick={() => onDelete(id)}>Delete</button>
+          </>
         )}
       </div>
     </div>

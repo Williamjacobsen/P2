@@ -24,6 +24,8 @@ import addProductRoute from "./routes/add-product.js";
 app.use("/add-product", addProductRoute);
 import deleteProductRoute from "./routes/delete-product.js";
 app.use("/delete-product", deleteProductRoute);
+import editProductRoute from "./routes/edit-product.js";
+app.use("/edit-product", editProductRoute);
 import vendorOrders from "./routes/vendor-orders.js";
 app.use("/vendor-orders", vendorOrders);
 import profileRoute from "./routes/profile.js";

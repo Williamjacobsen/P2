@@ -19,6 +19,7 @@ import ProfileProductOrders from "./pages/Profile/ProfileProductOrders";
 import ReSignInPopUp from "./pages/Profile/ReSignInPopUp";
 import Success from "./pages/SuccessFailure/Success";
 import Failure from "./pages/SuccessFailure/Failure";
+import EditProduct from "./pages/Vendor/Edit-Product";
 
 export default function App() {
   const [cartAmount, setCartAmount] = useState(0);
@@ -26,19 +27,40 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<><Header cartAmount={cartAmount} setCartAmount={setCartAmount} /><ReSignInPopUp /></>} >
+        <Route
+          path="/"
+          element={
+            <>
+              <Header cartAmount={cartAmount} setCartAmount={setCartAmount} />
+              <ReSignInPopUp />
+            </>
+          }
+        >
           <Route index element={<FrontPage />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
-          <Route path="/Product/:id" element={<Product setCartAmount={setCartAmount} />} />
+          <Route
+            path="/Product/:id"
+            element={<Product setCartAmount={setCartAmount} />}
+          />
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/Cart" element={<Cart setCartAmount={setCartAmount} />} />
-          <Route path="/profile-product-orders" element={<ProfileProductOrders />} />
-          <Route path="/success" element={<Success setCartAmount={setCartAmount} />} />
+          <Route
+            path="/Cart"
+            element={<Cart setCartAmount={setCartAmount} />}
+          />
+          <Route
+            path="/profile-product-orders"
+            element={<ProfileProductOrders />}
+          />
+          <Route
+            path="/success"
+            element={<Success setCartAmount={setCartAmount} />}
+          />
           <Route path="/cancel" element={<Failure />} />
           <Route path="/vendor" element={<Vendor />} />
           <Route path="/vendor/add-product" element={<AddProduct />} />
+          <Route path="/vendor/edit-product/:id" element={<EditProduct />} />
           <Route path="/vendor/orders" element={<Orders />} />
           <Route path="*" element={<NoPage />} />
         </Route>

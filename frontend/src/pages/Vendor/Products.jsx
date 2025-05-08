@@ -8,6 +8,8 @@ import usePages from "../../utils/usePages";
 const productsPerPage = 11;
 
 export default function Products({ VendorID }) {
+  const navigate = useNavigate();
+
   const [vendorProducts, setVendorProducts] = useState([]);
   const [
     getVisiblePartOfPageArray,
@@ -78,6 +80,9 @@ export default function Products({ VendorID }) {
               productBrand={product.Brand}
               showVendorButtons={true}
               discount={product.DiscountProcent}
+              onEdit={(id) => {
+                navigate(`/vendor/edit-product/${id}`);
+              }}
               onDelete={handleDelete}
             ></ProductCard>
           );
