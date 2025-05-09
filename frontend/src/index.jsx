@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
@@ -6,7 +6,6 @@ import reportWebVitals from "./reportWebVitals";
 import Header from "./pages/Header/Header";
 import NoPage from "./pages//NoPage";
 import FrontPage from "./pages/FrontPage/FrontPage";
-import Example from "./pages/Example";
 import FAQ from "./pages/FAQ/FAQ";
 import Vendor from "./pages/Vendor/Vendor";
 import Coupons from "./pages/Vendor/Coupons/Coupons";
@@ -21,8 +20,11 @@ import ProfileProductOrders from "./pages/Profile/ProfileProductOrders";
 import ReSignInPopUp from "./pages/Profile/ReSignInPopUp";
 import Success from "./pages/SuccessFailure/Success";
 import Failure from "./pages/SuccessFailure/Failure";
+import EditProduct from "./pages/Vendor/Edit-Product";
 
 export default function App() {
+  const [cartAmount, setCartAmount] = useState(0);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -30,27 +32,36 @@ export default function App() {
           path="/"
           element={
             <>
-              <Header />
+              <Header cartAmount={cartAmount} setCartAmount={setCartAmount} />
               <ReSignInPopUp />
             </>
           }
         >
           <Route index element={<FrontPage />} />
-          <Route path="/example" element={<Example />} />
           <Route path="/FAQ" element={<FAQ />} />
           <Route path="/Product-Catalogue" element={<ProductCatalogue />} />
-          <Route path="/Product/:id" element={<Product />} />
+          <Route
+            path="/Product/:id"
+            element={<Product setCartAmount={setCartAmount} />}
+          />
           <Route path="/profile" element={<Profile />} />
           <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/Cart" element={<Cart />} />
+          <Route
+            path="/Cart"
+            element={<Cart setCartAmount={setCartAmount} />}
+          />
           <Route
             path="/profile-product-orders"
             element={<ProfileProductOrders />}
           />
-          <Route path="/success" element={<Success />} />
+          <Route
+            path="/success"
+            element={<Success setCartAmount={setCartAmount} />}
+          />
           <Route path="/cancel" element={<Failure />} />
           <Route path="/vendor" element={<Vendor />} />
           <Route path="/vendor/add-product" element={<AddProduct />} />
+          <Route path="/vendor/edit-product/:id" element={<EditProduct />} />
           <Route path="/vendor/orders" element={<Orders />} />
           <Route path="/coupons" element={<Coupons />} />
           <Route path="*" element={<NoPage />} />

@@ -54,7 +54,7 @@ export default function Profile() {
           modalContent={<ModifyModal
             modificationFunction={modifyProfile}
             databasePropertyName="PhoneNumber"
-            labelText="New phone number: "
+            labelText="New phone number: " 
             inputType="text"
             theMinLength={8}
             theMaxLength={16}

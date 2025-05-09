@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import "./FrontPage.css";
 import BoxShop from "./FrontPageStores";
 import ProductCard from "../ProductCatalogue/Product-Card";
@@ -15,7 +14,7 @@ export default function FrontPage() {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await fetch("http://localhost:3001/BestSellers");
+        const response = await fetch("http://localhost:3001/front-page/best-sellers");
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
         SetBestSellers(data);

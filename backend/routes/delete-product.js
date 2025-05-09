@@ -41,6 +41,10 @@ router.delete("/:id", validateProfileAccessToken, async (req, res) => {
       productId,
     ]);
 
+    await pool.query(`DELETE FROM p2.productstatistics WHERE ProductID = ?`, [
+      productId,
+    ]);
+
     const [result] = await pool.query(`DELETE FROM p2.Product WHERE ID = ?`, [
       productId,
     ]);

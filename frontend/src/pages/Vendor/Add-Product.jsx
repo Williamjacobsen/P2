@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 
 import useGetProfile from "../Profile/useGetProfile";
 import useGetVendor from "../Profile/useGetVendor";
+import { getAllCookieProducts } from "../../utils/cookies";
 
 const genderOptions = ["Male", "Female", "Unisex"];
 const clothingOptions = [
@@ -260,7 +261,7 @@ export default function AddProduct() {
               {sizes.map((e, i) => (
                 <li key={i}>
                   {e.size} — {e.stock}
-                  <button onClick={() => removeSizeEntry(i)}>Remove</button>
+                  <button onClick={() => removeSizeEntry(i)}>Remove</button> {/* Implement removeFromCart() */}
                 </li>
               ))}
             </ul>

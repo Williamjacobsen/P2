@@ -1,17 +1,28 @@
 // Tutorial on building sticky headers: https://www.youtube.com/watch?v=puwPc9W5Qw8
 // Turotial on building headers: https://www.youtube.com/watch?v=f3uCSh6LIY0
 
-import React, { version } from "react";
+import React, { useEffect, useState, version } from "react";
 import { Outlet, Link } from "react-router-dom";
 import "./Header.css";
+import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart";
 
 import useGetProfile from "../Profile/useGetProfile";
 import useGetVendor from "../Profile/useGetVendor";
 
-export default function Header() {
+import {getAllCookieProducts} from "../../utils/cookies";
+
+export default function Header({ cartAmount, setCartAmount }) {
+
+  useEffect(() => {
+    setCartAmount(AmountOfItemsInCart());
+  }, [])
+
+
+
   // Hooks
   const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
+
 
   // Is the user signed in?
   if (isLoadingProfile) {
@@ -24,14 +35,14 @@ export default function Header() {
 
   return (
     <div>
-      <DefaultHeader profile={profile} />
+      <DefaultHeader profile={profile} cartAmount={cartAmount} />
       <VendorHeader vendor={vendor} />
       <Outlet />
     </div>
   );
 }
 
-function DefaultHeader({ profile }) {
+function DefaultHeader({ profile, cartAmount }) {
   return (
     <header class="default-header sticky" style={{ zIndex: 99 }}>
       <div>
@@ -78,7 +89,7 @@ function DefaultHeader({ profile }) {
         <ul>
           <li>
             {" "}
-            <Link to="/cart"> Cart </Link>{" "}
+            <Link to="/cart"> Cart: {cartAmount}</Link>{" "}
           </li>
         </ul>
       </div>

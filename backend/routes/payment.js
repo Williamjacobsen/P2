@@ -157,12 +157,16 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
       expand: ["payment_intent"],
     });
 
+    const customerEmail = session.customer_details?.email || null;
+
     if (
       session.payment_status === "paid" &&
       session.payment_intent.status === "succeeded"
     ) {
       const items = JSON.parse(session.metadata.items);
       const customerID = session.metadata.customerID;
+
+      const products = [];
 
       for (const item of items) {
         const [productRows] = await pool.query(
@@ -180,11 +184,11 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
         const currentDateTime = new Date();
         currentDateTime.getUTCDate();
 
-        const [vendorCVRRows] = await pool.query(
-          "SELECT CVR FROM Vendor WHERE Name = ?",
+        const [vendorRows] = await pool.query(
+          "SELECT CVR, Address FROM Vendor WHERE Name = ?",
           [storeName]
         );
-        const vendorCVR = vendorCVRRows[0]?.CVR;
+        const vendorCVR = vendorRows[0].CVR;
 
         const finalPrice =
           item.quantity *
@@ -214,9 +218,33 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
           "UPDATE ProductSize SET Stock = Stock - ? WHERE ProductID = ? AND Size = ? AND Stock >= ?",
           [item.quantity, item.id, item.size, item.quantity]
         );
+
+        // Vi laver en pool, som indsætter et produkts i BestSeller
+        //Hvis der allerede findes et produkt med samme KEY i bestSeller, så skal den blot opdatere AmountSold
+        await pool.query(
+          `INSERT INTO p2.productstatistics (ProductID, AmountSold)
+             VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE
+             AmountSold = AmountSold + ?;`,
+          [item.id, item.quantity, item.quantity]
+        );
+
+        products.push({
+          ID: item.id,
+          name: productData.Name,
+          price: productData.Price,
+          finalPrice: finalPrice,
+          quantity: item.quantity,
+          vendorAddress: vendorRows[0].Address,
+          customerEmail: customerEmail,
+        });
       }
 
-      res.json({ success: true, message: "Payment confirmed" });
+      res.json({
+        success: true,
+        message: "Payment confirmed",
+        products: products,
+      });
     } else {
       console.log("Payment not successful - status:", {
         payment_status: session.payment_status,
