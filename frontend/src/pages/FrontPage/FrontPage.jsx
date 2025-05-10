@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FrontPage.css";
-import BoxShop from "./FrontPageStores";
+import Stores from "./FrontPageStores";
 import ProductCard from "../ProductCatalogue/Product-Card";
 
 
@@ -77,7 +77,7 @@ export default function FrontPage() {
               View Profile
             </button>
           </div>
-          <BoxShop />
+          <Stores />
         </div>
       </div>
       <div className="fp-products">
