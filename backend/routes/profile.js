@@ -537,7 +537,8 @@ function setSecureCookie(httpResponse, cookieName, value, maxAgeInSeconds) {
   httpResponse.cookie(cookieName, value, {
     httpOnly: true, // Effect: Cannot be accessed using Javascript (e.g. using "document.cookies").
     secure: true, // Effect: Can only be sent using HTTPS (which is encrypted).
-    sameSite: "Strict", // Effect: Can only be sent to the website's origin site, not third parties (e.g. protects against "cross-site request forgery" attacks).
+    //sameSite: "Strict", // Effect: Can only be sent to the website's origin site, not third parties (e.g. protects against "cross-site request forgery" attacks).
+    sameSite: "none", // allow cross-site
     maxAge: 1000 * maxAgeInSeconds, // Expiration (in milliseconds)
   });
 }
