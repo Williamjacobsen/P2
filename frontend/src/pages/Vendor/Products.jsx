@@ -8,6 +8,8 @@ import usePages from "../../utils/usePages";
 const productsPerPage = 11;
 
 export default function Products({ VendorID }) {
+  const navigate = useNavigate();
+
   const [vendorProducts, setVendorProducts] = useState([]);
   const [
     getVisiblePartOfPageArray,
@@ -20,7 +22,7 @@ export default function Products({ VendorID }) {
     async function fetchVendorProducts() {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/VendorProducts/${VendorID}`
+          `${process.env.REACT_APP_BACKEND_URL}/vendor/vendor-products/${VendorID}`
         );
         if (!response.ok) {
           throw new Error("failed to fetch vendor products");
@@ -40,6 +42,7 @@ export default function Products({ VendorID }) {
         `${process.env.REACT_APP_BACKEND_URL}/delete-product/${productId}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 
@@ -77,6 +80,9 @@ export default function Products({ VendorID }) {
               productBrand={product.Brand}
               showVendorButtons={true}
               discount={product.DiscountProcent}
+              onEdit={(id) => {
+                navigate(`/vendor/edit-product/${id}`);
+              }}
               onDelete={handleDelete}
             ></ProductCard>
           );

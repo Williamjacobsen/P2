@@ -24,7 +24,8 @@ export default async function handleCheckout(products) {
     const session = await response.json();
 
     if (!response.ok) {
-      return Promise.reject(session.error);
+      alert(session.error);
+      return;
     }
 
     const result = await stripe.redirectToCheckout({

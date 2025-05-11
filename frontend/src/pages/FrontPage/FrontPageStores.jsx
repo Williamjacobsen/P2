@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../SearchBar.css";
 
 export default function BoxShop() {
   const [shops, setShops] = useState([]);
@@ -9,7 +8,7 @@ export default function BoxShop() {
     const shopCircles = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/shopCircles`
+          `${process.env.REACT_APP_BACKEND_URL}/front-page/shop-circles`
         );
         if (!response.ok) {
           throw new Error("Failed To Fetch ShopCircles");
@@ -31,9 +30,6 @@ export default function BoxShop() {
           key={shop.id}
           className="shop-circle"
         >
-          {/*
-          <img src={shop.image} />
-          */}
           <span>{shop.Name}</span>
         </Link>
       ))}

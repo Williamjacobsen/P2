@@ -1,36 +1,47 @@
-import React, { useState, useEffect } from "react";
+// Tutorial on custom hooks (because this file revolves around a custom hook) in React: https://www.youtube.com/watch?v=I2Bgi0Qcdvc
+
+import { useState, useEffect } from "react";
 
 /**
  * React hook (which is why the function name starts with "use").
- * Gets an array of vendor JSON objects from the server's database.
- * @returns the object [isLoading (a boolean), vendors (an array of JSON object)].
+ * Gets a vendor JSON object from the server's database.
+ * @returns the object [isLoading (a boolean), vendor (a JSON object)].
  */
-export default function useGetVendor() {
+export default function useGetVendor(vendorID) {
   const [isLoading, setIsLoading] = useState(true);
-  const [vendors, setVendors] = useState([]);
+  const [vendor, setVendor] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
-        setVendors(await requestVendors());
+        if (vendorID === undefined || vendorID === null) {
+          setVendor(null);
+          setIsLoading(false);
+          return [isLoading, vendor];
+        }
+        setVendor(await requestVendor(vendorID));
         setIsLoading(false);
       } catch (error) {
         alert(error);
       }
     })();
-  }, []);
+  }, [vendorID]);
 
-  return [isLoading, vendors];
+  return [isLoading, vendor];
 }
 
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+// Helpers
+// ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
 /**
- * Tries to get all vendors from the server.
- * @returns either a list of vendor objects (from the MySQL database), or a Promise.reject() with an error message.
+ * Tries to get a vendor from the server.
+ * @returns either null, a vendor object (from the MySQL database), or a Promise.reject() with an error message.
  */
-async function requestVendors() {
+async function requestVendor(vendorID) {
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/vendor/get-all`,
+      `${process.env.REACT_APP_BACKEND_URL}/vendor/get?vendorID=${vendorID}`,
       {
         method: "GET",
       }
@@ -38,7 +49,7 @@ async function requestVendors() {
     // Handle server response
     const data = await response.json();
     if (!response.ok) return Promise.reject(data.errorMessage);
-    return data.vendors;
+    return data.vendor;
   } catch (error) {
     return Promise.reject(error);
   }

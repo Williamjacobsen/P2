@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+
 import useGetProfile from "../Profile/useGetProfile";
 import useGetVendor from "../Profile/useGetVendor";
+import usePages from "../../utils/usePages";
+
+const ordersPerPage = 5;
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -9,6 +13,12 @@ export default function Orders() {
   const [storeID, setStoreID] = useState(-1);
   const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
+  const [
+    getVisiblePartOfPageArray,
+    CurrentPageDisplay,
+    PreviousPageButton,
+    NextPageButton,
+  ] = usePages(orders, ordersPerPage);
 
   useEffect(() => {
     (async () => {
@@ -39,7 +49,7 @@ export default function Orders() {
       }
     }
     getOrders();
-  }, [isLoadingVendor]);
+  }, [isLoadingVendor, vendor, storeID]);
 
   function handleCheckboxChange(orderID, field, value) {
     setOrders((orders) =>
@@ -79,6 +89,7 @@ export default function Orders() {
         `${process.env.REACT_APP_BACKEND_URL}/vendor-orders/update/${orderID}`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -97,7 +108,12 @@ export default function Orders() {
 
   return (
     <div>
-      {orders.map((order, i) => (
+      <div>
+        <CurrentPageDisplay />
+        <PreviousPageButton />
+        <NextPageButton />
+      </div>
+      {getVisiblePartOfPageArray().map((order, i) => (
         <div key={i} style={{ backgroundColor: "rgb(200, 200, 200)" }}>
           <h4>Customer:</h4>
           <h4>

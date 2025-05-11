@@ -10,6 +10,7 @@ export default function ProductCard({
   price,
   productBrand,
   showVendorButtons,
+  onEdit,
   onDelete,
   discount,
 }) {
@@ -36,7 +37,10 @@ export default function ProductCard({
           >{`${finalPrice.toFixed(0)},00 kr`}</p>
         </Link>
         {showVendorButtons && (
-          <button onClick={() => onDelete(id)}>Delete</button>
+          <>
+            <button onClick={() => onEdit(id)}>Edit</button>
+            <button onClick={() => onDelete(id)}>Delete</button>
+          </>
         )}
       </div>
     </div>

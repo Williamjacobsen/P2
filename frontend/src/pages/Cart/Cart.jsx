@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+//import { useCart } from "./CartContext";
 import ProductInCart from "./Product-In-Cart";
 import "./Cart.css";
 import CheckoutCard from "./Checkout-Card";
 import { deleteCookie, getAllCookieProducts } from "../../utils/cookies";
 import handleCheckout from "./handleCheckout";
 import useGetProfile from "../Profile/useGetProfile";
+import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart";
 
-export default function Cart() {
+export default function Cart({ setCartAmount }) {
   const [cartProducts, setCartProducts] = useState([]);
   const [cookieProducts, setCookieProducts] = useState([]);
+  //const { removeFromCart } = useCart();
 
   useEffect(() => {
     setCookieProducts(getAllCookieProducts());
@@ -25,6 +27,12 @@ export default function Cart() {
               .then((res) => res.json())
               .then((data) => {
                 const dbProduct = data[0];
+
+                if (!dbProduct) {
+                  //if product that user had in their cart was deleted from database this gets rid of it from the users cart
+                  deleteCookie(`Product-${product.id}`, "/");
+                }
+
                 //ok so, we grab product info from the database with fetch which gives us an array with a single object in it
                 //the reason for that is SQL returns rows even if there is just one match for the query
                 //then we extract the single object from the array the db gives back with data[0],
@@ -69,7 +77,16 @@ export default function Cart() {
     }
     return sum;
   }
-
+  /*
+  const handleRemoveItem = (productId) => {
+    // Remove from context
+    removeFromCart(productId);
+    // Remove from cookies
+    deleteCookie(`Product-${productId}`, "/");
+    // Update local state
+    setCookieProducts(getAllCookieProducts());
+  };
+*/
   return (
     <div className={"cartPage"}>
       <div className={"cartContainer"}>
@@ -80,7 +97,7 @@ export default function Cart() {
               storeName={product.StoreName}
               price={product.Price}
               productName={`${product.Brand} - ${product.Name}`}
-              storeAddress={product.StoreAddress}
+              storeAddress={product.Address}
               quantity={product.quantity}
               size={product.size}
               discount={product.DiscountProcent}
@@ -88,6 +105,8 @@ export default function Cart() {
                 deleteCookie(`Product-${product.ID}`, "/");
                 //we reload the cookies now that one has been deleted.
                 setCookieProducts(getAllCookieProducts());
+
+                setCartAmount(AmountOfItemsInCart());
               }}
             />
           );
@@ -98,6 +117,8 @@ export default function Cart() {
         PaymentFunction={() => {
           if (profile === undefined) {
             navigate("/sign-in");
+          } else if (cartProducts.length === 0 || cartProducts.length < 0) {
+            alert("No products in cart");
           } else {
             handleCheckout(cartProducts);
           }
