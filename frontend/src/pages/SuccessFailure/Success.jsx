@@ -31,7 +31,10 @@ export default function Success({ setCartAmount }) {
 
       try {
         const res = await fetch(
-          `http://localhost:3001/checkout/verify-payment?session_id=${sessionId}`
+          `http://localhost:3001/checkout/verify-payment?session_id=${sessionId}`,
+          {
+            credentials: "include",
+          }
         );
         const data = await res.json();
 

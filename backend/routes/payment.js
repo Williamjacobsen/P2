@@ -158,6 +158,8 @@ router.post(
 router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
   try {
     handleValidationErrors(req, res, validationResult);
+    const accessToken = req.cookies.profileAccessToken;
+    const profile = await getProfile(res, accessToken);
 
     const session_id = req.query.session_id;
 
