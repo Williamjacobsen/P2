@@ -250,12 +250,10 @@ router.post(
       const profile = await getProfile(res, accessToken);
       // Hinder deletion if a vendor profile (this should only be done by contacting the website administrators)
       if (profile.VendorID !== null) {
-        return res
-          .status(401)
-          .json({
-            error:
-              "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile.",
-          }); // 401 = Unauthorized
+        return res.status(401).json({
+          error:
+            "Vendor profiles cannot be deleted by the user. Please contact the website administrators if you wish to delete your vendor profile.",
+        }); // 401 = Unauthorized
       }
       // Verify password
       if ((await bcrypt.compare(password, profile.PasswordHash)) === false) {
@@ -325,11 +323,9 @@ router.put(
             `SELECT * FROM p2.Profile WHERE PhoneNumber='${newValue}';`
           );
           if (Object.keys(anotherProfileRows).length !== 0) {
-            return res
-              .status(409)
-              .json({
-                error: "Another profile already uses that phone number.",
-              }); // 409 = Conflict
+            return res.status(409).json({
+              error: "Another profile already uses that phone number.",
+            }); // 409 = Conflict
           }
           break;
         case "Password":
@@ -339,12 +335,10 @@ router.put(
           propertyName = "PasswordHash";
           break;
         case "VendorID":
-          return res
-            .status(401)
-            .json({
-              error:
-                "Users do not have permission to change their profile vendor ID. Please contact the website administrators.",
-            }); // 401 = Unauthorized
+          return res.status(401).json({
+            error:
+              "Users do not have permission to change their profile vendor ID. Please contact the website administrators.",
+          }); // 401 = Unauthorized
       }
       // Update property with the new value
       await pool.query(

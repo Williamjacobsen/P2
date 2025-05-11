@@ -2,6 +2,7 @@ import express from "express";
 import pool from "../db.js";
 import Stripe from "stripe";
 import { validationResult } from "express-validator";
+
 import {
   handleValidationErrors,
   validateProfileAccessToken,
@@ -26,23 +27,24 @@ router.post(
       const accessToken = req.cookies.profileAccessToken;
       const profile = await getProfile(res, accessToken);
 
-      if (!profile.VendorID) {
-        throw new Error("User is not a Vendor");
-      }
-
       if (!cartProducts) {
         return res.status(400).json({ error: "No products in the cart." });
       }
 
-      const productIds = cartProducts.map((p) => p.id);
-      console.log("Fetching products from DB with IDs:", productIds);
+      const productIds = cartProducts.map((p) => p.ID);
 
       const [products] = await pool.query(
         "SELECT ID, Name, Price, DiscountProcent FROM Product WHERE ID IN (?)",
         [productIds]
       );
 
-      console.log("Products fetched from DB:", products);
+      if (products.length !== productIds.length) {
+        const foundIds = products.map((p) => p.ID);
+        const missing = productIds.filter((id) => !foundIds.includes(id));
+        return res
+          .status(400)
+          .json({ error: `Products not found: ${missing.join(", ")}` });
+      }
 
       const productMap = {};
       products.forEach((product) => {
@@ -50,10 +52,23 @@ router.post(
       });
 
       for (const item of cartProducts) {
-        if (!productMap[item.ID]) {
-          return res
-            .status(400)
-            .json({ error: `Product with ID ${item.ID} not found` });
+        const [[sizeRow]] = await pool.query(
+          "SELECT Stock FROM ProductSize WHERE ProductID = ? AND Size = ?",
+          [item.ID, item.size]
+        );
+        if (!sizeRow) {
+          return res.status(400).json({
+            error: `Size "${item.size}" not found for product ID ${item.ID}`,
+          });
+        }
+        if (sizeRow.Stock < item.quantity) {
+          return res.status(400).json({
+            error: `Not enough stock for "${productMap[item.ID].Name}" size ${
+              item.size
+            }. Requested ${item.quantity}, but only ${
+              sizeRow.Stock
+            } available.`,
+          });
         }
       }
 
@@ -82,27 +97,53 @@ router.post(
         });
       }
 
+      // Becuase metadata values can have up to 500 characters:
+
+      // cartProducts:
+      // [{
+      //  ID: 1,
+      //  StoreID: 1,
+      //  Name: 'Daedric boots',
+      //  Price: 1000,
+      //  DiscountProcent: 10,
+      //  Description: 'Enjoy slavery wearing these.',
+      //  ClothingType: 'Footwear',
+      //  Brand: 'Nwah',
+      //  Gender: 'Male',
+      //  StoreName: 'UrbanTrendz',
+      //  Path: null,
+      //  StoreAddress: 'Nørrebrogade 21, Copenhagen',
+      //  size: 'medium',
+      //  quantity: 3
+      // }, ...],
+
+      // Needed data in metadata
+      // CustomerID
+      // ID
+      // Size
+      // Quantity
+
+      // To allow for more products, and faster requests, metadata could be a string of values like '4, 21, 4',
+      // but instead we make it a dictionary for readablilty (less optimal)
+
       const necessaryDataForMetadata = cartProducts.map((item) => ({
         id: item.ID,
         size: item.size,
         quantity: item.quantity,
       }));
 
-      console.log("Creating Stripe session with line items:", line_items);
-
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items,
         mode: "payment",
-        success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        success_url:
+          "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url: "http://localhost:3000/cancel",
         metadata: {
           customerID: profile.ID,
           items: JSON.stringify(necessaryDataForMetadata),
         },
       });
-
-      console.log("Stripe session created:", session.id);
 
       res.status(200).json({ id: session.id });
     } catch (error) {
@@ -114,9 +155,11 @@ router.post(
   }
 );
 
-router.get("/verify-payment", async (req, res) => {
+router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
   try {
     handleValidationErrors(req, res, validationResult);
+    const accessToken = req.cookies.profileAccessToken;
+    const profile = await getProfile(res, accessToken);
 
     const session_id = req.query.session_id;
 
@@ -137,12 +180,16 @@ router.get("/verify-payment", async (req, res) => {
       expand: ["payment_intent"],
     });
 
+    const customerEmail = session.customer_details?.email || null;
+
     if (
       session.payment_status === "paid" &&
       session.payment_intent.status === "succeeded"
     ) {
       const items = JSON.parse(session.metadata.items);
       const customerID = session.metadata.customerID;
+
+      const products = [];
 
       for (const item of items) {
         const [productRows] = await pool.query(
@@ -160,11 +207,11 @@ router.get("/verify-payment", async (req, res) => {
         const currentDateTime = new Date();
         currentDateTime.getUTCDate();
 
-        const [vendorCVRRows] = await pool.query(
-          "SELECT CVR FROM Vendor WHERE Name = ?",
+        const [vendorRows] = await pool.query(
+          "SELECT CVR, Address FROM Vendor WHERE Name = ?",
           [storeName]
         );
-        const vendorCVR = vendorCVRRows[0]?.CVR;
+        const vendorCVR = vendorRows[0].CVR;
 
         const finalPrice =
           item.quantity *
@@ -194,9 +241,33 @@ router.get("/verify-payment", async (req, res) => {
           "UPDATE ProductSize SET Stock = Stock - ? WHERE ProductID = ? AND Size = ? AND Stock >= ?",
           [item.quantity, item.id, item.size, item.quantity]
         );
+
+        // Vi laver en pool, som indsætter et produkts i BestSeller
+        //Hvis der allerede findes et produkt med samme KEY i bestSeller, så skal den blot opdatere AmountSold
+        await pool.query(
+          `INSERT INTO p2.productstatistics (ProductID, AmountSold)
+             VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE
+             AmountSold = AmountSold + ?;`,
+          [item.id, item.quantity, item.quantity]
+        );
+
+        products.push({
+          ID: item.id,
+          name: productData.Name,
+          price: productData.Price,
+          finalPrice: finalPrice,
+          quantity: item.quantity,
+          vendorAddress: vendorRows[0].Address,
+          customerEmail: customerEmail,
+        });
       }
 
-      res.json({ success: true, message: "Payment confirmed" });
+      res.json({
+        success: true,
+        message: "Payment confirmed",
+        products: products,
+      });
     } else {
       console.log("Payment not successful - status:", {
         payment_status: session.payment_status,

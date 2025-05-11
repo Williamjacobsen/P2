@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { validationResult } from "express-validator";
+import { validationResult, check } from "express-validator";
 
 import pool from "../db.js";
 import { getProfile } from "./profile.js";
@@ -102,6 +102,51 @@ router.put(
           .status(500)
           .json({ error: "Internal server error: " + error });
       }
+    }
+  }
+);
+
+router.get(
+  "/vendor-products/:vendorid",
+  [
+    // I'd have used the validateVendorID export from inputValidation.js,
+    // but the person who wrote this route used the name "vendorid" instead of "vendorID". Oh well...
+    check("vendorid").bail().escape().notEmpty().isInt(),
+  ],
+  async (req, res) => {
+    // Handle validation errors
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res.status(400).json({
+        error:
+          "Input is invalid for the input: '" +
+          validationErrors.array()[0].path +
+          "'",
+      }); // 400 = Bad request
+    }
+
+    const { vendorid } = req.params; // VendorID is grabbed from the url parameter
+
+    if (vendorid <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Vendor ID must be a positive integer" });
+    }
+
+    try {
+      const [result] = await pool.query(
+        `
+      SELECT p2.Product.*, p2.Vendor.Name AS StoreName
+      FROM p2.Product
+             JOIN p2.Vendor ON p2.Product.StoreID = p2.Vendor.ID
+      WHERE p2.Product.StoreID = ?
+    `,
+        [vendorid]
+      ); // Use parameterized query to safely inject vendorid
+      res.status(200).json(result);
+    } catch (err) {
+      console.log("error in database query for vendorproducts", err);
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );

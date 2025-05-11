@@ -21,7 +21,6 @@ router.get("/:productId", async (req, res) => {
 router.get("/:productId/primary", async (req, res) => {
   try {
     const { productId } = req.params;
-
     const [rows] = await pool.query(
       "SELECT Path FROM p2.ProductImage WHERE ProductID = ? LIMIT 1",
       [productId]
