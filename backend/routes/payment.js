@@ -38,16 +38,37 @@ router.post(
         [productIds]
       );
 
+      if (products.length !== productIds.length) {
+        const foundIds = products.map((p) => p.ID);
+        const missing = productIds.filter((id) => !foundIds.includes(id));
+        return res
+          .status(400)
+          .json({ error: `Products not found: ${missing.join(", ")}` });
+      }
+
       const productMap = {};
       products.forEach((product) => {
         productMap[product.ID] = product;
       });
 
       for (const item of cartProducts) {
-        if (!productMap[item.ID]) {
-          return res
-            .status(400)
-            .json({ error: `Product with ID ${item.ID} not found` });
+        const [[sizeRow]] = await pool.query(
+          "SELECT Stock FROM ProductSize WHERE ProductID = ? AND Size = ?",
+          [item.ID, item.size]
+        );
+        if (!sizeRow) {
+          return res.status(400).json({
+            error: `Size "${item.size}" not found for product ID ${item.ID}`,
+          });
+        }
+        if (sizeRow.Stock < item.quantity) {
+          return res.status(400).json({
+            error: `Not enough stock for "${productMap[item.ID].Name}" size ${
+              item.size
+            }. Requested ${item.quantity}, but only ${
+              sizeRow.Stock
+            } available.`,
+          });
         }
       }
 

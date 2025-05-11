@@ -60,6 +60,7 @@ router.get("/get/:id", validateProfileAccessToken, async (req, res) => {
     if (!profile.VendorID) {
       throw new Error("User is not a Vendor");
     }
+
     const [productRows] = await pool.query(
       `SELECT Product.*, Vendor.Name AS VendorName
        FROM Product
