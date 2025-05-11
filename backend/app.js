@@ -9,7 +9,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "p2-client.vercel.app",
+    origin: "https://p2-client.vercel.app",
     credentials: true, // allows cookies and credentials to be sent to the backend
   })
 );
