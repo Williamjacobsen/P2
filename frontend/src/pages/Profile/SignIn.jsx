@@ -128,7 +128,6 @@ async function requestProfileCreation(email, password, phoneNumber) {
   try {
     const response = await fetch("http://localhost:3001/profile/create", {
       method: "POST",
-      credentials: "include", // Ensures cookies are sent with the request
       headers: {
         "Content-Type": "application/json",
       },

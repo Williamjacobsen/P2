@@ -38,5 +38,4 @@ export default function Modal({ modalContent = "X", openButtonText = "X", closeB
       }
     </>
   );
-
 }
