@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./ProductCSS.css";
-import { setCookie } from "../../utils/cookies.js";
+import {getCookie, setCookie} from "../../utils/cookies.js";
 import { getAllCookieProducts } from "../../utils/cookies.js";
 import useGetVendor from "../Profile/useGetVendor.jsx";
 import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart.js";
@@ -89,7 +89,7 @@ export default function ProductPage({ setCartAmount }) {
         <p className="product-brand">{productData[0]?.Brand}</p>
         <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
-        <p className="product-price">{productData[0]?.DiscountProcent > 0 ? productData[0]?.Price - (productData[0]?.Price * productData[0]?.DiscountProcent) / 100 : productData[0]?.Price},00 kr</p>
+        <p className="product-price">{(productData[0]?.DiscountProcent > 0 ? productData[0]?.Price - (productData[0]?.Price * productData[0]?.DiscountProcent) / 100 : productData[0]?.Price).toFixed(2)} kr</p>
         <div>
           <div>
             <label htmlFor="sizeSelection" hidden>Size</label>
@@ -142,20 +142,20 @@ export default function ProductPage({ setCartAmount }) {
                 alert("Please Select a size");
                 return;
               }
+              const existingCookie = getCookie(`Product-${productData[0]?.ID}-${sizeSelection}`);
+              const existingQuantity = existingCookie ? JSON.parse(existingCookie).quantity || 0 : 0;
               const cookievalue = JSON.stringify({
                 id: productData[0]?.ID,
                 size: sizeSelection,
-                quantity: quantitySelection,
+                quantity: quantitySelection + existingQuantity,
                 sizeID: productData[0]?.sizeID
               });
-              
-              setCookie(
-                `Product-${productData[0]?.ID}`,
-                cookievalue,
-                null,
-                "/"
-              );
-
+                setCookie(
+                    `Product-${productData[0]?.ID}-${sizeSelection}`,
+                    cookievalue,
+                    null,
+                    "/"
+                );
               setCartAmount(AmountOfItemsInCart());
             }}
           >

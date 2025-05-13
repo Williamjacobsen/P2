@@ -32,9 +32,12 @@ export default function ProductCard({
           <h1>{`${productBrand} - ${productName}`}</h1>
           {/* used a short circuit logical expression the paragraph only shows if there is a discount */}
           {discount > 0 && <p>-{discount}%</p>}
-          <p
-            style={{ color: discount > 0 ? "red" : "black" }}
-          >{`${finalPrice.toFixed(0)},00 kr`}</p>
+          <div className="price-container">
+            {discount > 0 && (
+                <p className="old-price">{`${price.toFixed(2)} kr`}</p>
+            )}
+            <p className="new-price">{`${finalPrice.toFixed(2)} kr`}</p>
+          </div>
         </Link>
         {showVendorButtons && (
           <>
