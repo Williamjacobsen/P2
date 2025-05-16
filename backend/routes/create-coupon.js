@@ -63,4 +63,36 @@ router.delete ('/', async (req, res) => {
   }
 });
 
+router.post('/', async (req, res) => {
+  try {
+    const { couponCode } = req.body;
+    
+    // Validate input
+    if (!couponCode) {
+      return res.status(400).json({ error: 'Coupon code is required' });
+    }
+
+    // Database query - IMPORTANT: Use your exact column names
+    const [rows] = await pool.query(
+      'SELECT CouponCode, DiscountValue FROM p2.Coupons WHERE CouponCode = ? AND IsActive = 1',
+      [couponCode]
+    );
+
+    // Check if coupon exists
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Coupon not found' });
+    }
+
+    // Return the first matching coupon
+    res.json({
+      CouponCode: rows[0].CouponCode,
+      DiscountValue: rows[0].DiscountValue
+    });
+
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

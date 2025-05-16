@@ -14,6 +14,9 @@ export default function Cart( {setCartAmount}) {
   const [cartProducts, setCartProducts] = useState([]);
   const [cookieProducts, setCookieProducts] = useState([]);
   //const { removeFromCart } = useCart();
+  const [couponCode, setCouponCode] = useState('');
+  const [validCoupon, setValidCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
 
   useEffect(() => {
     setCookieProducts(getAllCookieProducts());
@@ -59,23 +62,51 @@ export default function Cart( {setCartAmount}) {
   const navigate = useNavigate();
   const [isLoadingProfile, profile] = useGetProfile();
 
+  const handleCouponApply = async () => {
+  try {
+    const response = await fetch('http://localhost:3001/validate-coupon', {  // Changed endpoint
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ couponCode }),
+    });
+
+    const data = await response.json();  // Parse response first
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'Failed to apply coupon');
+    }
+
+    setValidCoupon({
+      CouponCode: data.CouponCode,
+      DiscountValue: data.DiscountValue
+    });
+    setCouponError(null);
+  } catch (error) {
+    setCouponError(error.message);
+    setValidCoupon(null);
+  }
+};
+
   // Is the user signed in?
   if (isLoadingProfile) {
     return <>Loading login...</>;
   }
 
-  //simply calculates the sum price of all the products in the cart
-  function calculateTotalPrice(products) {
-    if (products.length === 0) {
-      return 0;
+  //simply calculates the sum price of all the products in the cart and adds the coupon value as a discount.
+  const calculateTotalPrice = (products) => {
+    if (products.length === 0) return 0;
+    let sum = products.reduce((total, product) => {
+      return total + (product.Price - (product.Price * product.DiscountProcent) / 100) * product.quantity;
+    }, 0);
+  
+    if (validCoupon) {
+      sum = Math.max(0, sum - validCoupon.DiscountValue);
     }
-
-    let sum = 0;
-    for (const product of products) {
-      sum += (product.Price -(product.Price * product.DiscountProcent) / 100) * product.quantity;
-    }
-    return sum;
-  }
+  
+  return sum;
+};
 /*
   const handleRemoveItem = (productId) => {
     // Remove from context
@@ -111,6 +142,30 @@ export default function Cart( {setCartAmount}) {
           );
         })}
       </div>
+      <div className={"coupon-section"}>
+       {!validCoupon ? (
+         <div className="coupon-input-group">
+           <input
+             type="text"
+             value={couponCode}
+             onChange={(e) => setCouponCode(e.target.value)}
+             placeholder="Enter coupon code"
+             className="coupon-input"
+           />
+           <button
+             onClick={handleCouponApply}
+             className="coupon-apply-button"
+           >
+             Apply Coupon
+           </button>
+           {couponError && <p className="error-message">{couponError}</p>}
+         </div>
+       ) : (
+         <p className="coupon-applied-message">
+           Coupon applied: {validCoupon.CouponCode} (${validCoupon.DiscountValue} discount)
+         </p>
+       )}
+     </div>
       <CheckoutCard
         price={calculateTotalPrice(cartProducts)}
         PaymentFunction={() => {
@@ -120,7 +175,7 @@ export default function Cart( {setCartAmount}) {
               alert("No products in cart");
           }
           else {
-            handleCheckout(cartProducts);
+            handleCheckout(cartProducts, validCoupon?.CouponCode);
           }
         }}
       />

@@ -32,6 +32,8 @@ import profileRoute from "./routes/profile.js";
 app.use("/profile", profileRoute);
 import vendorRoute from "./routes/vendor.js";
 app.use("/vendor", vendorRoute);
+import createCouponRoute from "./routes/create-coupon.js";
+app.use("/create-coupon", createCouponRoute);
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
 import payment from "./routes/payment.js";

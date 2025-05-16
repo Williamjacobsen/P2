@@ -63,7 +63,7 @@ export default function App() {
           <Route path="/vendor/add-product" element={<AddProduct />} />
           <Route path="/vendor/edit-product/:id" element={<EditProduct />} />
           <Route path="/vendor/orders" element={<Orders />} />
-          <Route path="/coupons" element={<Coupons />} />
+          <Route path="/vendor/coupons" element={<Coupons />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
