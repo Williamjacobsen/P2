@@ -129,10 +129,7 @@ function VendorHeader({ vendor }) {
             </li>
             <li>
               {" "}
-              <Link to="/vendor/coupons">
-                {" "}
-                Coupons{" "}
-              </Link>{" "}
+              <Link to="/vendor/coupons"> Coupons </Link>{" "}
             </li>
           </ul>
         </div>

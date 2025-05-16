@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import useGetProfile from "../../Profile/useGetProfile";
 import useGetVendor from "../../Profile/useGetVendor";
 
-export default function CreateCoupon() {
+export default function Coupons() {
 
   // Hooks
   const [isLoadingProfile, profile] = useGetProfile();
