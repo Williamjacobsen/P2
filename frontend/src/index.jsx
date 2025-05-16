@@ -62,6 +62,7 @@ export default function App() {
           <Route path="/vendor/add-product" element={<AddProduct />} />
           <Route path="/vendor/edit-product/:id" element={<EditProduct />} />
           <Route path="/vendor/orders" element={<Orders />} />
+          <Route path="/vendor/coupons" element={<Orders />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

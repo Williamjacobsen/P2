@@ -129,9 +129,9 @@ function VendorHeader({ vendor }) {
             </li>
             <li>
               {" "}
-              <Link to="/NOT IMPLEMENTED">
+              <Link to="/vendor/coupons">
                 {" "}
-                Coupons (NOT IMPLEMENTED){" "}
+                Coupons{" "}
               </Link>{" "}
             </li>
           </ul>
