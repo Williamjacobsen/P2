@@ -13,7 +13,7 @@ export default function ProductPage({ setCartAmount }) {
   const [productData, setProductData] = useState([]);
   const [mainImage, setMainImage] = useState();
   const [sizeSelection, setSizeSelection] = useState("");
-  const [quantitySelection, setQuantitySelection] = useState(1);
+  const [quantitySelection, setQuantitySelection] = useState(0);
   /** Finds all data relevant see server.js for database interaction */
   useEffect(() => {
     async function allProductData() {
@@ -140,6 +140,10 @@ export default function ProductPage({ setCartAmount }) {
             onClick={() => {
               if (!sizeSelection) {
                 alert("Please Select a size");
+                return;
+              }
+              if (quantitySelection === null || quantitySelection === 0) {
+                alert("Please Select an amount");
                 return;
               }
               const existingCookie = getCookie(`Product-${productData[0]?.ID}-${sizeSelection}`);
