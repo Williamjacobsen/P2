@@ -47,13 +47,13 @@ describe('ProductCard', () => {
             </BrowserRouter>
         )
         await waitFor(() =>{
-            expect(screen.getByText('900,00 kr')).toBeInTheDocument();
+            expect(screen.getByText('900.00 kr')).toBeInTheDocument();
         });
         expect(screen.getByText('CowboyBoots - Black Boots')).toBeInTheDocument();
         expect(screen.getByText('Nørrebrogade 21, Copenhagen')).toBeInTheDocument();
         expect(screen.getByText('UrbanTrendz')).toBeInTheDocument();
         expect(screen.getByText('-10%')).toBeInTheDocument();
-        expect(screen.getByText('1800,00 kr')).toBeInTheDocument();
+        expect(screen.getByText('1800.00 kr')).toBeInTheDocument();
         expect(screen.getByText('CLICK-AND-COLLECT')).toBeInTheDocument();
     });
 });

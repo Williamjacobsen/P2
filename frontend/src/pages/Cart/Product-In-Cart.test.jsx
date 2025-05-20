@@ -23,7 +23,7 @@ describe('ProductCard', () => {
         expect(screen.getByText('Heavy T-Shirt')).toBeInTheDocument();
         expect(screen.getByText('Crazy Store')).toBeInTheDocument();
         expect(screen.getByText(`Size: Medium`)).toBeInTheDocument();
-        expect(screen.getByText('205,00 kr')).toBeInTheDocument();
+        expect(screen.getByText('205.00 kr')).toBeInTheDocument();
         expect(screen.getByText('-59%')).toBeInTheDocument();
         expect(screen.getByText('Quantity: 2')).toBeInTheDocument();
     });

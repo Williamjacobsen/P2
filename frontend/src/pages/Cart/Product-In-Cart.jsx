@@ -29,7 +29,7 @@ function ProductInCart({
         <p>{productName}</p>
         <p>{`Size: ${size}`}</p>
         {discount > 0 && <h1>-{discount}%</h1>}
-        <h1>{`${finalPrice?.toFixed(0)},00 kr`}</h1>
+        <h1>{`${finalPrice?.toFixed(2)} kr`}</h1>
         <h1>{`Quantity: ${quantity}`}</h1>
       </div>
       <div className={"cartRemove"}>

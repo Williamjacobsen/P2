@@ -24,6 +24,6 @@ describe('ProductCard', () => {
         expect(headings[0]).toHaveTextContent('NameOfStore');
         expect(headings[1]).toHaveTextContent(`Brand - NameOfProduct`);
 
-        expect(getByText('500,00 kr')).toBeInTheDocument();
+        expect(getByText('500.00 kr')).toBeInTheDocument();
     });
 });

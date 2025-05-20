@@ -89,7 +89,15 @@ export default function ProductPage({ setCartAmount }) {
         <p className="product-brand">{productData[0]?.Brand}</p>
         <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
-        <p className="product-price">{(productData[0]?.DiscountProcent > 0 ? productData[0]?.Price - (productData[0]?.Price * productData[0]?.DiscountProcent) / 100 : productData[0]?.Price).toFixed(2)} kr</p>
+        {typeof productData[0]?.Price === "number" && (
+            <p className="product-price">
+              {(
+                  productData[0]?.DiscountProcent > 0
+                      ? productData[0].Price - (productData[0].Price * productData[0].DiscountProcent) / 100
+                      : productData[0].Price
+              ).toFixed(2)} kr
+            </p>
+        )}
         <div>
           <div>
             <label htmlFor="sizeSelection" hidden>Size</label>

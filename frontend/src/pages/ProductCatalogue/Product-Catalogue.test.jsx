@@ -82,8 +82,8 @@ describe('ProductCard', () => {
 
         fireEvent.change(screen.getByLabelText(/Price/i), {target: {value: "Highest Price"}});
         const sortedProducts = getAllByRole("product-card");
-        expect(sortedProducts[0].querySelector('p')).toHaveTextContent("500,00 kr");
-        expect(sortedProducts[1].querySelector('p')).toHaveTextContent("200,00 kr");
+        expect(sortedProducts[0].querySelector('p')).toHaveTextContent("500.00 kr");
+        expect(sortedProducts[1].querySelector('p')).toHaveTextContent("200.00 kr");
         clearFilter();
     });
 });

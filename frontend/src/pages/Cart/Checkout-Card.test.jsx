@@ -13,6 +13,6 @@ describe('ProductCard', () => {
 
             />
         )
-        expect(screen.getByText('205,00 kr')).toBeInTheDocument();
+        expect(screen.getByText('205 kr')).toBeInTheDocument();
     });
 });

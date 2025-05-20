@@ -65,7 +65,7 @@ describe("ProductPage", () => {
         expect(screen.getByText("Vendor: MockVendor")).toBeInTheDocument();
         expect(screen.getByText("Cool Shirt")).toBeInTheDocument();
         expect(screen.getByText("A very cool shirt")).toBeInTheDocument();
-        expect(screen.getByText(/299,00 kr/)).toBeInTheDocument();
+        expect(screen.getByText(/299.00 kr/)).toBeInTheDocument();
         expect(screen.getByLabelText("Size")).toBeInTheDocument();  
         expect(screen.getByLabelText("Quantity")).toBeInTheDocument(); 
         expect(screen.getByRole("button", { name: /add to cart/i })).toBeInTheDocument();
