@@ -20,6 +20,7 @@ import ReSignInPopUp from "./pages/Profile/ReSignInPopUp";
 import Success from "./pages/SuccessFailure/Success";
 import Failure from "./pages/SuccessFailure/Failure";
 import EditProduct from "./pages/Vendor/Edit-Product";
+import Coupons from "./pages/Vendor/Coupon/Coupon";
 
 export default function App() {
   const [cartAmount, setCartAmount] = useState(0);
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/vendor/add-product" element={<AddProduct />} />
           <Route path="/vendor/edit-product/:id" element={<EditProduct />} />
           <Route path="/vendor/orders" element={<Orders />} />
+          <Route path="/vendor/coupons" element={<Coupons />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
