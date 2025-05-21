@@ -2,17 +2,17 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./ProductCSS.css";
-import { setCookie } from "../../utils/cookies.js";
 import { getAllCookieProducts } from "../../utils/cookies.js";
 import useGetVendor from "../Profile/useGetVendor.jsx";
 import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart.js";
+import { getCookie, setCookie } from "../../utils/cookies.js";
 
 export default function ProductPage({ setCartAmount }) {
   const { id } = useParams();
   const [productData, setProductData] = useState([]);
   const [mainImage, setMainImage] = useState();
   const [sizeSelection, setSizeSelection] = useState("");
-  const [quantitySelection, setQuantitySelection] = useState(1);
+  const [quantitySelection, setQuantitySelection] = useState(0);
   /** Finds all data relevant see server.js for database interaction */
   useEffect(() => {
     async function allProductData() {
@@ -90,13 +90,16 @@ export default function ProductPage({ setCartAmount }) {
         <p className="product-brand">{productData[0]?.Brand}</p>
         <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
-        <p className="product-price">
-          {productData[0]?.DiscountProcent > 0
-            ? productData[0]?.Price -
-              (productData[0]?.Price * productData[0]?.DiscountProcent) / 100
-            : productData[0]?.Price}
-          ,00 kr
-        </p>
+        {typeof productData[0]?.Price === "number" && (
+          <p className="product-price">
+            {(productData[0]?.DiscountProcent > 0
+              ? productData[0].Price -
+                (productData[0].Price * productData[0].DiscountProcent) / 100
+              : productData[0].Price
+            ).toFixed(2)}{" "}
+            kr
+          </p>
+        )}
         <div>
           <div>
             <label htmlFor="sizeSelection" hidden>
@@ -160,15 +163,28 @@ export default function ProductPage({ setCartAmount }) {
                 alert("Please Select a size");
                 return;
               }
+
+              if (quantitySelection === null || quantitySelection === 0) {
+                alert("Please Select an amount");
+                return;
+              }
+
+              const existingCookie = getCookie(
+                `Product-${productData[0]?.ID}-${sizeSelection}`
+              );
+              const existingQuantity = existingCookie
+                ? JSON.parse(existingCookie).quantity || 0
+                : 0;
+
               const cookievalue = JSON.stringify({
                 id: productData[0]?.ID,
                 size: sizeSelection,
-                quantity: quantitySelection,
+                quantity: quantitySelection + existingQuantity,
                 sizeID: productData[0]?.sizeID,
               });
 
               setCookie(
-                `Product-${productData[0]?.ID}`,
+                `Product-${productData[0]?.ID}-${sizeSelection}`,
                 cookievalue,
                 null,
                 "/"

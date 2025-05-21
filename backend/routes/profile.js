@@ -554,15 +554,15 @@ async function signIn(httpRequest, httpResponse, email, password) {
   );
   // Verify that profile exists
   if (Object.keys(profileRows).length === 0) {
-    return httpResponse
-      .status(404)
-      .json({ error: "Email does not have a profile." }); // 404 = Not Found
+    const error = "Email does not have a profile.";
+    httpResponse.status(404).json({ error: error }); // 404 = Not Found
+    return Promise.reject(error);
   }
   // Verify password
   if ((await bcrypt.compare(password, profileRows[0].PasswordHash)) === false) {
-    return httpResponse
-      .status(401)
-      .json({ error: "Password does not match email." }); // 401 = Unauthorized
+    const error = "Password does not match email.";
+    httpResponse.status(401).json({ error: error }); // 401 = Unauthorized
+    return Promise.reject(error);
   }
   // Create an access token containing the user's profile ID
   const profileID = profileRows[0].ID;

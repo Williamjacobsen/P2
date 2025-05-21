@@ -34,6 +34,8 @@ import vendorRoute from "./routes/vendor.js";
 app.use("/vendor", vendorRoute);
 import productOrderRoute from "./routes/productOrder.js";
 app.use("/productOrder", productOrderRoute);
+import CouponRoute from "./routes/coupon.js";
+app.use("/coupon", CouponRoute);
 import payment from "./routes/payment.js";
 app.use("/checkout", payment);
 import productID from "./routes/productID.js";

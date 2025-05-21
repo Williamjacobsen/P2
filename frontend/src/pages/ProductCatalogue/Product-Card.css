@@ -41,7 +41,6 @@
   justify-content: center;
 }
 
-
 .SortBox {
   width: 100px;
   padding: 10px;
@@ -101,4 +100,28 @@ button {
 
 button:hover {
   background-color: rgb(200, 200, 200);
+}
+
+.price-container {
+  display: flex;
+  gap: 8px; /* space between prices */
+  flex-wrap: wrap; /* allows wrapping if space is tight */
+  justify-content: center;
+  align-items: baseline;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: gray;
+  font-size: 0.9em;
+}
+
+.new-price {
+  color: black;
+  font-weight: bold;
+  font-size: 1em;
+}
+.product-card p {
+  margin: 0; /* Remove margin from <p> */
+  padding: 0; /* Remove padding from <p> */
 }

@@ -9,20 +9,16 @@ import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart";
 import useGetProfile from "../Profile/useGetProfile";
 import useGetVendor from "../Profile/useGetVendor";
 
-import {getAllCookieProducts} from "../../utils/cookies";
+import { getAllCookieProducts } from "../../utils/cookies";
 
 export default function Header({ cartAmount, setCartAmount }) {
-
   useEffect(() => {
     setCartAmount(AmountOfItemsInCart());
-  }, [])
-
-
+  }, []);
 
   // Hooks
   const [isLoadingProfile, profile] = useGetProfile();
   const [isLoadingVendor, vendor] = useGetVendor(profile?.VendorID);
-
 
   // Is the user signed in?
   if (isLoadingProfile) {
@@ -129,10 +125,7 @@ function VendorHeader({ vendor }) {
             </li>
             <li>
               {" "}
-              <Link to="/NOT IMPLEMENTED">
-                {" "}
-                Coupons (NOT IMPLEMENTED){" "}
-              </Link>{" "}
+              <Link to="/vendor/coupons"> Coupons </Link>{" "}
             </li>
           </ul>
         </div>

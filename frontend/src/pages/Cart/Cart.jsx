@@ -75,7 +75,7 @@ export default function Cart({ setCartAmount }) {
         (product.Price - (product.Price * product.DiscountProcent) / 100) *
         product.quantity;
     }
-    return sum;
+    return sum.toFixed(2);
   }
   /*
   const handleRemoveItem = (productId) => {
@@ -103,6 +103,7 @@ export default function Cart({ setCartAmount }) {
               discount={product.DiscountProcent}
               removeFunction={() => {
                 deleteCookie(`Product-${product.ID}`, "/");
+                deleteCookie(`Product-${product.ID}-${product.size}`, "/");
                 //we reload the cookies now that one has been deleted.
                 setCookieProducts(getAllCookieProducts());
 

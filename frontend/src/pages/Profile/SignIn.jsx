@@ -130,7 +130,6 @@ async function requestProfileCreation(email, password, phoneNumber) {
       `${process.env.REACT_APP_BACKEND_URL}/profile/create`,
       {
         method: "POST",
-        credentials: "include", // Ensures cookies are sent with the request
         headers: {
           "Content-Type": "application/json",
         },
