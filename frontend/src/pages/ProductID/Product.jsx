@@ -2,13 +2,12 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./ProductCSS.css";
-import {getCookie, setCookie} from "../../utils/cookies.js";
+import { getCookie, setCookie } from "../../utils/cookies.js";
 import { getAllCookieProducts } from "../../utils/cookies.js";
 import useGetVendor from "../Profile/useGetVendor.jsx";
 import { AmountOfItemsInCart } from "../../utils/AmountOfItemsInCart.js";
 
 export default function ProductPage({ setCartAmount }) {
-
   const { id } = useParams();
   const [productData, setProductData] = useState([]);
   const [mainImage, setMainImage] = useState();
@@ -31,21 +30,26 @@ export default function ProductPage({ setCartAmount }) {
   }, [id]);
 
   // Hooks
-  const [isLoadingVendor, productVendor] = useGetVendor(productData[0]?.StoreID);
+  const [isLoadingVendor, productVendor] = useGetVendor(
+    productData[0]?.StoreID
+  );
 
   // Is the user a vendor?
   if (isLoadingVendor) {
-    return (<>Loading vendor information...</>);
+    return <>Loading vendor information...</>;
+  } else if (productVendor === null) {
+    return <>Error: Product vendor is null.</>;
   }
-  else if (productVendor === null) {
-    return (<>Error: Product vendor is null.</>);
-  }
-
 
   /** Made to switch main image */
   const onImgClick = (image) => {
     setMainImage(image);
   };
+
+  const sizes = Array.from(new Set(productData.map((p) => p.Size)));
+  const images = Array.from(
+    new Map(productData.map((item) => [item.Path, item])).values()
+  );
 
   return (
     <div className="container">
@@ -63,24 +67,20 @@ export default function ProductPage({ setCartAmount }) {
               />
             </div>
             <div className="thumbnail-row">
-              {productData.map(
-                (product, i) =>
-                  product?.Path && (
-                    <div key={product.id} className="thumbnail-container">
-                      <button onClick={() => onImgClick(product)}>
-                        <img
-                          key={i}
-                          src={product.Path}
-                          alt={`Thumbnail ${product.ID}`}
-                          className="thumbnail-image"
-                          onError={(e) => {
-                            e.target.src = "/PlusIcon.jpg";
-                          }}
-                        />
-                      </button>
-                    </div>
-                  )
-              )}
+              {images.map((img, i) => (
+                <div key={i} className="thumbnail-container">
+                  <button onClick={() => onImgClick(img)}>
+                    <img
+                      src={img.Path}
+                      alt={`Thumbnail ${img.ID}`}
+                      className="thumbnail-image"
+                      onError={(e) => {
+                        e.target.src = "/PlusIcon.jpg";
+                      }}
+                    />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -90,40 +90,45 @@ export default function ProductPage({ setCartAmount }) {
         <p className="product-vendor">Vendor: {productVendor?.Name}</p>
         <p className="product-name">{productData[0]?.Name}</p>
         {typeof productData[0]?.Price === "number" && (
-            <p className="product-price">
-              {(
-                  productData[0]?.DiscountProcent > 0
-                      ? productData[0].Price - (productData[0].Price * productData[0].DiscountProcent) / 100
-                      : productData[0].Price
-              ).toFixed(2)} kr
-            </p>
+          <p className="product-price">
+            {(productData[0]?.DiscountProcent > 0
+              ? productData[0].Price -
+                (productData[0].Price * productData[0].DiscountProcent) / 100
+              : productData[0].Price
+            ).toFixed(2)}{" "}
+            kr
+          </p>
         )}
         <div>
           <div>
-            <label htmlFor="sizeSelection" hidden>Size</label>
+            <label htmlFor="sizeSelection" hidden>
+              Size
+            </label>
             <select
-                id="sizeSelection"
-                defaultValue={sizeSelection}
-                className="SortBox"
-                onChange={(e) => {
-                  setSizeSelection(e.target.value);
-                }}
-                style={{ width: "300px" }}
+              id="sizeSelection"
+              defaultValue={sizeSelection}
+              className="SortBox"
+              onChange={(e) => {
+                setSizeSelection(e.target.value);
+              }}
+              style={{ width: "300px" }}
             >
               <option value="SIZE" hidden={true}>
                 SIZE
               </option>
-              {productData.map((product) => {
-                return (
-                    <option key={product.Size} value={product.Size}>
-                      {product.Size}
-                    </option>
-                );})}
+              {sizes.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </select>
-          </div> {/* The function extracts straight from productData so no need for it here */}
+          </div>{" "}
+          {/* The function extracts straight from productData so no need for it here */}
         </div>
         <div>
-          <label htmlFor="category" hidden>Quantity</label>
+          <label htmlFor="category" hidden>
+            Quantity
+          </label>
           <select
             id="category"
             defaultValue="1"
@@ -135,10 +140,15 @@ export default function ProductPage({ setCartAmount }) {
             <option value="AMOUNT" hidden={true}>
               AMOUNT
             </option>
-            {[...Array(productData.find(product => product.Size === sizeSelection)?.Stock || 0)].map((_,i) => (
-                <option value={i + 1} key={i}>
-                  {i + 1}
-                </option>
+            {[
+              ...Array(
+                productData.find((product) => product.Size === sizeSelection)
+                  ?.Stock || 0
+              ),
+            ].map((_, i) => (
+              <option value={i + 1} key={i}>
+                {i + 1}
+              </option>
             ))}
           </select>
           <button
@@ -154,25 +164,29 @@ export default function ProductPage({ setCartAmount }) {
                 alert("Please Select an amount");
                 return;
               }
-              const existingCookie = getCookie(`Product-${productData[0]?.ID}-${sizeSelection}`);
-              const existingQuantity = existingCookie ? JSON.parse(existingCookie).quantity || 0 : 0;
+              const existingCookie = getCookie(
+                `Product-${productData[0]?.ID}-${sizeSelection}`
+              );
+              const existingQuantity = existingCookie
+                ? JSON.parse(existingCookie).quantity || 0
+                : 0;
               const cookievalue = JSON.stringify({
                 id: productData[0]?.ID,
                 size: sizeSelection,
                 quantity: quantitySelection + existingQuantity,
-                sizeID: productData[0]?.sizeID
+                sizeID: productData[0]?.sizeID,
               });
-                setCookie(
-                    `Product-${productData[0]?.ID}-${sizeSelection}`,
-                    cookievalue,
-                    null,
-                    "/"
-                );
+              setCookie(
+                `Product-${productData[0]?.ID}-${sizeSelection}`,
+                cookievalue,
+                null,
+                "/"
+              );
               setCartAmount(AmountOfItemsInCart());
             }}
           >
             ADD TO CART
-            </button>
+          </button>
           {/* Made to make a cookie with product, id, keep cookie till browser closed, path '/' which means entire website so every page can see. Check cookies.js for more info */}
         </div>
         <div>
