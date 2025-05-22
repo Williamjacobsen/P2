@@ -1,6 +1,10 @@
 import React from "react";
 import { useEffect, useState, useRef } from "react";
-import { deleteCookie, getAllCookieProducts } from "../../utils/cookies";
+import {
+  deleteCookie,
+  getAllCookieProducts,
+  deleteAllProductCookies,
+} from "../../utils/cookies";
 import emailjs from "@emailjs/browser";
 import useGetProfile from "../Profile/useGetProfile";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -42,9 +46,7 @@ export default function Success({ setCartAmount }) {
           if (data?.products) {
             SendEmail(data.products);
 
-            for (let product of data.products) {
-              deleteCookie(`Product-${product?.ID}`, "/");
-            }
+            deleteAllProductCookies();
 
             setCartAmount(0);
           }
