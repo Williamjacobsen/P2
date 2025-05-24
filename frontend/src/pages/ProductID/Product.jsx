@@ -48,6 +48,11 @@ export default function ProductPage({ setCartAmount }) {
     setMainImage(image);
   };
 
+  const sizes = Array.from(new Set(productData.map((p) => p.Size)));
+  const images = Array.from(
+    new Map(productData.map((item) => [item.Path, item])).values()
+  );
+
   return (
     <div className="container">
       <div className="left-content">
@@ -64,24 +69,20 @@ export default function ProductPage({ setCartAmount }) {
               />
             </div>
             <div className="thumbnail-row">
-              {productData.map(
-                (product, i) =>
-                  product?.Path && (
-                    <div key={product.id} className="thumbnail-container">
-                      <button onClick={() => onImgClick(product)}>
-                        <img
-                          key={i}
-                          src={product.Path}
-                          alt={`Thumbnail ${product.ID}`}
-                          className="thumbnail-image"
-                          onError={(e) => {
-                            e.target.src = "/PlusIcon.jpg";
-                          }}
-                        />
-                      </button>
-                    </div>
-                  )
-              )}
+              {images.map((img, i) => (
+                <div key={i} className="thumbnail-container">
+                  <button onClick={() => onImgClick(img)}>
+                    <img
+                      src={img.Path}
+                      alt={`Thumbnail ${img.ID}`}
+                      className="thumbnail-image"
+                      onError={(e) => {
+                        e.target.src = "/PlusIcon.jpg";
+                      }}
+                    />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -117,13 +118,11 @@ export default function ProductPage({ setCartAmount }) {
               <option value="SIZE" hidden={true}>
                 SIZE
               </option>
-              {productData.map((product) => {
-                return (
-                  <option key={product.Size} value={product.Size}>
-                    {product.Size}
-                  </option>
-                );
-              })}
+              {sizes.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </select>
           </div>{" "}
           {/* The function extracts straight from productData so no need for it here */}

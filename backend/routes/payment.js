@@ -241,15 +241,27 @@ router.get("/verify-payment", validateSessionIdParam, async (req, res) => {
           [item.quantity, item.id, item.size, item.quantity]
         );
 
-        // Vi laver en pool, som indsætter et produkts i BestSeller
-        //Hvis der allerede findes et produkt med samme KEY i bestSeller, så skal den blot opdatere AmountSold
-        await pool.query(
-          `INSERT INTO p2.Productstatistics (ProductID, AmountSold)
-             VALUES (?, ?)
-           ON DUPLICATE KEY UPDATE
-             AmountSold = AmountSold + ?;`,
-          [item.id, item.quantity, item.quantity]
+        const [rows] = await pool.query(
+          `SELECT AmountSold
+             FROM p2.Productstatistics
+            WHERE ProductID = ?`,
+          [item.id]
         );
+
+        if (rows.length > 0) {
+          await pool.query(
+            `UPDATE p2.Productstatistics
+                SET AmountSold = AmountSold + ?
+              WHERE ProductID = ?`,
+            [item.quantity, item.id]
+          );
+        } else {
+          await pool.query(
+            `INSERT INTO p2.Productstatistics (ProductID, AmountSold)
+                 VALUES (?, ?)`,
+            [item.id, item.quantity]
+          );
+        }
 
         products.push({
           ID: item.id,

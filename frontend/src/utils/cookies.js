@@ -63,3 +63,14 @@ export function getAllCookieProducts() {
   }
   return products;
 }
+
+export function deleteAllProductCookies() {
+  const cookies = document.cookie.split("; ");
+
+  cookies.forEach((cookie) => {
+    const [name] = cookie.split("=");
+    if (name.startsWith("Product-")) {
+      deleteCookie(name);
+    }
+  });
+}
